@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <radialGradient id="rimGrad" cx="42%" cy="38%" r="58%">
+      <stop offset="0%" stop-color="#E0E0E0"/>
+      <stop offset="45%" stop-color="#CCCCCC"/>
+      <stop offset="75%" stop-color="#B5B5B5"/>
+      <stop offset="100%" stop-color="#969696"/>
+    </radialGradient>
+
+    <linearGradient id="follGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8A8A8A"/>
+      <stop offset="18%" stop-color="#AAAAAA"/>
+      <stop offset="38%" stop-color="#CACACA"/>
+      <stop offset="50%" stop-color="#D8D8D8"/>
+      <stop offset="62%" stop-color="#C5C5C5"/>
+      <stop offset="82%" stop-color="#A5A5A5"/>
+      <stop offset="100%" stop-color="#808080"/>
+    </linearGradient>
+
+    <linearGradient id="shaftGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#A8A8A8"/>
+      <stop offset="35%" stop-color="#CCCCCC"/>
+      <stop offset="50%" stop-color="#E0E0E0"/>
+      <stop offset="65%" stop-color="#C8C8C8"/>
+      <stop offset="100%" stop-color="#A0A0A0"/>
+    </linearGradient>
+
+    <clipPath id="innerClip">
+      <circle cx="250" cy="250" r="217"/>
+    </clipPath>
+
+    <path id="textTop" d="M 45,250 A 205,205 0 0,1 455,250 A 205,205 0 0,1 45,250" fill="none"/>
+    <path id="textBottom" d="M 48,250 A 202,202 0 0,0 452,250 A 202,202 0 0,0 48,250" fill="none"/>
+  </defs>
+
+  <!-- Slim metallic rim -->
+  <circle cx="250" cy="250" r="244" fill="#808080"/>
+  <circle cx="250" cy="250" r="243" fill="#D0D0D0"/>
+  <circle cx="250" cy="250" r="240" fill="url(#rimGrad)"/>
+  <circle cx="250" cy="250" r="221" fill="#A0A0A0"/>
+  <circle cx="250" cy="250" r="219" fill="#C5C5C5"/>
+  <circle cx="250" cy="250" r="217" fill="#FAFAFA"/>
+
+  <!-- Pink band -->
+  <g clip-path="url(#innerClip)">
+    <rect x="30" y="195" width="440" height="72" fill="#EDBECC"/>
+  </g>
+
+  <!-- LEFT FOLLICLE -->
+  <g opacity="0.88">
+    <!-- Shaft -->
+    <path d="M 205,120 C 204.6,146 204,176 203,200 L 208,200 C 207,176 206.6,146 205,120 Z" fill="url(#shaftGrad)"/>
+    <line x1="206" y1="122" x2="205.5" y2="198" stroke="white" stroke-width="0.6" opacity="0.3"/>
+    <!-- Body -->
+    <path d="M 203,200 C 202,216 200,238 198,256 C 196,274 195,286 194,294 L 218,294 C 217,286 216,274 214,256 C 212,238 211,216 209,200 Z" fill="url(#follGrad)"/>
+    <!-- Left tail -->
+    <path d="M 194,294 C 192,306 188,322 184,336 C 181,346 179,354 180,358 C 181,362 184,362 186,358 C 189,352 193,340 196,328 C 198,320 200,312 202,306 L 206,294 Z" fill="url(#follGrad)"/>
+    <!-- Right tail -->
+    <path d="M 206,294 L 210,306 C 212,312 214,320 216,328 C 219,340 223,352 226,358 C 228,362 231,362 232,358 C 233,354 231,346 228,336 C 224,322 220,306 218,294 Z" fill="url(#follGrad)"/>
+  </g>
+
+  <!-- CENTER FOLLICLE (largest) -->
+  <g opacity="0.9">
+    <!-- Shaft -->
+    <path d="M 250,92 C 249.6,126 249,168 248,200 L 253,200 C 252,168 251.6,126 250,92 Z" fill="url(#shaftGrad)"/>
+    <line x1="250.5" y1="94" x2="250" y2="198" stroke="white" stroke-width="0.8" opacity="0.32"/>
+    <!-- Body -->
+    <path d="M 248,200 C 246,220 244,248 241,270 C 239,290 238,304 237,312 L 263,312 C 262,304 261,290 259,270 C 256,248 254,220 253,200 Z" fill="url(#follGrad)"/>
+    <!-- Left tail -->
+    <path d="M 237,312 C 234,326 229,344 224,358 C 220,370 218,378 220,383 C 222,386 225,386 228,382 C 232,376 237,362 242,346 C 245,336 248,326 250,318 L 250,312 Z" fill="url(#follGrad)"/>
+    <!-- Right tail -->
+    <path d="M 250,312 L 250,318 C 252,326 255,336 258,346 C 263,362 268,376 272,382 C 275,386 278,386 280,383 C 282,378 280,370 276,358 C 271,344 266,326 263,312 Z" fill="url(#follGrad)"/>
+  </g>
+
+  <!-- RIGHT FOLLICLE -->
+  <g opacity="0.88">
+    <!-- Shaft -->
+    <path d="M 295,115 C 295,142 295.5,174 296,200 L 291,200 C 291.5,174 292,142 295,115 Z" fill="url(#shaftGrad)"/>
+    <line x1="293.5" y1="117" x2="293.5" y2="198" stroke="white" stroke-width="0.6" opacity="0.3"/>
+    <!-- Body -->
+    <path d="M 296,200 C 297,216 299,238 301,256 C 303,274 304,286 305,294 L 281,294 C 282,286 283,274 285,256 C 287,238 288,216 289,200 Z" fill="url(#follGrad)"/>
+    <!-- Left tail -->
+    <path d="M 293,294 L 289,306 C 287,312 285,320 283,328 C 280,340 276,352 273,358 C 271,362 268,362 267,358 C 266,354 268,346 271,336 C 275,322 279,306 281,294 Z" fill="url(#follGrad)"/>
+    <!-- Right tail -->
+    <path d="M 305,294 C 307,306 311,322 315,336 C 318,346 320,354 319,358 C 318,362 315,362 313,358 C 310,352 306,340 303,328 C 301,320 299,312 297,306 L 293,294 Z" fill="url(#follGrad)"/>
+  </g>
+
+  <!-- Upper text -->
+  <text dy="18" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-weight="700" font-size="19" fill="#4A4A4A" letter-spacing="2">
+    <textPath href="#textTop" startOffset="25%" text-anchor="middle">&#x041F;&#x0420;&#x041E;&#x0424;&#x0415;&#x0421;&#x0421;&#x0418;&#x041E;&#x041D;&#x0410;&#x041B;&#x042C;&#x041D;&#x041E;&#x0415; &#x041E;&#x0411;&#x0429;&#x0415;&#x0421;&#x0422;&#x0412;&#x041E;</textPath>
+  </text>
+
+  <!-- Lower text -->
+  <text dy="-2" font-family="Helvetica Neue, Helvetica, Arial, sans-serif"
+        font-weight="700" font-size="30" fill="#4A4A4A" letter-spacing="4">
+    <textPath href="#textBottom" startOffset="25%" text-anchor="middle">&#x0422;&#x0420;&#x0418;&#x0425;&#x041E;&#x041B;&#x041E;&#x0413;&#x041E;&#x0412;</textPath>
+  </text>
+</svg>

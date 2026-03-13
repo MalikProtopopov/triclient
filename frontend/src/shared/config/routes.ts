@@ -1,0 +1,36 @@
+export const ROUTES = {
+  HOME: "/",
+  DOCTORS: "/doctors",
+  DOCTOR: (id: string) => `/doctors/${id}`,
+  EVENTS: "/events",
+  EVENT: (slug: string) => `/events/${slug}`,
+  ARTICLES: "/articles",
+  ARTICLE: (slug: string) => `/articles/${slug}`,
+  DOCUMENTS: "/documents",
+  DOCUMENT: (slug: string) => `/documents/${slug}`,
+  PRAVLENIE: "/pravlenie",
+  THEMES: "/themes",
+
+  LOGIN: "/login",
+  REGISTER: "/register",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
+  CONFIRM_EMAIL: "/confirm-email",
+
+  ONBOARDING_ROLE: "/onboarding/role",
+  ONBOARDING_PROFILE: "/onboarding/profile",
+  ONBOARDING_PENDING: "/onboarding/pending",
+
+  CABINET: "/cabinet",
+  CABINET_PERSONAL: "/cabinet/personal",
+  CABINET_PUBLIC: "/cabinet/public",
+  CABINET_PAYMENTS: "/cabinet/payments",
+  CABINET_EVENTS: "/cabinet/events",
+  CABINET_CERTIFICATE: "/cabinet/certificate",
+  CABINET_TELEGRAM: "/cabinet/telegram",
+  CABINET_SETTINGS: "/cabinet/settings",
+  CABINET_VOTING: "/cabinet/voting",
+
+  PAYMENT_SUCCESS: "/payment/success",
+  PAYMENT_FAIL: "/payment/fail",
+} as const;

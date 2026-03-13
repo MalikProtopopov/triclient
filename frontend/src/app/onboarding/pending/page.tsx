@@ -1,0 +1,111 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Clock, XCircle, CheckCircle, Loader2 } from "lucide-react";
+
+import { Header } from "@/widgets/header";
+import { Footer } from "@/widgets/footer";
+import { Button } from "@/shared/ui";
+import { ROUTES } from "@/shared/config";
+import { useOnboardingStatus } from "@/entities/auth";
+import { getOnboardingStepRoute } from "@/providers/AuthProvider";
+
+function formatSubmittedDate(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+export default function OnboardingPendingPage() {
+  const router = useRouter();
+  const { data: status, isLoading } = useOnboardingStatus();
+
+  if (status) {
+    if (status.moderation_status === "approved") {
+      const target = status.next_step === "pay_entry_fee" ? ROUTES.CABINET_PAYMENTS : ROUTES.CABINET;
+      router.replace(target);
+      return null;
+    }
+    if (status.next_step !== "await_moderation" && status.moderation_status !== "rejected") {
+      router.replace(getOnboardingStepRoute(status.next_step));
+      return null;
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col bg-bg">
+        <Header />
+        <main className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-accent" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (status?.moderation_status === "rejected") {
+    return (
+      <>
+        <Header />
+        <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
+            <XCircle className="h-8 w-8 text-red-500" />
+          </div>
+
+          <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
+            Заявка отклонена
+          </h1>
+
+          {status.rejection_comment && (
+            <p className="mb-6 text-sm leading-relaxed text-text-secondary">
+              {status.rejection_comment}
+            </p>
+          )}
+
+          <p className="mb-8 text-sm text-text-muted">
+            Дата подачи: {formatSubmittedDate(status.submitted_at)}
+          </p>
+
+          <Link href={ROUTES.ONBOARDING_PROFILE}>
+            <Button>Исправить и отправить повторно</Button>
+          </Link>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Header />
+      <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center">
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
+          <Clock className="h-8 w-8 text-amber-500" />
+        </div>
+
+        <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
+          Заявка на проверке
+        </h1>
+
+        <p className="mb-6 text-sm leading-relaxed text-text-secondary">
+          Ваша заявка отправлена на модерацию. Мы проверим ваши документы и уведомим вас
+          по email в течение 2–3 рабочих дней.
+        </p>
+
+        <p className="mb-8 text-sm text-text-muted">
+          Дата подачи: {formatSubmittedDate(status?.submitted_at ?? null)}
+        </p>
+
+        <Link href={ROUTES.CABINET}>
+          <Button>Перейти в личный кабинет</Button>
+        </Link>
+      </main>
+      <Footer />
+    </>
+  );
+}

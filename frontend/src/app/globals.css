@@ -1,0 +1,110 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-accent-contrast: var(--accent-contrast);
+
+  --color-bg: var(--bg);
+  --color-bg-secondary: var(--bg-secondary);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-border: var(--border-color);
+  --color-border-light: var(--border-light);
+  --color-border-mid: var(--border-mid);
+  --color-border-dark: var(--border-dark);
+
+  --color-metal: var(--metal);
+  --color-metal-light: var(--metal-light);
+  --color-metal-dark: var(--metal-dark);
+
+  --color-success: #4ade80;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  --font-heading: var(--font-family-heading);
+  --font-body: var(--font-family-body);
+}
+
+:root {
+  --accent: #edbecc;
+  --accent-hover: #e5a8ba;
+  --accent-light: rgba(237, 190, 204, 0.15);
+  --accent-contrast: #4a4a4a;
+
+  --bg: #fafafa;
+  --bg-secondary: #ffffff;
+
+  --text-primary: #4a4a4a;
+  --text-secondary: #6b6b6b;
+  --text-muted: #808080;
+
+  --border-color: #e0e0e0;
+  --border-light: #e0e0e0;
+  --border-mid: #c5c5c5;
+  --border-dark: #808080;
+
+  --metal: #d0d0d0;
+  --metal-light: #e0e0e0;
+  --metal-dark: #cccccc;
+
+  --font-family-heading: var(--font-playfair), Georgia, serif;
+  --font-family-body: var(--font-raleway), system-ui, sans-serif;
+}
+
+/* ═══ VARIANT 1: Clinical Elegance ═══ */
+.theme-clinical {
+  --font-family-heading: var(--font-playfair), Georgia, serif;
+  --font-family-body: var(--font-raleway), system-ui, sans-serif;
+}
+
+/* ═══ VARIANT 2: Modern Medical ═══ */
+.theme-modern {
+  --font-family-heading: var(--font-cormorant), Georgia, serif;
+  --font-family-body: var(--font-mulish), system-ui, sans-serif;
+}
+
+/* ═══ VARIANT 3: Warm Professionalism ═══ */
+.theme-warm {
+  --font-family-heading: var(--font-libre), Georgia, serif;
+  --font-family-body: var(--font-nunito), system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-family-heading);
+}
+
+/* Metallic gradient utility */
+.bg-metal-gradient {
+  background: linear-gradient(135deg, #d0d0d0, #e0e0e0, #cccccc);
+}
+
+/* Warm noise texture overlay */
+.bg-noise {
+  position: relative;
+}
+.bg-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}

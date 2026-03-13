@@ -1,0 +1,9 @@
+# Certbot (SSL certificates — never commit)
+certbot/conf/
+certbot/www/
+
+# IDE / OS
+.DS_Store
+.cursor/
+*.swp
+*.swo
