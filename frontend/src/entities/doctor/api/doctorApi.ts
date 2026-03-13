@@ -15,6 +15,11 @@ export const doctorApi = {
   getById: (id: string): Promise<DoctorResponseSchema> =>
     apiClient.get(API_ENDPOINTS.DOCTORS.BY_ID(id)),
 
-  getCities: (): Promise<CityResponseSchema[]> =>
-    apiClient.get(API_ENDPOINTS.CITIES, { params: { with_doctors: true } }),
+  getCities: async (): Promise<CityResponseSchema[]> => {
+    const response = await apiClient.get<{ data: CityResponseSchema[] }>(
+      API_ENDPOINTS.CITIES,
+      { params: { with_doctors: true } },
+    );
+    return response.data;
+  },
 };

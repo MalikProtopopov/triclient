@@ -4,8 +4,12 @@ import { apiClient } from "@/shared/api";
 import type { Certificate } from "../types";
 
 export const certificateApi = {
-  getList: (): Promise<Certificate[]> =>
-    apiClient.get(API_ENDPOINTS.CERTIFICATES.LIST),
+  getList: async (): Promise<Certificate[]> => {
+    const response = await apiClient.get<{ data: Certificate[] }>(
+      API_ENDPOINTS.CERTIFICATES.LIST,
+    );
+    return response.data;
+  },
 
   download: async (id: string): Promise<string> => {
     const data = await apiClient.get<{ redirect_url: string }>(

@@ -92,7 +92,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     setEmailError(undefined);
     try {
-      await authApi.register({ email, password });
+      await authApi.register({ email, password, re_password: confirmPassword });
       setIsConfirmed(true);
       startCooldown();
     } catch (err) {

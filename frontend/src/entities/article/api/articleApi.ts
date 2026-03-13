@@ -15,6 +15,10 @@ export const articleApi = {
   getBySlug: (slug: string): Promise<ArticleResponseSchema> =>
     apiClient.get(API_ENDPOINTS.ARTICLES.BY_SLUG(slug)),
 
-  getThemes: (): Promise<ArticleTheme[]> =>
-    apiClient.get(API_ENDPOINTS.ARTICLE_THEMES),
+  getThemes: async (): Promise<ArticleTheme[]> => {
+    const response = await apiClient.get<{ data: ArticleTheme[] }>(
+      API_ENDPOINTS.ARTICLE_THEMES,
+    );
+    return response.data;
+  },
 };
