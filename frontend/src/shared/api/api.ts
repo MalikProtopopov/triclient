@@ -25,7 +25,13 @@ class ApiClient {
     this.instance.interceptors.response.use(
       (response) => response,
       async (error) => {
-        if (error.response?.status === 401 && typeof window !== "undefined") {
+        const status = error.response?.status;
+
+        if (typeof window === "undefined") {
+          return Promise.reject(error);
+        }
+
+        if (status === 401) {
           try {
             const refreshResponse = await axios.post(
               `${baseURL}${API_ENDPOINTS.AUTH.REFRESH}`,
@@ -37,15 +43,24 @@ class ApiClient {
             error.config.headers.Authorization = `Bearer ${newToken}`;
             return this.instance.request(error.config);
           } catch {
-            sessionStorage.removeItem("access_token");
-            sessionStorage.removeItem("user");
-            document.cookie = "has_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+            this.clearSessionAndRedirect();
           }
         }
+
+        if (status === 403 && !sessionStorage.getItem("access_token")) {
+          this.clearSessionAndRedirect();
+        }
+
         return Promise.reject(error);
       },
     );
+  }
+
+  private clearSessionAndRedirect(): void {
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("user");
+    document.cookie = "has_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
