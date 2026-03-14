@@ -29,10 +29,10 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const data = await authApi.login({ email, password });
-      login(data.access_token, data.user);
+      const onboarding = await login(data.access_token);
       const redirect = searchParams.get("redirect");
-      router.push(getPostLoginRedirect(data.user, redirect));
       toast.success("Добро пожаловать!");
+      router.push(getPostLoginRedirect(onboarding, redirect));
     } catch (err) {
       const axiosErr = err as AxiosError<ApiError>;
       const code = axiosErr.response?.data?.error?.code;

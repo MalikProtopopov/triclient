@@ -3,19 +3,29 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 import { authApi } from "@/entities/auth";
-import type { User as AuthUser, OnboardingNextStep } from "@/entities/auth";
+import type { OnboardingStatus, OnboardingNextStep } from "@/entities/auth";
 import { ROUTES } from "@/shared/config";
 
-export interface User extends AuthUser {
-  first_name?: string;
-  last_name?: string;
+export interface SessionUser {
+  onboarding: OnboardingStatus;
+  email?: string;
+}
+
+function getEmailFromToken(token: string): string | undefined {
+  try {
+    const payload = token.split(".")[1];
+    const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    return decoded.email ?? decoded.sub;
+  } catch {
+    return undefined;
+  }
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: SessionUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (token: string, user: User) => void;
+  login: (token: string) => Promise<OnboardingStatus>;
   logout: () => void;
 }
 
@@ -39,11 +49,12 @@ const NEXT_STEP_ROUTES: Partial<Record<OnboardingNextStep, string>> = {
   completed: ROUTES.CABINET,
 };
 
-export function getPostLoginRedirect(user: User, redirectParam?: string | null): string {
+export function getPostLoginRedirect(
+  onboarding: OnboardingStatus,
+  redirectParam?: string | null,
+): string {
   if (redirectParam) return redirectParam;
-  if (!user.has_chosen_role) return ROUTES.ONBOARDING_ROLE;
-  if (!user.onboarding_completed) return ROUTES.ONBOARDING_PENDING;
-  return ROUTES.CABINET;
+  return NEXT_STEP_ROUTES[onboarding.next_step] ?? ROUTES.CABINET;
 }
 
 export function getOnboardingStepRoute(nextStep: OnboardingNextStep): string {
@@ -54,44 +65,32 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   isAuthenticated: false,
-  login: () => {},
+  login: () => Promise.reject(),
   logout: () => {},
 });
 
 export const useAuth = (): AuthContextType => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = sessionStorage.getItem("access_token");
-    const savedUser = sessionStorage.getItem("user");
-
-    if (!token || !savedUser) {
+    if (!token) {
       setIsLoading(false);
       return;
     }
 
-    let parsed: User | null = null;
-    try {
-      parsed = JSON.parse(savedUser) as User;
-    } catch {
-      sessionStorage.removeItem("access_token");
-      sessionStorage.removeItem("user");
-      clearSessionCookie();
-      setIsLoading(false);
-      return;
-    }
-
+    const email = getEmailFromToken(token);
     authApi
       .getOnboardingStatus()
-      .then(() => {
-        setUser(parsed);
+      .then((onboarding) => {
+        setUser({ onboarding, email });
+        setSessionCookie();
       })
       .catch(() => {
         sessionStorage.removeItem("access_token");
-        sessionStorage.removeItem("user");
         clearSessionCookie();
       })
       .finally(() => {
@@ -99,17 +98,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
   }, []);
 
-  const login = useCallback((token: string, userData: User): void => {
+  const login = useCallback(async (token: string): Promise<OnboardingStatus> => {
     sessionStorage.setItem("access_token", token);
-    sessionStorage.setItem("user", JSON.stringify(userData));
     setSessionCookie();
-    setUser(userData);
+    const email = getEmailFromToken(token);
+    const onboarding = await authApi.getOnboardingStatus();
+    setUser({ onboarding, email });
+    return onboarding;
   }, []);
 
   const logout = useCallback((): void => {
     authApi.logout().catch(() => {});
     sessionStorage.removeItem("access_token");
-    sessionStorage.removeItem("user");
     clearSessionCookie();
     setUser(null);
     window.location.href = ROUTES.LOGIN;

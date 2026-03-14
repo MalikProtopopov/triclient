@@ -15,7 +15,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   access_token: string;
-  user: User;
+  token_type: string;
 }
 
 export interface RegisterRequest {
@@ -33,9 +33,7 @@ export interface VerifyEmailRequest {
 }
 
 export interface VerifyEmailResponse {
-  access_token: string;
-  refresh_token: string;
-  user: User;
+  message: string;
 }
 
 export interface ForgotPasswordRequest {

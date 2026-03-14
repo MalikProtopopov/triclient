@@ -7,7 +7,6 @@ import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { ROUTES } from "@/shared/config";
-import { useAuth, getPostLoginRedirect } from "@/providers/AuthProvider";
 import { authApi } from "@/entities/auth";
 
 type ConfirmState = "loading" | "success" | "error";
@@ -15,7 +14,6 @@ type ConfirmState = "loading" | "success" | "error";
 function ConfirmEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
   const [state, setState] = useState<ConfirmState>("loading");
 
   useEffect(() => {
@@ -27,17 +25,16 @@ function ConfirmEmailContent() {
 
     authApi
       .verifyEmail({ token })
-      .then((data) => {
+      .then(() => {
         setState("success");
-        login(data.access_token, data.user);
         setTimeout(() => {
-          router.push(getPostLoginRedirect(data.user));
-        }, 1500);
+          router.push(ROUTES.LOGIN);
+        }, 2000);
       })
       .catch(() => {
         setState("error");
       });
-  }, [searchParams, login, router]);
+  }, [searchParams, router]);
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -59,7 +56,7 @@ function ConfirmEmailContent() {
                 Email подтверждён!
               </h1>
               <p className="mt-2 text-sm text-text-secondary">
-                Перенаправление...
+                Перенаправление на вход...
               </p>
             </>
           )}

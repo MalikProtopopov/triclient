@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/providers/AuthProvider";
+import { usePersonalProfile } from "@/entities/profile";
 import { ROUTES } from "@/shared/config";
 import { cn } from "@/shared/lib";
 
@@ -35,7 +36,8 @@ const DOCTOR_NAV = [
 export const CabinetSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const { data: profile } = usePersonalProfile();
 
   const handleLogout = (): void => {
     logout();
@@ -47,14 +49,14 @@ export const CabinetSidebar = () => {
       <div className="border-b border-border p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-contrast">
-            {user?.first_name?.[0]}
-            {user?.last_name?.[0]}
+            {profile?.first_name?.[0]}
+            {profile?.last_name?.[0]}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-text-primary">
-              {user?.first_name} {user?.last_name?.[0]}.
+              {profile?.first_name} {profile?.last_name?.[0]}.
             </p>
-            <p className="truncate text-xs text-text-muted">{user?.email}</p>
+            <p className="truncate text-xs text-text-muted">{profile?.phone}</p>
           </div>
         </div>
       </div>
