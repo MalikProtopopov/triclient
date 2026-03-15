@@ -24,7 +24,7 @@ export const API_ENDPOINTS = {
   },
   DOCTORS: {
     LIST: "/api/v1/doctors",
-    BY_ID: (id: string) => `/api/v1/doctors/${id}`,
+    BY_SLUG: (slug: string) => `/api/v1/doctors/${slug}`,
   },
   EVENTS: {
     LIST: "/api/v1/events",

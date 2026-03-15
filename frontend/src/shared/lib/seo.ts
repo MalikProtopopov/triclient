@@ -8,12 +8,26 @@ interface MetadataDefaults {
   description: string;
 }
 
+const VALID_OG_TYPES = new Set(["website", "article", "book", "profile"]);
+type OgType = "website" | "article" | "book" | "profile";
+
+const VALID_TWITTER_CARDS = new Set(["summary", "summary_large_image"]);
+type TwitterCard = "summary" | "summary_large_image";
+
 export function buildMetadata(
   seo: SeoMeta | null | undefined,
   defaults: MetadataDefaults,
 ): Metadata {
   const title = seo?.title || defaults.title;
   const description = seo?.description || defaults.description;
+
+  const ogType: OgType = VALID_OG_TYPES.has(seo?.og_type ?? "")
+    ? (seo!.og_type as OgType)
+    : "website";
+
+  const twitterCard: TwitterCard = VALID_TWITTER_CARDS.has(seo?.twitter_card ?? "")
+    ? (seo!.twitter_card as TwitterCard)
+    : "summary_large_image";
 
   return {
     title,
@@ -23,11 +37,11 @@ export function buildMetadata(
       description,
       siteName: ENV.SITE_NAME,
       url: seo?.og_url ?? undefined,
-      type: (seo?.og_type as "website" | "article") ?? "website",
+      type: ogType,
       images: seo?.og_image ? [{ url: seo.og_image }] : undefined,
     },
     twitter: {
-      card: (seo?.twitter_card as "summary" | "summary_large_image") ?? "summary_large_image",
+      card: twitterCard,
       title,
       description,
     },

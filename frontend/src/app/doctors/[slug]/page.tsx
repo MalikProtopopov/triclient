@@ -18,9 +18,9 @@ function getInitials(firstName: string, lastName: string): string {
 
 export default function DoctorProfilePage() {
   const params = useParams();
-  const id = typeof params.id === "string" ? params.id : "";
+  const slug = typeof params.slug === "string" ? params.slug : "";
 
-  const { data: doctor, isLoading } = useDoctor(id);
+  const { data: doctor, isLoading } = useDoctor(slug);
 
   if (isLoading) {
     return (

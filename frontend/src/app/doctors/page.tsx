@@ -25,7 +25,7 @@ function DoctorsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [cityId, setCityId] = useState(searchParams.get("city") ?? "");
+  const [citySlug, setCitySlug] = useState(searchParams.get("city") ?? "");
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
   const [page, setPage] = useState(1);
 
@@ -33,15 +33,15 @@ function DoctorsContent() {
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (cityId) params.set("city", cityId);
+    if (citySlug) params.set("city", citySlug);
     if (debouncedSearch) params.set("search", debouncedSearch);
     const qs = params.toString();
     router.replace(qs ? `?${qs}` : "/doctors", { scroll: false });
-  }, [cityId, debouncedSearch, router]);
+  }, [citySlug, debouncedSearch, router]);
 
   const { data: citiesData } = useCities();
   const { data: doctorsData, isLoading } = useDoctors({
-    city_id: cityId || undefined,
+    city_slug: citySlug || undefined,
     search: debouncedSearch || undefined,
     limit: PER_PAGE,
     offset: (page - 1) * PER_PAGE,
@@ -58,7 +58,7 @@ function DoctorsContent() {
   }, []);
 
   const handleCityChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCityId(e.target.value);
+    setCitySlug(e.target.value);
     setPage(1);
   }, []);
 
@@ -66,7 +66,7 @@ function DoctorsContent() {
     { value: "", label: "Все города" },
     ...cities
       .filter((c) => !c.doctors_count || c.doctors_count > 0)
-      .map((c) => ({ value: c.id, label: c.name })),
+      .map((c) => ({ value: c.slug, label: c.name })),
   ];
 
   return (
@@ -98,7 +98,7 @@ function DoctorsContent() {
             <div className="w-full sm:w-48">
               <Select
                 options={cityOptions}
-                value={cityId}
+                value={citySlug}
                 onChange={handleCityChange}
                 placeholder="Город"
               />
@@ -118,7 +118,7 @@ function DoctorsContent() {
               action={{
                 label: "Сбросить фильтры",
                 onClick: () => {
-                  setCityId("");
+                  setCitySlug("");
                   setSearch("");
                   setPage(1);
                 },

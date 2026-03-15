@@ -12,8 +12,8 @@ export const doctorApi = {
   getList: (filters?: DoctorFilters): Promise<DoctorListResponseSchema> =>
     apiClient.get(API_ENDPOINTS.DOCTORS.LIST, { params: filters }),
 
-  getById: (id: string): Promise<DoctorResponseSchema> =>
-    apiClient.get(API_ENDPOINTS.DOCTORS.BY_ID(id)),
+  getBySlug: (slug: string): Promise<DoctorResponseSchema> =>
+    apiClient.get(API_ENDPOINTS.DOCTORS.BY_SLUG(slug)),
 
   getCities: async (): Promise<CityResponseSchema[]> => {
     const response = await apiClient.get<{ data: CityResponseSchema[] }>(
