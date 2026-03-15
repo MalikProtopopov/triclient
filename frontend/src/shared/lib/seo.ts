@@ -14,6 +14,14 @@ type OgType = "website" | "article" | "book" | "profile";
 const VALID_TWITTER_CARDS = new Set(["summary", "summary_large_image"]);
 type TwitterCard = "summary" | "summary_large_image";
 
+function resolveOgImageUrl(url: string | null): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const base = ENV.API_URL.replace(/\/$/, "");
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return `${base}${path}`;
+}
+
 export function buildMetadata(
   seo: SeoMeta | null | undefined,
   defaults: MetadataDefaults,

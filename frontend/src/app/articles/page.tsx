@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 import { useArticles, useArticleThemes } from "@/entities/article";
 import { Header } from "@/widgets/header";
@@ -13,9 +15,19 @@ import { formatDate } from "@/shared/lib/format";
 
 const PER_PAGE = 10;
 
-export default function ArticlesPage() {
-  const [themeSlug, setThemeSlug] = useState("");
+function ArticlesContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [themeSlug, setThemeSlug] = useState(searchParams.get("theme") ?? "");
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (themeSlug) params.set("theme", themeSlug);
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : ROUTES.ARTICLES, { scroll: false });
+  }, [themeSlug, router]);
 
   const { data: themesData } = useArticleThemes();
   const { data, isLoading } = useArticles({
