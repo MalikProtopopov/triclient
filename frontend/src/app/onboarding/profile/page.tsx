@@ -11,6 +11,7 @@ import { Button, Input, Select, Card } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { useCities } from "@/entities/doctor";
 import { useOnboardingStatus, authApi } from "@/entities/auth";
+import type { OnboardingNextStep } from "@/entities/auth";
 import { getOnboardingStepRoute } from "@/providers/AuthProvider";
 
 const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png";
@@ -45,7 +46,7 @@ function FileUploadZone({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const f = e.dataTransfer.files[0];
-    if (f && (f.size <= MAX_SIZE_BYTES) && /\.(pdf|jpg|jpeg|png)$/i.test(f.name)) {
+    if (f && f.size <= MAX_SIZE_BYTES && /\.(pdf|jpg|jpeg|png)$/i.test(f.name)) {
       onFileChange(f);
     }
   };
@@ -105,6 +106,64 @@ function FileUploadZone({
   );
 }
 
+const STEP_LABELS: { step: OnboardingNextStep; label: string }[] = [
+  { step: "choose_role", label: "Роль" },
+  { step: "fill_profile", label: "Анкета" },
+  { step: "upload_documents", label: "Документы" },
+  { step: "submit", label: "Отправка" },
+];
+
+const STEP_ORDER: OnboardingNextStep[] = [
+  "choose_role",
+  "fill_profile",
+  "upload_documents",
+  "submit",
+];
+
+function OnboardingProgress({ currentStep }: { currentStep: OnboardingNextStep }) {
+  const currentIndex = STEP_ORDER.indexOf(currentStep);
+
+  return (
+    <div className="mb-8 flex items-center gap-0">
+      {STEP_LABELS.map(({ step, label }, i) => {
+        const idx = STEP_ORDER.indexOf(step);
+        const isDone = idx < currentIndex;
+        const isCurrent = idx === currentIndex;
+
+        return (
+          <div key={step} className="flex flex-1 items-center">
+            <div className="flex flex-col items-center">
+              <div
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
+                  isDone
+                    ? "bg-accent text-white"
+                    : isCurrent
+                      ? "border-2 border-accent bg-bg text-accent"
+                      : "border-2 border-border bg-bg text-text-muted"
+                }`}
+              >
+                {isDone ? <Check className="h-4 w-4" /> : i + 1}
+              </div>
+              <span
+                className={`mt-1 whitespace-nowrap text-xs ${
+                  isCurrent ? "font-medium text-accent" : "text-text-muted"
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+            {i < STEP_LABELS.length - 1 && (
+              <div
+                className={`mb-5 h-0.5 flex-1 transition-colors ${idx < currentIndex ? "bg-accent" : "bg-border"}`}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 const VALID_STEPS = new Set(["fill_profile", "upload_documents", "submit"]);
 
 export default function OnboardingProfilePage() {
@@ -133,7 +192,7 @@ export default function OnboardingProfilePage() {
   const setCertificate = (f: File | null) =>
     setCertificateFile(f ? { file: f, name: f.name, size: f.size } : null);
 
-  if (status && !VALID_STEPS.has(status.next_step)) {
+  if (status && !VALID_STEPS.has(status.next_step) && status.moderation_status !== "rejected") {
     router.replace(getOnboardingStepRoute(status.next_step));
     return null;
   }
@@ -141,12 +200,7 @@ export default function OnboardingProfilePage() {
   const cityOptions = cities.map((c) => ({ value: c.id, label: c.name }));
 
   const requiredFilled =
-    lastName.trim() &&
-    firstName.trim() &&
-    phone.trim() &&
-    cityId &&
-    diplomaFile &&
-    certificateFile;
+    lastName.trim() && firstName.trim() && phone.trim() && cityId && diplomaFile;
 
   const uploadFile = async (file: FileState, documentType: string) => {
     if (!file.file) return;
@@ -175,9 +229,9 @@ export default function OnboardingProfilePage() {
       });
 
       if (diplomaFile) await uploadFile(diplomaFile, "medical_diploma");
-      if (certificateFile) await uploadFile(certificateFile, "specialization_certificate");
+      if (certificateFile) await uploadFile(certificateFile, "retraining_cert");
       for (const extra of extraFiles) {
-        if (extra.file) await uploadFile(extra, "other");
+        if (extra.file) await uploadFile(extra, "additional_cert");
       }
 
       await authApi.submitOnboarding();
@@ -202,20 +256,26 @@ export default function OnboardingProfilePage() {
     );
   }
 
+  const currentStep: OnboardingNextStep = status?.next_step ?? "fill_profile";
+
   return (
     <div className="flex min-h-screen flex-col bg-bg">
       <Header />
       <main className="flex-1 px-4 py-8">
         <div className="mx-auto max-w-2xl">
-          <h1 className="mb-8 text-2xl font-semibold text-text-primary">
-            Заполните анкету
-          </h1>
+          <OnboardingProgress currentStep={currentStep} />
+
+          <h1 className="mb-4 text-2xl font-semibold text-text-primary">Заполните анкету</h1>
+
+          {status?.moderation_status === "rejected" && status.rejection_comment && (
+            <div className="mb-6 rounded-xl border border-red-500/50 bg-red-500/10 px-5 py-4 text-sm text-red-700 dark:text-red-400">
+              <strong>Заявка отклонена.</strong> Причина: {status.rejection_comment}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-10">
             <Card>
-              <h2 className="mb-4 text-lg font-medium text-text-primary">
-                Личные данные
-              </h2>
+              <h2 className="mb-4 text-lg font-medium text-text-primary">Личные данные</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Input
                   label="Фамилия"
@@ -299,9 +359,7 @@ export default function OnboardingProfilePage() {
             </Card>
 
             <Card>
-              <h2 className="mb-4 text-lg font-medium text-text-primary">
-                Документы
-              </h2>
+              <h2 className="mb-4 text-lg font-medium text-text-primary">Документы</h2>
               <div className="space-y-4">
                 <FileUploadZone
                   label="Диплом о высшем медицинском образовании"
@@ -311,7 +369,6 @@ export default function OnboardingProfilePage() {
                 />
                 <FileUploadZone
                   label="Сертификат о переподготовке"
-                  required
                   file={certificateFile}
                   onFileChange={setCertificate}
                 />
@@ -324,8 +381,7 @@ export default function OnboardingProfilePage() {
                 />
                 {!diplomaFile && (
                   <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
-                    Без диплома о высшем мед. образовании оплата членского взноса будет
-                    недоступна
+                    Без диплома о высшем мед. образовании оплата членского взноса будет недоступна
                   </div>
                 )}
               </div>
@@ -338,7 +394,9 @@ export default function OnboardingProfilePage() {
               disabled={!requiredFilled || isSubmitting}
               isLoading={isSubmitting}
             >
-              Отправить заявку на проверку
+              {status?.moderation_status === "rejected"
+                ? "Исправить и отправить заново"
+                : "Отправить заявку на проверку"}
             </Button>
           </form>
         </div>

@@ -71,7 +71,7 @@ export interface OnboardingStatus {
   profile_filled: boolean;
   documents_uploaded: boolean;
   has_medical_diploma: boolean;
-  moderation_status: "pending" | "approved" | "rejected" | null;
+  moderation_status: "pending_review" | "approved" | "rejected" | "active" | "deactivated" | null;
   submitted_at: string | null;
   rejection_comment: string | null;
   next_step: OnboardingNextStep;

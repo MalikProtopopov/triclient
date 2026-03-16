@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Clock, XCircle, CheckCircle, Loader2 } from "lucide-react";
 
+import { toast } from "sonner";
+
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { Button } from "@/shared/ui";
@@ -22,11 +24,12 @@ function formatSubmittedDate(iso: string | null): string {
 
 export default function OnboardingPendingPage() {
   const router = useRouter();
-  const { data: status, isLoading } = useOnboardingStatus();
+  const { data: status, isLoading } = useOnboardingStatus({ refetchInterval: 30_000 });
 
   if (status) {
-    if (status.moderation_status === "approved") {
+    if (status.moderation_status === "approved" || status.moderation_status === "active") {
       const target = status.next_step === "pay_entry_fee" ? ROUTES.CABINET_PAYMENTS : ROUTES.CABINET;
+      toast.success("Заявка одобрена! Добро пожаловать.");
       router.replace(target);
       return null;
     }

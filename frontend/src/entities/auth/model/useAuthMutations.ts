@@ -72,11 +72,12 @@ export const useSubmitOnboardingMutation = () => {
   });
 };
 
-export const useOnboardingStatus = (enabled = true) =>
+export const useOnboardingStatus = (options?: { enabled?: boolean; refetchInterval?: number }) =>
   useQuery({
     queryKey: authKeys.onboardingStatus,
     queryFn: () => authApi.getOnboardingStatus(),
-    enabled,
+    enabled: options?.enabled ?? true,
+    refetchInterval: options?.refetchInterval,
   });
 
 export const useChangeEmailMutation = () =>
