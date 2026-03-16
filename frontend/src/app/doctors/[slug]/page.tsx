@@ -7,7 +7,7 @@ import { MapPin, Phone, Mail, ArrowLeft } from "lucide-react";
 import { useDoctor } from "@/entities/doctor";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Card, SkeletonCard, ContentBlockRenderer } from "@/shared/ui";
+import { Card, SkeletonCard, DocumentContentBlockRenderer } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 
 function getInitials(firstName: string, lastName: string): string {
@@ -153,7 +153,7 @@ export default function DoctorProfilePage() {
               </Card>
             )}
 
-            <ContentBlockRenderer blocks={doctor.content_blocks ?? []} />
+            <DocumentContentBlockRenderer blocks={doctor.content_blocks ?? []} />
           </div>
         </div>
       </main>

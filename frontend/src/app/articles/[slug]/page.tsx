@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useArticle } from "@/entities/article";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { ContentBlockRenderer } from "@/shared/ui";
+import { DocumentContentBlockRenderer } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
 
@@ -85,7 +85,7 @@ export default function ArticleDetailPage() {
           dangerouslySetInnerHTML={{ __html: article.content }}
         />
 
-        <ContentBlockRenderer blocks={article.content_blocks ?? []} className="mt-10 space-y-6" />
+        <DocumentContentBlockRenderer blocks={article.content_blocks ?? []} className="mt-10 space-y-6" />
       </main>
       <Footer />
     </div>

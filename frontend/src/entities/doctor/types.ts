@@ -1,4 +1,8 @@
-import type { PaginatedResponse, SeoMeta, ContentBlock } from "@/shared/types";
+import type {
+  PaginatedResponse,
+  SeoMeta,
+  ContentBlockPublicNested,
+} from "@/shared/types";
 
 export interface DoctorResponseSchema {
   id: string;
@@ -17,7 +21,7 @@ export interface DoctorResponseSchema {
   slug: string;
   is_active: boolean;
   seo: SeoMeta | null;
-  content_blocks: ContentBlock[];
+  content_blocks: ContentBlockPublicNested[];
 }
 
 export type DoctorListResponseSchema = PaginatedResponse<DoctorResponseSchema>;

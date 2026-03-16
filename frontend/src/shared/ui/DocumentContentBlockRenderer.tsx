@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { Download, ExternalLink } from "lucide-react";
 
-import type { ContentBlockPublicNested } from "@/entities/document";
+import type { ContentBlockPublicNested } from "@/shared/types";
+import { resolveMediaUrl } from "@/shared/lib/mediaUrl";
 
 function useDeviceType(): "desktop" | "mobile" {
   if (typeof window === "undefined") return "desktop";
@@ -38,12 +39,13 @@ function TextBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function ImageBlock({ block }: { block: ContentBlockPublicNested }) {
-  if (!block.media_url) return null;
+  const src = resolveMediaUrl(block.media_url) ?? block.media_url;
+  if (!src) return null;
   return (
     <figure>
       <div className="relative overflow-hidden rounded-xl aspect-video">
         <Image
-          src={block.media_url}
+          src={src}
           alt={block.title ?? ""}
           fill
           className="object-cover"
@@ -60,9 +62,10 @@ function ImageBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function VideoBlock({ block }: { block: ContentBlockPublicNested }) {
-  if (!block.media_url) return null;
+  const mediaUrl = resolveMediaUrl(block.media_url) ?? block.media_url;
+  if (!mediaUrl) return null;
 
-  const embedUrl = getEmbedUrl(block.media_url);
+  const embedUrl = getEmbedUrl(mediaUrl);
   if (embedUrl) {
     return (
       <div className="relative aspect-video overflow-hidden rounded-xl">
@@ -77,12 +80,13 @@ function VideoBlock({ block }: { block: ContentBlockPublicNested }) {
     );
   }
 
+  const posterUrl = resolveMediaUrl(block.thumbnail_url) ?? block.thumbnail_url;
   return (
     <div className="overflow-hidden rounded-xl">
       <video
-        src={block.media_url}
+        src={mediaUrl}
         controls
-        poster={block.thumbnail_url ?? undefined}
+        poster={posterUrl ?? undefined}
         className="w-full"
         preload="metadata"
       />
@@ -91,11 +95,12 @@ function VideoBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function FileBlock({ block }: { block: ContentBlockPublicNested }) {
-  if (!block.media_url) return null;
+  const href = resolveMediaUrl(block.media_url) ?? block.media_url;
+  if (!href) return null;
   const label = block.link_label || block.title || "Скачать файл";
   return (
     <a
-      href={block.media_url}
+      href={href}
       download
       className="inline-flex items-center gap-2 rounded-lg border border-border bg-bg-secondary px-4 py-3 text-sm font-medium text-accent transition-colors hover:border-accent/40 hover:bg-bg"
     >
@@ -121,12 +126,15 @@ function LinkBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function GalleryBlock({ block }: { block: ContentBlockPublicNested }) {
-  if (!block.media_url) return null;
+  const mediaUrl = resolveMediaUrl(block.media_url) ?? block.media_url;
+  const thumbUrl = resolveMediaUrl(block.thumbnail_url) ?? block.thumbnail_url;
+  const src = thumbUrl || mediaUrl;
+  if (!src) return null;
   return (
     <figure>
       <div className="relative overflow-hidden rounded-xl aspect-video">
         <Image
-          src={block.thumbnail_url || block.media_url}
+          src={src}
           alt={block.title ?? ""}
           fill
           className="object-cover"
@@ -143,12 +151,13 @@ function GalleryBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function BannerBlock({ block }: { block: ContentBlockPublicNested }) {
+  const mediaSrc = resolveMediaUrl(block.media_url) ?? block.media_url;
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-bg-secondary">
-      {block.media_url && (
+      {mediaSrc && (
         <div className="relative aspect-[21/9] w-full">
           <Image
-            src={block.media_url}
+            src={mediaSrc}
             alt={block.title ?? ""}
             fill
             className="object-cover"
@@ -206,7 +215,12 @@ export function DocumentContentBlockRenderer({
   if (!blocks || blocks.length === 0) return null;
 
   const visible = blocks
-    .filter((b) => b.device_type === "all" || b.device_type === deviceType)
+    .filter(
+      (b) =>
+        b.device_type === "all" ||
+        b.device_type === "both" ||
+        b.device_type === deviceType,
+    )
     .sort((a, b) => a.sort_order - b.sort_order);
 
   if (visible.length === 0) return null;

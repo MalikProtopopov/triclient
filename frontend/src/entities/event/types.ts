@@ -1,4 +1,8 @@
-import type { PaginatedResponse, SeoMeta, ContentBlock } from "@/shared/types";
+import type {
+  PaginatedResponse,
+  SeoMeta,
+  ContentBlockPublicNested,
+} from "@/shared/types";
 
 export interface EventResponseSchema {
   id: string;
@@ -13,7 +17,7 @@ export interface EventResponseSchema {
   tariffs: EventTariff[];
   galleries: EventGallery[];
   recordings: EventRecording[];
-  content_blocks: ContentBlock[];
+  content_blocks: ContentBlockPublicNested[];
   seo: SeoMeta | null;
   user_registration?: EventRegistrationResponse | null;
 }

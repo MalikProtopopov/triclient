@@ -11,7 +11,7 @@ import { useEvent, useEventRegisterMutation } from "@/entities/event";
 import type { EventTariff, EventRegistrationResponse } from "@/entities/event";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Card, Button, Badge, Modal, Input, ContentBlockRenderer } from "@/shared/ui";
+import { Card, Button, Badge, Modal, Input, DocumentContentBlockRenderer } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatDateTime, formatPrice } from "@/shared/lib/format";
 import { resolveMediaUrl, deriveEventStatus } from "@/shared/lib/mediaUrl";
@@ -327,7 +327,7 @@ export default function EventDetailPage() {
           </section>
         )}
 
-        <ContentBlockRenderer blocks={event.content_blocks ?? []} className="mb-10 space-y-6" />
+        <DocumentContentBlockRenderer blocks={event.content_blocks ?? []} className="mb-10 space-y-6" />
 
         {!isUpcoming && (
           <>

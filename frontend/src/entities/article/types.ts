@@ -1,4 +1,8 @@
-import type { PaginatedResponse, SeoMeta, ContentBlock } from "@/shared/types";
+import type {
+  PaginatedResponse,
+  SeoMeta,
+  ContentBlockPublicNested,
+} from "@/shared/types";
 
 export interface ArticleTheme {
   id: string;
@@ -18,7 +22,7 @@ export interface ArticleResponseSchema {
   seo_title: string;
   seo_description: string;
   seo: SeoMeta | null;
-  content_blocks: ContentBlock[];
+  content_blocks: ContentBlockPublicNested[];
 }
 
 export type ArticleListResponseSchema = PaginatedResponse<ArticleResponseSchema>;
