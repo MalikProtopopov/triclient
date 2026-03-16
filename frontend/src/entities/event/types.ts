@@ -9,13 +9,13 @@ export interface EventResponseSchema {
   event_end_date: string;
   location: string;
   cover_image_url: string | null;
-  status: "upcoming" | "past";
+  status?: "upcoming" | "past";
   tariffs: EventTariff[];
   galleries: EventGallery[];
   recordings: EventRecording[];
   content_blocks: ContentBlock[];
   seo: SeoMeta | null;
-  user_registration: EventRegistrationResponse | null;
+  user_registration?: EventRegistrationResponse | null;
 }
 
 export interface EventTariff {
@@ -28,9 +28,10 @@ export interface EventTariff {
   member_price: number;
   benefits: string[] | null;
   seats_limit: number | null;
-  seats_taken: number;
-  is_active: boolean;
-  sort_order: number;
+  seats_taken?: number;
+  seats_available?: number;
+  is_active?: boolean;
+  sort_order?: number;
 }
 
 export interface EventGallery {

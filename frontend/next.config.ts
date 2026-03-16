@@ -2,8 +2,25 @@ import type { NextConfig } from "next";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+function getApiImagePattern() {
+  try {
+    const u = new URL(API_URL);
+    return {
+      protocol: u.protocol.replace(":", "") as "http" | "https",
+      hostname: u.hostname,
+      pathname: "/**",
+      ...(u.port && u.port !== "80" && u.port !== "443" ? { port: u.port } : {}),
+    };
+  } catch {
+    return { protocol: "https" as const, hostname: "trihoback.mediann.dev", pathname: "/**" };
+  }
+}
+
 const nextConfig: NextConfig = {
   output: "standalone",
+  images: {
+    remotePatterns: [getApiImagePattern()],
+  },
   async redirects() {
     return [
       {

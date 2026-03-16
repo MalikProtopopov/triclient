@@ -37,6 +37,8 @@ export function buildMetadata(
     ? (seo!.twitter_card as TwitterCard)
     : "summary_large_image";
 
+  const ogImageUrl = resolveOgImageUrl(seo?.og_image ?? null);
+
   return {
     title,
     description,
@@ -46,7 +48,7 @@ export function buildMetadata(
       siteName: ENV.SITE_NAME,
       url: seo?.og_url ?? undefined,
       type: ogType,
-      images: seo?.og_image ? [{ url: seo.og_image }] : undefined,
+      images: ogImageUrl ? [{ url: ogImageUrl }] : undefined,
     },
     twitter: {
       card: twitterCard,

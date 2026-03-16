@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Play, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -13,6 +14,7 @@ import { Footer } from "@/widgets/footer";
 import { Card, Button, Badge, Modal, Input, ContentBlockRenderer } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatDateTime, formatPrice } from "@/shared/lib/format";
+import { resolveMediaUrl, deriveEventStatus } from "@/shared/lib/mediaUrl";
 import { useAuth } from "@/providers/AuthProvider";
 
 function generateIdempotencyKey(): string {
@@ -30,7 +32,12 @@ function TariffCard({
   isRegistering: boolean;
   isRegistered: boolean;
 }) {
-  const seatsLeft = tariff.seats_limit !== null ? tariff.seats_limit - tariff.seats_taken : null;
+  const seatsLeft =
+    tariff.seats_available != null
+      ? tariff.seats_available
+      : tariff.seats_limit != null && tariff.seats_taken != null
+        ? tariff.seats_limit - tariff.seats_taken
+        : null;
   const soldOut = seatsLeft !== null && seatsLeft <= 0;
 
   return (
@@ -38,6 +45,12 @@ function TariffCard({
       <h3 className="mb-1 font-medium text-text-primary">{tariff.name}</h3>
       {tariff.description && (
         <p className="mb-3 text-sm text-text-secondary">{tariff.description}</p>
+      )}
+      {tariff.conditions && (
+        <p className="mb-2 text-sm text-text-muted">{tariff.conditions}</p>
+      )}
+      {tariff.details && (
+        <p className="mb-2 text-sm text-text-muted">{tariff.details}</p>
       )}
       <div className="mb-2 text-sm text-text-secondary">
         <span className="font-medium text-text-primary">{formatPrice(tariff.price)}</span>
@@ -55,7 +68,7 @@ function TariffCard({
           ))}
         </ul>
       )}
-      {seatsLeft !== null && (
+      {seatsLeft !== null && tariff.seats_limit != null && (
         <p className="mb-4 text-xs text-text-muted">
           {soldOut ? "Мест нет" : `Мест: ${seatsLeft} из ${tariff.seats_limit}`}
         </p>
@@ -66,7 +79,7 @@ function TariffCard({
         <Button
           size="sm"
           className="mt-auto"
-          disabled={soldOut || isRegistering || !tariff.is_active}
+          disabled={soldOut || isRegistering || tariff.is_active === false}
           onClick={() => onRegister(tariff.id)}
         >
           {isRegistering ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -246,7 +259,8 @@ export default function EventDetailPage() {
     );
   }
 
-  const isUpcoming = event.status === "upcoming";
+  const isUpcoming =
+    (event.status ?? deriveEventStatus(event.event_date)) === "upcoming";
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -259,7 +273,19 @@ export default function EventDetailPage() {
           ← Все мероприятия
         </Link>
 
-        <div className="mb-8 h-64 w-full max-h-80 overflow-hidden rounded-xl bg-metal-light" />
+        {event.cover_image_url ? (
+          <div className="relative mb-8 aspect-video w-full max-h-80 overflow-hidden rounded-xl bg-metal-light">
+            <Image
+              src={resolveMediaUrl(event.cover_image_url)!}
+              alt={event.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 896px) 100vw, 896px"
+            />
+          </div>
+        ) : (
+          <div className="mb-8 h-64 w-full max-h-80 overflow-hidden rounded-xl bg-metal-light" />
+        )}
 
         <h1 className="mb-2 font-heading text-3xl font-semibold text-text-primary">
           {event.title}
@@ -279,15 +305,15 @@ export default function EventDetailPage() {
           />
         )}
 
-        {isUpcoming && event.tariffs.length > 0 && (
+        {isUpcoming && (event.tariffs?.length ?? 0) > 0 && (
           <section className="mb-10">
             <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
               Тарифы
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {event.tariffs
-                .filter((t) => t.is_active)
-                .sort((a, b) => a.sort_order - b.sort_order)
+                .filter((t) => t.is_active !== false)
+                .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
                 .map((tariff) => (
                   <TariffCard
                     key={tariff.id}
