@@ -6,19 +6,13 @@ import { authApi } from "@/entities/auth";
 import type { OnboardingStatus, OnboardingNextStep } from "@/entities/auth";
 import { ROUTES } from "@/shared/config";
 
+const DEFAULT_SIDEBAR_SECTIONS = ["cabinet", "events", "settings"];
+
 export interface SessionUser {
   onboarding: OnboardingStatus;
   email?: string;
-}
-
-function getEmailFromToken(token: string): string | undefined {
-  try {
-    const payload = token.split(".")[1];
-    const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
-    return decoded.email ?? decoded.sub;
-  } catch {
-    return undefined;
-  }
+  role?: "doctor" | "user";
+  sidebarSections: string[];
 }
 
 interface AuthContextType {
@@ -82,11 +76,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    const email = getEmailFromToken(token);
-    authApi
-      .getOnboardingStatus()
-      .then((onboarding) => {
-        setUser({ onboarding, email });
+    Promise.all([authApi.getMe(), authApi.getOnboardingStatus()])
+      .then(([me, onboarding]) => {
+        setUser({
+          onboarding,
+          email: me.email,
+          role: me.role,
+          sidebarSections: me.sidebar_sections?.length
+            ? me.sidebar_sections
+            : DEFAULT_SIDEBAR_SECTIONS,
+        });
         setSessionCookie();
       })
       .catch(() => {
@@ -101,9 +100,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = useCallback(async (token: string): Promise<OnboardingStatus> => {
     sessionStorage.setItem("access_token", token);
     setSessionCookie();
-    const email = getEmailFromToken(token);
-    const onboarding = await authApi.getOnboardingStatus();
-    setUser({ onboarding, email });
+    const [me, onboarding] = await Promise.all([
+      authApi.getMe(),
+      authApi.getOnboardingStatus(),
+    ]);
+    setUser({
+      onboarding,
+      email: me.email,
+      role: me.role,
+      sidebarSections: me.sidebar_sections?.length
+        ? me.sidebar_sections
+        : DEFAULT_SIDEBAR_SECTIONS,
+    });
     return onboarding;
   }, []);
 

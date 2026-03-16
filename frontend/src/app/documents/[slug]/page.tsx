@@ -7,7 +7,7 @@ import { Download } from "lucide-react";
 import { useDocument } from "@/entities/document";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Button, ContentBlockRenderer } from "@/shared/ui";
+import { Button, DocumentContentBlockRenderer } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 
 export default function DocumentDetailPage() {
@@ -78,7 +78,7 @@ export default function DocumentDetailPage() {
           </div>
         )}
 
-        <ContentBlockRenderer blocks={doc.content_blocks ?? []} />
+        <DocumentContentBlockRenderer blocks={doc.content_blocks ?? []} />
       </main>
       <Footer />
     </div>

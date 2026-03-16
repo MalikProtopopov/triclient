@@ -11,6 +11,7 @@ import type {
   ForgotPasswordRequest,
   ResetPasswordRequest,
   OnboardingStatus,
+  AuthMeResponse,
   ChooseRoleRequest,
   DoctorProfileRequest,
   ChangeEmailRequest,
@@ -35,6 +36,9 @@ export const authApi = {
 
   logout: (): Promise<{ message: string }> =>
     apiClient.post(API_ENDPOINTS.AUTH.LOGOUT),
+
+  getMe: (): Promise<AuthMeResponse> =>
+    apiClient.get(API_ENDPOINTS.AUTH.ME),
 
   getOnboardingStatus: (): Promise<OnboardingStatus> =>
     apiClient.get(API_ENDPOINTS.ONBOARDING.STATUS),

@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
     CHANGE_PASSWORD: "/api/v1/auth/change-password",
     LOGOUT: "/api/v1/auth/logout",
     CONFIRM_EMAIL_CHANGE: "/api/v1/auth/confirm-email-change",
+    ME: "/api/v1/auth/me",
   },
   ONBOARDING: {
     STATUS: "/api/v1/onboarding/status",

@@ -10,10 +10,11 @@ export const profileKeys = {
   events: () => [...profileKeys.all, "events"] as const,
 };
 
-export const usePersonalProfile = () =>
+export const usePersonalProfile = (options?: { enabled?: boolean }) =>
   useQuery({
     queryKey: profileKeys.personal(),
     queryFn: () => profileApi.getPersonal(),
+    enabled: options?.enabled,
   });
 
 export const useUpdatePersonalMutation = () => {

@@ -16,6 +16,15 @@ export interface LoginRequest {
 export interface LoginResponse {
   access_token: string;
   token_type: string;
+  role?: "doctor" | "user";
+}
+
+export interface AuthMeResponse {
+  id: string;
+  email: string;
+  role: "doctor" | "user";
+  is_staff: boolean;
+  sidebar_sections: string[];
 }
 
 export interface RegisterRequest {

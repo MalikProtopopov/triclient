@@ -26,6 +26,7 @@ export type {
   ResetPasswordRequest,
   OnboardingStatus,
   OnboardingNextStep,
+  AuthMeResponse,
   ChooseRoleRequest,
   DoctorProfileRequest,
   ChangeEmailRequest,

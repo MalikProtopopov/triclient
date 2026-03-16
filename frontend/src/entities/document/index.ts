@@ -3,5 +3,5 @@ export { useDocuments, useDocument, documentKeys } from "./model/useDocument";
 export type {
   OrganizationDocument,
   DocumentListResponse,
-  ContentBlock,
+  ContentBlockPublicNested,
 } from "./types";

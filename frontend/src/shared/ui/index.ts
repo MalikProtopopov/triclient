@@ -9,3 +9,4 @@ export { PaymentStatusBadge, ModerationStatusBadge } from "./StatusBadge";
 export { EmptyState } from "./EmptyState";
 export { PageLoader } from "./PageLoader";
 export { ContentBlockRenderer } from "./ContentBlockRenderer";
+export { DocumentContentBlockRenderer } from "./DocumentContentBlockRenderer";
