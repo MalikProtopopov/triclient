@@ -1,7 +1,5 @@
-import { connection } from "next/server";
 import ArticlesClient from "./ArticlesClient";
 
-export default async function ArticlesPage() {
-  await connection();
+export default function ArticlesPage() {
   return <ArticlesClient />;
 }

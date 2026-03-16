@@ -1,7 +1,5 @@
-import { connection } from "next/server";
 import EventsClient from "./EventsClient";
 
-export default async function EventsPage() {
-  await connection();
+export default function EventsPage() {
   return <EventsClient />;
 }
