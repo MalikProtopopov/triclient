@@ -1,7 +1,7 @@
+import { connection } from "next/server";
 import DoctorsClient from "./DoctorsClient";
 
-export const dynamic = "force-dynamic";
-
-export default function DoctorsPage() {
+export default async function DoctorsPage() {
+  await connection();
   return <DoctorsClient />;
 }

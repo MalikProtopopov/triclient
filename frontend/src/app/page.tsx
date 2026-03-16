@@ -1,7 +1,7 @@
+import { connection } from "next/server";
 import HomeClient from "./HomeClient";
 
-export const dynamic = "force-dynamic";
-
-export default function HomePage() {
+export default async function HomePage() {
+  await connection();
   return <HomeClient />;
 }

@@ -1,7 +1,7 @@
+import { connection } from "next/server";
 import ArticlesClient from "./ArticlesClient";
 
-export const dynamic = "force-dynamic";
-
-export default function ArticlesPage() {
+export default async function ArticlesPage() {
+  await connection();
   return <ArticlesClient />;
 }

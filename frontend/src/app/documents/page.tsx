@@ -1,7 +1,7 @@
+import { connection } from "next/server";
 import DocumentsClient from "./DocumentsClient";
 
-export const dynamic = "force-dynamic";
-
-export default function DocumentsPage() {
+export default async function DocumentsPage() {
+  await connection();
   return <DocumentsClient />;
 }

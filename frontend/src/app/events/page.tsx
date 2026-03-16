@@ -1,7 +1,7 @@
+import { connection } from "next/server";
 import EventsClient from "./EventsClient";
 
-export const dynamic = "force-dynamic";
-
-export default function EventsPage() {
+export default async function EventsPage() {
+  await connection();
   return <EventsClient />;
 }
