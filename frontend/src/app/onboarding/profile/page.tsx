@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Upload, X, Check, Loader2 } from "lucide-react";
@@ -20,7 +20,7 @@ import {
   authApi,
   authKeys,
 } from "@/entities/auth";
-import type { OnboardingNextStep } from "@/entities/auth";
+import type { OnboardingNextStep, OnboardingStatus } from "@/entities/auth";
 import { getOnboardingStepRoute } from "@/providers/AuthProvider";
 
 const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png";
@@ -199,11 +199,21 @@ export default function OnboardingProfilePage() {
   const [diplomaFile, setDiplomaFile] = useState<FileState | null>(null);
   const [certificateFile, setCertificateFile] = useState<FileState | null>(null);
   const [extraFiles, setExtraFiles] = useState<FileState[]>([]);
+  const [optimisticStep, setOptimisticStep] = useState<OnboardingNextStep | null>(null);
 
   const setDiploma = (f: File | null) =>
     setDiplomaFile(f ? { file: f, name: f.name, size: f.size } : null);
   const setCertificate = (f: File | null) =>
     setCertificateFile(f ? { file: f, name: f.name, size: f.size } : null);
+
+  useEffect(() => {
+    if (
+      status?.next_step &&
+      ["upload_documents", "submit", "await_moderation"].includes(status.next_step)
+    ) {
+      setOptimisticStep(null);
+    }
+  }, [status?.next_step]);
 
   if (status && !VALID_STEPS.has(status.next_step) && status.moderation_status !== "rejected") {
     router.replace(getOnboardingStepRoute(status.next_step));
@@ -217,9 +227,10 @@ export default function OnboardingProfilePage() {
   const documentsFilled = !!diplomaFile;
 
   const currentStep: OnboardingNextStep =
-    status?.moderation_status === "rejected"
+    optimisticStep ??
+    (status?.moderation_status === "rejected"
       ? "fill_profile"
-      : (status?.next_step ?? "fill_profile");
+      : (status?.next_step ?? "fill_profile"));
 
   const isStep2Loading = saveProfileMutation.isPending;
   const isStep3Loading = uploadDocumentMutation.isPending;
@@ -249,7 +260,20 @@ export default function OnboardingProfilePage() {
         specialization: specialization || undefined,
         academic_degree: academicDegree || undefined,
       });
+      setOptimisticStep("upload_documents");
+      toast.success("Анкета сохранена");
       await queryClient.refetchQueries({ queryKey: authKeys.onboardingStatus });
+      const updated = queryClient.getQueryData(authKeys.onboardingStatus) as
+        | OnboardingStatus
+        | undefined;
+      if (
+        updated?.next_step === "upload_documents" ||
+        updated?.next_step === "submit"
+      ) {
+        setOptimisticStep(null);
+      } else {
+        window.location.reload();
+      }
     } catch {
       toast.error("Ошибка при сохранении анкеты");
     }
@@ -264,7 +288,17 @@ export default function OnboardingProfilePage() {
       for (const extra of extraFiles) {
         if (extra.file) await uploadFile(extra, "additional_cert");
       }
+      setOptimisticStep("submit");
+      toast.success("Документы загружены");
       await queryClient.refetchQueries({ queryKey: authKeys.onboardingStatus });
+      const updated = queryClient.getQueryData(authKeys.onboardingStatus) as
+        | OnboardingStatus
+        | undefined;
+      if (updated?.next_step === "submit" || updated?.next_step === "await_moderation") {
+        setOptimisticStep(null);
+      } else {
+        window.location.reload();
+      }
     } catch {
       toast.error("Ошибка при загрузке документов");
     }
