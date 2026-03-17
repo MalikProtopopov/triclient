@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Upload, AlertCircle } from "lucide-react";
@@ -38,9 +38,9 @@ export default function PublicProfilePage() {
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
-    watch,
     formState: { errors, isDirty },
   } = useForm<PublicFormValues>({
     resolver: zodResolver(publicSchema),
@@ -111,8 +111,6 @@ export default function PublicProfilePage() {
   const initials = profile
     ? `${profile.first_name?.[0] ?? ""}${profile.last_name?.[0] ?? ""}`.toUpperCase()
     : "";
-
-  const cityId = watch("city_id");
 
   if (isLoading) return <PageLoader />;
 
@@ -199,11 +197,22 @@ export default function PublicProfilePage() {
               label="Публичный телефон"
               {...register("public_phone")}
             />
-            <DropdownSelect
-              label="Город"
-              options={[{ value: "", label: "Выберите город" }, ...cityOptions]}
-              value={cityId ?? ""}
-              {...register("city_id")}
+            <Controller
+              name="city_id"
+              control={control}
+              render={({ field }) => (
+                <DropdownSelect
+                  label="Город"
+                  options={[
+                    { value: "", label: "Выберите город" },
+                    ...cityOptions,
+                  ]}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                />
+              )}
             />
             <Input
               label="Клиника"
