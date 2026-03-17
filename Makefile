@@ -10,11 +10,13 @@ test-logs:
 
 test-deploy:
 	git pull
+	docker image prune -f
 	docker compose -f docker-compose.test.yml --env-file frontend/.env.test build frontend
 	docker compose -f docker-compose.test.yml --env-file frontend/.env.test up -d frontend
 
 test-rebuild:
 	git pull
+	docker image prune -f
 	docker compose -f docker-compose.test.yml --env-file frontend/.env.test build --no-cache frontend
 	docker compose -f docker-compose.test.yml --env-file frontend/.env.test up -d frontend
 
@@ -30,6 +32,7 @@ prod-logs:
 
 prod-deploy:
 	git pull
+	docker image prune -f
 	docker compose -f docker-compose.prod.yml --env-file frontend/.env.production build frontend
 	docker compose -f docker-compose.prod.yml up -d frontend
 
