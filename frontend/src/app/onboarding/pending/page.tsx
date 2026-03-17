@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Clock, XCircle, CheckCircle, Loader2 } from "lucide-react";
@@ -25,6 +26,13 @@ function formatSubmittedDate(iso: string | null): string {
 export default function OnboardingPendingPage() {
   const router = useRouter();
   const { data: status, isLoading } = useOnboardingStatus({ refetchInterval: 30_000 });
+
+  useEffect(() => {
+    if (status?.next_step === "await_moderation" && sessionStorage.getItem("onboarding_submitted") === "1") {
+      toast.success("Заявка успешно отправлена");
+      sessionStorage.removeItem("onboarding_submitted");
+    }
+  }, [status?.next_step]);
 
   if (status) {
     if (status.moderation_status === "approved" || status.moderation_status === "active") {
@@ -87,12 +95,12 @@ export default function OnboardingPendingPage() {
     <>
       <Header />
       <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
-          <Clock className="h-8 w-8 text-amber-500" />
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50 dark:bg-green-500/10">
+          <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-500" />
         </div>
 
         <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
-          Заявка на проверке
+          Заявка успешно отправлена
         </h1>
 
         <p className="mb-6 text-sm leading-relaxed text-text-secondary">

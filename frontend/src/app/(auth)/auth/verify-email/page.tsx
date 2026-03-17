@@ -30,11 +30,16 @@ function VerifyEmailContent() {
       .verifyEmail({ token })
       .then(() => {
         toast.success("Email подтверждён!");
-        return authApi.getOnboardingStatus();
-      })
-      .then((status) => {
+        const hasSession =
+          typeof window !== "undefined" && !!sessionStorage.getItem("access_token");
+        if (hasSession) {
+          return authApi.getOnboardingStatus().then((status) => {
+            setState("success");
+            router.replace(getOnboardingStepRoute(status.next_step));
+          });
+        }
         setState("success");
-        router.replace(getOnboardingStepRoute(status.next_step));
+        router.replace(`${ROUTES.LOGIN}?verified=1`);
       })
       .catch(() => {
         setState("error");

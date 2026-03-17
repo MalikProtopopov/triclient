@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Upload, X, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -11,7 +12,14 @@ import { Button, Input, DropdownSelect, Card } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatPhoneInput, formatPhoneForApi } from "@/shared/lib/phoneMask";
 import { useCities } from "@/entities/doctor";
-import { useOnboardingStatus, authApi } from "@/entities/auth";
+import {
+  useOnboardingStatus,
+  useSaveDoctorProfileMutation,
+  useUploadDocumentMutation,
+  useSubmitOnboardingMutation,
+  authApi,
+  authKeys,
+} from "@/entities/auth";
 import type { OnboardingNextStep } from "@/entities/auth";
 import { getOnboardingStepRoute } from "@/providers/AuthProvider";
 
@@ -169,9 +177,14 @@ const VALID_STEPS = new Set(["fill_profile", "upload_documents", "submit"]);
 
 export default function OnboardingProfilePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: citiesData } = useCities({ withDoctors: false });
   const { data: status, isLoading: statusLoading } = useOnboardingStatus();
   const cities = citiesData ?? [];
+
+  const saveProfileMutation = useSaveDoctorProfileMutation();
+  const uploadDocumentMutation = useUploadDocumentMutation();
+  const submitMutation = useSubmitOnboardingMutation();
 
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -186,7 +199,6 @@ export default function OnboardingProfilePage() {
   const [diplomaFile, setDiplomaFile] = useState<FileState | null>(null);
   const [certificateFile, setCertificateFile] = useState<FileState | null>(null);
   const [extraFiles, setExtraFiles] = useState<FileState[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const setDiploma = (f: File | null) =>
     setDiplomaFile(f ? { file: f, name: f.name, size: f.size } : null);
@@ -200,23 +212,32 @@ export default function OnboardingProfilePage() {
 
   const cityOptions = cities.map((c) => ({ value: c.id, label: c.name }));
 
-  const requiredFilled =
-    lastName.trim() && firstName.trim() && phone.trim() && cityId && diplomaFile;
+  const profileFilled =
+    lastName.trim() && firstName.trim() && phone.trim() && cityId;
+  const documentsFilled = !!diplomaFile;
+
+  const currentStep: OnboardingNextStep =
+    status?.moderation_status === "rejected"
+      ? "fill_profile"
+      : (status?.next_step ?? "fill_profile");
+
+  const isStep2Loading = saveProfileMutation.isPending;
+  const isStep3Loading = uploadDocumentMutation.isPending;
+  const isStep4Loading = submitMutation.isPending;
 
   const uploadFile = async (file: FileState, documentType: string) => {
     if (!file.file) return;
     const formData = new FormData();
     formData.append("file", file.file);
     formData.append("document_type", documentType);
-    await authApi.uploadDocument(formData);
+    await uploadDocumentMutation.mutateAsync(formData);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleStep2Next = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!requiredFilled) return;
-    setIsSubmitting(true);
+    if (!profileFilled) return;
     try {
-      await authApi.saveDoctorProfile({
+      await saveProfileMutation.mutateAsync({
         last_name: lastName,
         first_name: firstName,
         middle_name: middleName || undefined,
@@ -228,20 +249,36 @@ export default function OnboardingProfilePage() {
         specialization: specialization || undefined,
         academic_degree: academicDegree || undefined,
       });
+      await queryClient.refetchQueries({ queryKey: authKeys.onboardingStatus });
+    } catch {
+      toast.error("Ошибка при сохранении анкеты");
+    }
+  };
 
+  const handleStep3Next = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!documentsFilled) return;
+    try {
       if (diplomaFile) await uploadFile(diplomaFile, "medical_diploma");
       if (certificateFile) await uploadFile(certificateFile, "retraining_cert");
       for (const extra of extraFiles) {
         if (extra.file) await uploadFile(extra, "additional_cert");
       }
+      await queryClient.refetchQueries({ queryKey: authKeys.onboardingStatus });
+    } catch {
+      toast.error("Ошибка при загрузке документов");
+    }
+  };
 
-      await authApi.submitOnboarding();
+  const handleStep4Submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await submitMutation.mutateAsync();
+      sessionStorage.setItem("onboarding_submitted", "1");
       toast.success("Заявка отправлена на модерацию");
       router.push(ROUTES.ONBOARDING_PENDING);
     } catch {
       toast.error("Ошибка при отправке заявки");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -257,7 +294,12 @@ export default function OnboardingProfilePage() {
     );
   }
 
-  const currentStep: OnboardingNextStep = status?.next_step ?? "fill_profile";
+  const cityName = cityOptions.find((o) => o.value === cityId)?.label ?? "";
+  const documentsCount = [
+    diplomaFile,
+    certificateFile,
+    ...extraFiles.filter((f) => f.file),
+  ].filter(Boolean).length;
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -266,140 +308,209 @@ export default function OnboardingProfilePage() {
         <div className="mx-auto max-w-2xl">
           <OnboardingProgress currentStep={currentStep} />
 
-          <h1 className="mb-4 text-2xl font-semibold text-text-primary">Заполните анкету</h1>
-
           {status?.moderation_status === "rejected" && status.rejection_comment && (
             <div className="mb-6 rounded-xl border border-red-500/50 bg-red-500/10 px-5 py-4 text-sm text-red-700 dark:text-red-400">
               <strong>Заявка отклонена.</strong> Причина: {status.rejection_comment}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-10">
-            <Card>
-              <h2 className="mb-4 text-lg font-medium text-text-primary">Личные данные</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Input
-                  label="Фамилия"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                  placeholder="Иванов"
-                />
-                <Input
-                  label="Имя"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                  placeholder="Иван"
-                />
-              </div>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <Input
-                  label="Отчество"
-                  value={middleName}
-                  onChange={(e) => setMiddleName(e.target.value)}
-                  placeholder="Иванович"
-                />
-                <Input
-                  label="Телефон"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
-                  required
-                  placeholder="+7 (999) 123-45-67"
-                />
-              </div>
-              <div className="mt-4 space-y-4">
-                <Input
-                  label="Паспортные данные"
-                  value={passport}
-                  onChange={(e) => setPassport(e.target.value)}
-                  placeholder="Серия и номер"
-                />
-                <DropdownSelect
-                  label="Город"
-                  options={cityOptions}
-                  value={cityId}
-                  onChange={(e) => setCityId(e.target.value)}
-                  placeholder="Выберите город"
-                  required
-                />
-              </div>
-            </Card>
-
-            <Card>
-              <h2 className="mb-4 text-lg font-medium text-text-primary">
-                Профессиональные данные
-              </h2>
-              <div className="space-y-4">
-                <Input
-                  label="Клиника"
-                  value={clinic}
-                  onChange={(e) => setClinic(e.target.value)}
-                  placeholder="Название клиники"
-                />
-                <Input
-                  label="Должность"
-                  value={position}
-                  onChange={(e) => setPosition(e.target.value)}
-                  placeholder="Врач-трихолог"
-                />
-                <Input
-                  label="Специализация"
-                  value={specialization}
-                  onChange={(e) => setSpecialization(e.target.value)}
-                  placeholder="Трихология"
-                />
-                <Input
-                  label="Научная степень"
-                  value={academicDegree}
-                  onChange={(e) => setAcademicDegree(e.target.value)}
-                  placeholder="к.м.н., д.м.н."
-                />
-              </div>
-            </Card>
-
-            <Card>
-              <h2 className="mb-4 text-lg font-medium text-text-primary">Документы</h2>
-              <div className="space-y-4">
-                <FileUploadZone
-                  label="Диплом о высшем медицинском образовании"
-                  required
-                  file={diplomaFile}
-                  onFileChange={setDiploma}
-                />
-                <FileUploadZone
-                  label="Сертификат о переподготовке"
-                  file={certificateFile}
-                  onFileChange={setCertificate}
-                />
-                <FileUploadZone
-                  label="Дополнительные сертификаты"
-                  file={extraFiles[0] ?? null}
-                  onFileChange={(f) =>
-                    setExtraFiles(f ? [{ file: f, name: f.name, size: f.size }] : [])
-                  }
-                />
-                {!diplomaFile && (
-                  <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
-                    Без диплома о высшем мед. образовании оплата членского взноса будет недоступна
+          {currentStep === "fill_profile" && (
+            <>
+              <h1 className="mb-4 text-2xl font-semibold text-text-primary">
+                Заполните анкету
+              </h1>
+              <form onSubmit={handleStep2Next} className="space-y-10">
+                <Card>
+                  <h2 className="mb-4 text-lg font-medium text-text-primary">
+                    Личные данные
+                  </h2>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Input
+                      label="Фамилия"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required
+                      placeholder="Иванов"
+                    />
+                    <Input
+                      label="Имя"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                      placeholder="Иван"
+                    />
                   </div>
-                )}
-              </div>
-            </Card>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <Input
+                      label="Отчество"
+                      value={middleName}
+                      onChange={(e) => setMiddleName(e.target.value)}
+                      placeholder="Иванович"
+                    />
+                    <Input
+                      label="Телефон"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
+                      required
+                      placeholder="+7 (999) 123-45-67"
+                    />
+                  </div>
+                  <div className="mt-4 space-y-4">
+                    <Input
+                      label="Паспортные данные"
+                      value={passport}
+                      onChange={(e) => setPassport(e.target.value)}
+                      placeholder="Серия и номер"
+                    />
+                    <DropdownSelect
+                      label="Город"
+                      options={cityOptions}
+                      value={cityId}
+                      onChange={(e) => setCityId(e.target.value)}
+                      placeholder="Выберите город"
+                      required
+                    />
+                  </div>
+                </Card>
 
-            <Button
-              type="submit"
-              fullWidth
-              size="lg"
-              disabled={!requiredFilled || isSubmitting}
-              isLoading={isSubmitting}
-            >
-              {status?.moderation_status === "rejected"
-                ? "Исправить и отправить заново"
-                : "Отправить заявку на проверку"}
-            </Button>
-          </form>
+                <Card>
+                  <h2 className="mb-4 text-lg font-medium text-text-primary">
+                    Профессиональные данные
+                  </h2>
+                  <div className="space-y-4">
+                    <Input
+                      label="Клиника"
+                      value={clinic}
+                      onChange={(e) => setClinic(e.target.value)}
+                      placeholder="Название клиники"
+                    />
+                    <Input
+                      label="Должность"
+                      value={position}
+                      onChange={(e) => setPosition(e.target.value)}
+                      placeholder="Врач-трихолог"
+                    />
+                    <Input
+                      label="Специализация"
+                      value={specialization}
+                      onChange={(e) => setSpecialization(e.target.value)}
+                      placeholder="Трихология"
+                    />
+                    <Input
+                      label="Научная степень"
+                      value={academicDegree}
+                      onChange={(e) => setAcademicDegree(e.target.value)}
+                      placeholder="к.м.н., д.м.н."
+                    />
+                  </div>
+                </Card>
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  size="lg"
+                  disabled={!profileFilled || isStep2Loading}
+                  isLoading={isStep2Loading}
+                >
+                  Далее
+                </Button>
+              </form>
+            </>
+          )}
+
+          {currentStep === "upload_documents" && (
+            <>
+              <h1 className="mb-4 text-2xl font-semibold text-text-primary">
+                Загрузите документы
+              </h1>
+              <form onSubmit={handleStep3Next} className="space-y-10">
+                <Card>
+                  <h2 className="mb-4 text-lg font-medium text-text-primary">
+                    Документы
+                  </h2>
+                  <div className="space-y-4">
+                    <FileUploadZone
+                      label="Диплом о высшем медицинском образовании"
+                      required
+                      file={diplomaFile}
+                      onFileChange={setDiploma}
+                    />
+                    <FileUploadZone
+                      label="Сертификат о переподготовке"
+                      file={certificateFile}
+                      onFileChange={setCertificate}
+                    />
+                    <FileUploadZone
+                      label="Дополнительные сертификаты"
+                      file={extraFiles[0] ?? null}
+                      onFileChange={(f) =>
+                        setExtraFiles(f ? [{ file: f, name: f.name, size: f.size }] : [])
+                      }
+                    />
+                    {!diplomaFile && (
+                      <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+                        Без диплома о высшем мед. образовании оплата членского взноса
+                        будет недоступна
+                      </div>
+                    )}
+                  </div>
+                </Card>
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  size="lg"
+                  disabled={!documentsFilled || isStep3Loading}
+                  isLoading={isStep3Loading}
+                >
+                  Далее
+                </Button>
+              </form>
+            </>
+          )}
+
+          {currentStep === "submit" && (
+            <>
+              <h1 className="mb-4 text-2xl font-semibold text-text-primary">
+                Подтверждение
+              </h1>
+              <form onSubmit={handleStep4Submit} className="space-y-10">
+                <Card>
+                  <p className="mb-4 text-sm text-text-secondary">
+                    Проверьте данные и нажмите кнопку для отправки заявки на модерацию.
+                  </p>
+                  <dl className="space-y-2 text-sm">
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-text-muted">ФИО:</dt>
+                      <dd className="text-text-primary">
+                        {[lastName, firstName, middleName].filter(Boolean).join(" ")}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-text-muted">Город:</dt>
+                      <dd className="text-text-primary">{cityName || "—"}</dd>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <dt className="text-text-muted">Документов загружено:</dt>
+                      <dd className="text-text-primary">{documentsCount}</dd>
+                    </div>
+                  </dl>
+                </Card>
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  size="lg"
+                  isLoading={isStep4Loading}
+                >
+                  {status?.moderation_status === "rejected"
+                    ? "Исправить и отправить заново"
+                    : "Отправить заявку на проверку"}
+                </Button>
+              </form>
+            </>
+          )}
         </div>
       </main>
       <Footer />
