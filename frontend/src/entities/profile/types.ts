@@ -42,6 +42,8 @@ export interface PublicProfile {
   public_email: string | null;
   public_phone: string | null;
   city_id: string | null;
+  /** API may return city object at top level */
+  city?: { id: string; name: string } | null;
   clinic_name: string | null;
   specialization: string | null;
   academic_degree: string | null;
@@ -54,16 +56,20 @@ export interface PublicProfile {
 }
 
 export interface PublicProfileDraft {
-  bio: string | null;
-  public_email: string | null;
-  public_phone: string | null;
-  city_id: string | null;
-  clinic_name: string | null;
-  specialization: string | null;
-  academic_degree: string | null;
+  status: "pending" | "rejected";
+  changes: {
+    bio?: string | null;
+    public_email?: string | null;
+    public_phone?: string | null;
+    city_id?: string | null;
+    clinic_name?: string | null;
+    specialization?: string | null;
+    academic_degree?: string | null;
+    photo_url?: string;
+  };
   submitted_at: string;
-  /** S3 key or path for photo pending moderation */
-  changes?: { photo_url?: string };
+  rejection_reason: string | null;
+  reviewed_at: string | null;
 }
 
 export interface UploadPhotoResponse {

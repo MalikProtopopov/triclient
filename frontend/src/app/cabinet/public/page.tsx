@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Upload, AlertCircle } from "lucide-react";
+import { Upload, AlertCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
@@ -14,10 +14,50 @@ import {
   useUploadPhotoMutation,
 } from "@/entities/profile";
 import type { ApiError } from "@/entities/auth";
-import type { UploadPhotoResponse } from "@/entities/profile";
+import type { PublicProfile, UploadPhotoResponse } from "@/entities/profile";
 import { useCities } from "@/entities/doctor";
 import { Card, Button, Input, DropdownSelect, PageLoader } from "@/shared/ui";
 import { resolvePendingPhotoUrl } from "@/shared/config";
+
+function getDisplayData(profile: PublicProfile): {
+  bio: string | null;
+  public_email: string | null;
+  public_phone: string | null;
+  city_id: string | null;
+  clinic_name: string | null;
+  specialization: string | null;
+  academic_degree: string | null;
+  photo_url: string | null;
+} {
+  const draft = profile.pending_draft;
+  const cityId = profile.city?.id ?? profile.city_id ?? null;
+
+  if (!draft?.changes) {
+    return {
+      bio: profile.bio,
+      public_email: profile.public_email,
+      public_phone: profile.public_phone,
+      city_id: cityId,
+      clinic_name: profile.clinic_name,
+      specialization: profile.specialization,
+      academic_degree: profile.academic_degree,
+      photo_url: profile.photo_url,
+    };
+  }
+
+  const c = draft.changes;
+  const photoKey = c.photo_url;
+  return {
+    bio: c.bio ?? profile.bio,
+    public_email: c.public_email ?? profile.public_email,
+    public_phone: c.public_phone ?? profile.public_phone,
+    city_id: c.city_id ?? cityId,
+    clinic_name: c.clinic_name ?? profile.clinic_name,
+    specialization: c.specialization ?? profile.specialization,
+    academic_degree: c.academic_degree ?? profile.academic_degree,
+    photo_url: photoKey ? resolvePendingPhotoUrl(photoKey) ?? null : profile.photo_url,
+  };
+}
 
 const publicSchema = z.object({
   bio: z.string().nullable(),
@@ -37,6 +77,10 @@ export default function PublicProfilePage() {
   const updateMutation = useUpdatePublicMutation();
   const photoMutation = useUploadPhotoMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isEditingAfterReject, setIsEditingAfterReject] = useState(false);
+
+  const draft = profile?.pending_draft;
+  const isFormLocked = !!draft && !isEditingAfterReject;
 
   const {
     register,
@@ -59,14 +103,15 @@ export default function PublicProfilePage() {
 
   useEffect(() => {
     if (profile && !isDirty) {
+      const display = getDisplayData(profile);
       reset({
-        bio: profile.bio,
-        public_email: profile.public_email,
-        public_phone: profile.public_phone,
-        city_id: profile.city_id,
-        clinic_name: profile.clinic_name,
-        specialization: profile.specialization,
-        academic_degree: profile.academic_degree,
+        bio: display.bio,
+        public_email: display.public_email,
+        public_phone: display.public_phone,
+        city_id: display.city_id,
+        clinic_name: display.clinic_name,
+        specialization: display.specialization,
+        academic_degree: display.academic_degree,
       });
     }
   }, [profile, reset, isDirty]);
@@ -75,14 +120,16 @@ export default function PublicProfilePage() {
     updateMutation.mutate(values, {
       onSuccess: (data) => {
         toast.success("Изменения отправлены на модерацию");
+        setIsEditingAfterReject(false);
+        const display = getDisplayData(data as PublicProfile);
         reset({
-          bio: data.bio,
-          public_email: data.public_email,
-          public_phone: data.public_phone,
-          city_id: data.city_id,
-          clinic_name: data.clinic_name,
-          specialization: data.specialization,
-          academic_degree: data.academic_degree,
+          bio: display.bio,
+          public_email: display.public_email,
+          public_phone: display.public_phone,
+          city_id: display.city_id,
+          clinic_name: display.clinic_name,
+          specialization: display.specialization,
+          academic_degree: display.academic_degree,
         });
       },
       onError: (error) => {
@@ -127,7 +174,7 @@ export default function PublicProfilePage() {
         Публичный профиль
       </h1>
 
-      {profile?.pending_draft && (
+      {draft?.status === "pending" && (
         <Card className="border-warning/30 bg-warning/5">
           <div className="flex items-center gap-3">
             <AlertCircle className="h-5 w-5 shrink-0 text-warning" />
@@ -137,12 +184,45 @@ export default function PublicProfilePage() {
               </p>
               <p className="text-sm text-text-secondary">
                 Ваши изменения отправлены{" "}
-                {new Date(profile.pending_draft.submitted_at).toLocaleDateString(
-                  "ru-RU",
-                )}{" "}
-                и ожидают проверки
+                {new Date(draft.submitted_at).toLocaleDateString("ru-RU")} и
+                ожидают проверки
               </p>
             </div>
+          </div>
+        </Card>
+      )}
+
+      {draft?.status === "rejected" && !isEditingAfterReject && (
+        <Card className="border-error/30 bg-error/5">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <XCircle className="h-5 w-5 shrink-0 text-error" />
+              <div>
+                <p className="font-medium text-text-primary">
+                  Изменения отклонены
+                </p>
+                <p className="text-sm text-text-secondary">
+                  Дата рассмотрения:{" "}
+                  {draft.reviewed_at
+                    ? new Date(draft.reviewed_at).toLocaleDateString("ru-RU")
+                    : "—"}
+                </p>
+              </div>
+            </div>
+            {draft.rejection_reason && (
+              <p className="text-sm text-text-primary pl-8">
+                Причина: {draft.rejection_reason}
+              </p>
+            )}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsEditingAfterReject(true)}
+              className="self-start"
+            >
+              Исправить и отправить заново
+            </Button>
           </div>
         </Card>
       )}
@@ -194,7 +274,7 @@ export default function PublicProfilePage() {
               variant="secondary"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
-              disabled={photoMutation.isPending}
+              disabled={photoMutation.isPending || isFormLocked}
             >
               <Upload className="mr-1.5 h-4 w-4" />
               {photoMutation.isPending ? "Загрузка..." : "Загрузить фото"}
@@ -210,7 +290,8 @@ export default function PublicProfilePage() {
               <textarea
                 {...register("bio")}
                 rows={4}
-                className="w-full rounded-lg border border-border bg-bg-secondary px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted transition-colors duration-200 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                disabled={isFormLocked}
+                className="w-full rounded-lg border border-border bg-bg-secondary px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted transition-colors duration-200 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder="Расскажите о себе и своей специализации"
               />
             </div>
@@ -219,10 +300,12 @@ export default function PublicProfilePage() {
               type="email"
               {...register("public_email")}
               error={errors.public_email?.message}
+              disabled={isFormLocked}
             />
             <Input
               label="Публичный телефон"
               {...register("public_phone")}
+              disabled={isFormLocked}
             />
             <Controller
               name="city_id"
@@ -238,27 +321,31 @@ export default function PublicProfilePage() {
                   onChange={(e) => field.onChange(e.target.value)}
                   onBlur={field.onBlur}
                   name={field.name}
+                  disabled={isFormLocked}
                 />
               )}
             />
             <Input
               label="Клиника"
               {...register("clinic_name")}
+              disabled={isFormLocked}
             />
             <Input
               label="Специализация"
               {...register("specialization")}
+              disabled={isFormLocked}
             />
             <Input
               label="Научная степень"
               {...register("academic_degree")}
               placeholder="к.м.н., д.м.н. и т.д."
+              disabled={isFormLocked}
             />
           </div>
 
           <Button
             type="submit"
-            disabled={!isDirty || updateMutation.isPending}
+            disabled={isFormLocked || !isDirty || updateMutation.isPending}
           >
             {updateMutation.isPending
               ? "Сохранение..."
