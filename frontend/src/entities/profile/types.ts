@@ -56,7 +56,7 @@ export interface PublicProfile {
 }
 
 export interface PublicProfileDraft {
-  status: "pending" | "rejected";
+  status: "pending" | "rejected" | "approved";
   changes: {
     bio?: string | null;
     public_email?: string | null;

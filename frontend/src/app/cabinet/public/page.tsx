@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Upload, AlertCircle, XCircle } from "lucide-react";
+import { Upload, AlertCircle, XCircle, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
@@ -86,7 +86,9 @@ export default function PublicProfilePage() {
   const [isEditingAfterReject, setIsEditingAfterReject] = useState(false);
 
   const draft = profile?.pending_draft;
-  const isFormLocked = !!draft && !isEditingAfterReject;
+  const isFormLocked =
+    draft?.status === "pending" ||
+    (draft?.status === "rejected" && !isEditingAfterReject);
 
   const {
     register,
@@ -229,6 +231,26 @@ export default function PublicProfilePage() {
             >
               Исправить и отправить заново
             </Button>
+          </div>
+        </Card>
+      )}
+
+      {draft?.status === "approved" && (
+        <Card className="border-success/30 bg-success/5">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-5 w-5 shrink-0 text-success" />
+            <div>
+              <p className="font-medium text-text-primary">
+                Изменения одобрены
+              </p>
+              <p className="text-sm text-text-secondary">
+                Профиль обновлён{" "}
+                {draft.reviewed_at
+                  ? new Date(draft.reviewed_at).toLocaleDateString("ru-RU")
+                  : ""}
+                . Вы можете внести новые правки в любое время.
+              </p>
+            </div>
           </div>
         </Card>
       )}
