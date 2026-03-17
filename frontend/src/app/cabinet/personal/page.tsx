@@ -248,11 +248,21 @@ export default function PersonalInfoPage() {
             </h3>
             {profile?.diploma_photo_url && (
               <div className="mb-4">
-                <img
-                  src={profile.diploma_photo_url}
-                  alt="Диплом"
-                  className="h-32 rounded-lg border border-border object-cover"
-                />
+                <a
+                  href={profile.diploma_photo_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <img
+                    src={profile.diploma_photo_url}
+                    alt="Диплом"
+                    className="h-32 rounded-lg border border-border object-cover transition-opacity hover:opacity-90 cursor-pointer"
+                  />
+                </a>
+                <p className="mt-1.5 text-xs text-text-muted">
+                  Нажмите, чтобы открыть в полном размере
+                </p>
               </div>
             )}
             <input

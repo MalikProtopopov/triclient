@@ -56,7 +56,7 @@ export default function PublicProfilePage() {
   });
 
   useEffect(() => {
-    if (profile) {
+    if (profile && !isDirty) {
       reset({
         bio: profile.bio,
         public_email: profile.public_email,
@@ -67,11 +67,22 @@ export default function PublicProfilePage() {
         academic_degree: profile.academic_degree,
       });
     }
-  }, [profile, reset]);
+  }, [profile, reset, isDirty]);
 
   const onSubmit = (values: PublicFormValues) => {
     updateMutation.mutate(values, {
-      onSuccess: () => toast.success("Изменения отправлены на модерацию"),
+      onSuccess: (data) => {
+        toast.success("Изменения отправлены на модерацию");
+        reset({
+          bio: data.bio,
+          public_email: data.public_email,
+          public_phone: data.public_phone,
+          city_id: data.city_id,
+          clinic_name: data.clinic_name,
+          specialization: data.specialization,
+          academic_degree: data.academic_degree,
+        });
+      },
       onError: (error) => {
         const axiosErr = error as AxiosError<ApiError>;
         const code = axiosErr.response?.data?.error?.code;

@@ -51,8 +51,10 @@ export const useUploadPhotoMutation = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (formData: FormData) => profileApi.uploadPhoto(formData),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: profileKeys.public() });
+    onSuccess: (data: { photo_url: string }) => {
+      qc.setQueryData<PublicProfile>(profileKeys.public(), (old) =>
+        old ? { ...old, photo_url: data.photo_url } : undefined
+      );
     },
   });
 };
