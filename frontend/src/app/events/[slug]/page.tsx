@@ -14,7 +14,7 @@ import { Footer } from "@/widgets/footer";
 import { Card, Button, Badge, Modal, Input, DocumentContentBlockRenderer } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatDateTime, formatPrice } from "@/shared/lib/format";
-import { resolveMediaUrl, deriveEventStatus } from "@/shared/lib/mediaUrl";
+import { deriveEventStatus } from "@/shared/lib/mediaUrl";
 import { useAuth } from "@/providers/AuthProvider";
 
 function generateIdempotencyKey(): string {
@@ -276,7 +276,7 @@ export default function EventDetailPage() {
         {event.cover_image_url ? (
           <div className="relative mb-8 aspect-video w-full max-h-80 overflow-hidden rounded-xl bg-metal-light">
             <Image
-              src={resolveMediaUrl(event.cover_image_url)!}
+              src={event.cover_image_url!}
               alt={event.title}
               fill
               className="object-cover"

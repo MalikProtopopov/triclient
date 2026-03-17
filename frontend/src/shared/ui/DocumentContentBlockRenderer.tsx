@@ -4,7 +4,6 @@ import Image from "next/image";
 import { Download, ExternalLink } from "lucide-react";
 
 import type { ContentBlockPublicNested } from "@/shared/types";
-import { resolveMediaUrl } from "@/shared/lib/mediaUrl";
 
 function useDeviceType(): "desktop" | "mobile" {
   if (typeof window === "undefined") return "desktop";
@@ -39,7 +38,7 @@ function TextBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function ImageBlock({ block }: { block: ContentBlockPublicNested }) {
-  const src = resolveMediaUrl(block.media_url) ?? block.media_url;
+  const src = block.media_url;
   if (!src) return null;
   return (
     <figure>
@@ -62,7 +61,7 @@ function ImageBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function VideoBlock({ block }: { block: ContentBlockPublicNested }) {
-  const mediaUrl = resolveMediaUrl(block.media_url) ?? block.media_url;
+  const mediaUrl = block.media_url;
   if (!mediaUrl) return null;
 
   const embedUrl = getEmbedUrl(mediaUrl);
@@ -80,7 +79,7 @@ function VideoBlock({ block }: { block: ContentBlockPublicNested }) {
     );
   }
 
-  const posterUrl = resolveMediaUrl(block.thumbnail_url) ?? block.thumbnail_url;
+  const posterUrl = block.thumbnail_url;
   return (
     <div className="overflow-hidden rounded-xl">
       <video
@@ -95,7 +94,7 @@ function VideoBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function FileBlock({ block }: { block: ContentBlockPublicNested }) {
-  const href = resolveMediaUrl(block.media_url) ?? block.media_url;
+  const href = block.media_url;
   if (!href) return null;
   const label = block.link_label || block.title || "Скачать файл";
   return (
@@ -126,8 +125,8 @@ function LinkBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function GalleryBlock({ block }: { block: ContentBlockPublicNested }) {
-  const mediaUrl = resolveMediaUrl(block.media_url) ?? block.media_url;
-  const thumbUrl = resolveMediaUrl(block.thumbnail_url) ?? block.thumbnail_url;
+  const mediaUrl = block.media_url;
+  const thumbUrl = block.thumbnail_url;
   const src = thumbUrl || mediaUrl;
   if (!src) return null;
   return (
@@ -151,7 +150,7 @@ function GalleryBlock({ block }: { block: ContentBlockPublicNested }) {
 }
 
 function BannerBlock({ block }: { block: ContentBlockPublicNested }) {
-  const mediaSrc = resolveMediaUrl(block.media_url) ?? block.media_url;
+  const mediaSrc = block.media_url;
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-bg-secondary">
       {mediaSrc && (
