@@ -14,8 +14,10 @@ import {
   useUploadPhotoMutation,
 } from "@/entities/profile";
 import type { ApiError } from "@/entities/auth";
+import type { UploadPhotoResponse } from "@/entities/profile";
 import { useCities } from "@/entities/doctor";
 import { Card, Button, Input, DropdownSelect, PageLoader } from "@/shared/ui";
+import { resolvePendingPhotoUrl } from "@/shared/config";
 
 const publicSchema = z.object({
   bio: z.string().nullable(),
@@ -102,7 +104,12 @@ export default function PublicProfilePage() {
     const fd = new FormData();
     fd.append("file", file);
     photoMutation.mutate(fd, {
-      onSuccess: () => toast.success("Фото обновлено"),
+      onSuccess: (data: UploadPhotoResponse) => {
+        toast.success(
+          data.message ??
+            "Фото отправлено на модерацию. Изменения появятся на сайте после одобрения администратором",
+        );
+      },
       onError: () => toast.error("Не удалось загрузить фото"),
     });
   };
@@ -144,17 +151,37 @@ export default function PublicProfilePage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Photo upload */}
           <div className="flex flex-col items-center gap-4">
-            {profile?.photo_url ? (
-              <img
-                src={profile.photo_url}
-                alt="Фото профиля"
-                className="h-[120px] w-[120px] rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex h-[120px] w-[120px] items-center justify-center rounded-full bg-accent text-3xl font-semibold text-accent-contrast">
-                {initials}
-              </div>
-            )}
+            {(() => {
+              const draftPhotoKey = profile?.pending_draft?.changes?.photo_url;
+              const draftPhotoUrl = resolvePendingPhotoUrl(draftPhotoKey);
+              const displayPhotoUrl =
+                draftPhotoUrl ?? profile?.photo_url ?? null;
+              const showModerationBadge =
+                profile?.photo_pending_moderation ?? !!draftPhotoKey;
+
+              return (
+                <>
+                  {displayPhotoUrl ? (
+                    <img
+                      src={displayPhotoUrl}
+                      alt="Фото профиля"
+                      className="h-[120px] w-[120px] rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-[120px] w-[120px] items-center justify-center rounded-full bg-accent text-3xl font-semibold text-accent-contrast">
+                      {initials}
+                    </div>
+                  )}
+                  {showModerationBadge && (
+                    <p className="text-center text-xs text-warning">
+                      {draftPhotoKey
+                        ? "Новое фото на модерации"
+                        : "Фото на модерации"}
+                    </p>
+                  )}
+                </>
+              );
+            })()}
             <input
               ref={fileInputRef}
               type="file"

@@ -49,6 +49,8 @@ export interface PublicProfile {
   first_name: string;
   last_name: string;
   pending_draft: PublicProfileDraft | null;
+  /** Client-only: set after upload when backend returns pending_moderation */
+  photo_pending_moderation?: boolean;
 }
 
 export interface PublicProfileDraft {
@@ -60,6 +62,14 @@ export interface PublicProfileDraft {
   specialization: string | null;
   academic_degree: string | null;
   submitted_at: string;
+  /** S3 key or path for photo pending moderation */
+  changes?: { photo_url?: string };
+}
+
+export interface UploadPhotoResponse {
+  photo_url: string;
+  message?: string;
+  pending_moderation: boolean;
 }
 
 export interface ProfileEvent {

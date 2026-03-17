@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { MapPin, Phone, Mail, ArrowLeft } from "lucide-react";
+import { AxiosError } from "axios";
 
 import { useDoctor } from "@/entities/doctor";
 import { Header } from "@/widgets/header";
@@ -20,7 +21,7 @@ export default function DoctorProfilePage() {
   const params = useParams();
   const slug = typeof params.slug === "string" ? params.slug : "";
 
-  const { data: doctor, isLoading } = useDoctor(slug);
+  const { data: doctor, isLoading, isError, error } = useDoctor(slug);
 
   if (isLoading) {
     return (
@@ -48,13 +49,23 @@ export default function DoctorProfilePage() {
     );
   }
 
-  if (!doctor) {
+  if (isError || !doctor) {
+    const status = (error as AxiosError)?.response?.status;
+    const message =
+      status === 404
+        ? "Врач временно недоступен"
+        : "Врач не найден";
     return (
       <div className="flex min-h-screen flex-col bg-bg">
         <Header />
         <main className="flex flex-1 items-center justify-center">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-text-primary">Врач не найден</h2>
+            <h2 className="text-xl font-semibold text-text-primary">{message}</h2>
+            <p className="mt-2 text-sm text-text-secondary">
+              {status === 404
+                ? "Профиль может быть скрыт из‑за истечения подписки"
+                : "Проверьте ссылку или вернитесь в каталог"}
+            </p>
             <Link href={ROUTES.DOCTORS} className="mt-4 inline-block text-accent hover:underline">
               ← Все врачи
             </Link>

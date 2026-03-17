@@ -17,4 +17,5 @@ export type {
   PublicProfile,
   PublicProfileDraft,
   UpdatePersonalRequest,
+  UploadPhotoResponse,
 } from "./types";
