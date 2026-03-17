@@ -82,12 +82,17 @@ export const useSubmitOnboardingMutation = () => {
   });
 };
 
-export const useOnboardingStatus = (options?: { enabled?: boolean; refetchInterval?: number }) =>
+export const useOnboardingStatus = (options?: {
+  enabled?: boolean;
+  refetchInterval?: number;
+  refetchOnWindowFocus?: boolean;
+}) =>
   useQuery({
     queryKey: authKeys.onboardingStatus,
     queryFn: () => authApi.getOnboardingStatus(),
     enabled: options?.enabled ?? true,
     refetchInterval: options?.refetchInterval,
+    refetchOnWindowFocus: options?.refetchOnWindowFocus,
   });
 
 export const useChangeEmailMutation = () =>

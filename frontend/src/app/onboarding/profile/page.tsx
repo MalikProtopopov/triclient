@@ -12,6 +12,7 @@ import { Button, Input, DropdownSelect, Card } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatPhoneInput, formatPhoneForApi } from "@/shared/lib/phoneMask";
 import { useCities } from "@/entities/doctor";
+import { usePersonalProfile } from "@/entities/profile";
 import {
   useOnboardingStatus,
   useSaveDoctorProfileMutation,
@@ -179,7 +180,14 @@ export default function OnboardingProfilePage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: citiesData } = useCities({ withDoctors: false });
-  const { data: status, isLoading: statusLoading } = useOnboardingStatus();
+  const { data: status, isLoading: statusLoading } = useOnboardingStatus({
+    refetchOnWindowFocus: false,
+  });
+  const { data: personalProfile } = usePersonalProfile({
+    enabled:
+      !!status &&
+      (status.next_step === "fill_profile" || status.moderation_status === "rejected"),
+  });
   const cities = citiesData ?? [];
 
   const saveProfileMutation = useSaveDoctorProfileMutation();
@@ -205,6 +213,24 @@ export default function OnboardingProfilePage() {
     setDiplomaFile(f ? { file: f, name: f.name, size: f.size } : null);
   const setCertificate = (f: File | null) =>
     setCertificateFile(f ? { file: f, name: f.name, size: f.size } : null);
+
+  useEffect(() => {
+    if (!personalProfile || !cities.length) return;
+    if (lastName || firstName) return;
+    setFirstName(personalProfile.first_name || "");
+    setLastName(personalProfile.last_name || "");
+    setMiddleName(personalProfile.middle_name || "");
+    setPhone(personalProfile.phone ? formatPhoneInput(personalProfile.phone) : "");
+    setPassport(personalProfile.passport_data || "");
+    const cityId = personalProfile.city
+      ? cities.find((c) => c.name === personalProfile.city)?.id ?? ""
+      : "";
+    setCityId(cityId);
+    setClinic(personalProfile.clinic_name || "");
+    setPosition(personalProfile.position || "");
+    setSpecialization(personalProfile.specialization || "");
+    setAcademicDegree(personalProfile.academic_degree || "");
+  }, [personalProfile, cities, lastName, firstName]);
 
   useEffect(() => {
     if (
