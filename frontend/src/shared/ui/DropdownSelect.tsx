@@ -85,6 +85,9 @@ export const DropdownSelect = forwardRef<HTMLSelectElement, DropdownSelectProps>
 
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
+        if (!containerRef.current?.contains(document.activeElement)) {
+          return;
+        }
         if (!isOpen) {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
