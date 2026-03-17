@@ -14,7 +14,11 @@ import {
   useUploadPhotoMutation,
 } from "@/entities/profile";
 import type { ApiError } from "@/entities/auth";
-import type { PublicProfile, UploadPhotoResponse } from "@/entities/profile";
+import type {
+  PublicProfile,
+  PublicProfileDraft,
+  UploadPhotoResponse,
+} from "@/entities/profile";
 import { useCities } from "@/entities/doctor";
 import { Card, Button, Input, DropdownSelect, PageLoader } from "@/shared/ui";
 import { resolvePendingPhotoUrl } from "@/shared/config";
@@ -32,7 +36,7 @@ function getDisplayData(profile: PublicProfile): {
   const draft = profile.pending_draft;
   const cityId = profile.city?.id ?? profile.city_id ?? null;
 
-  if (!draft?.changes) {
+  if (!draft) {
     return {
       bio: profile.bio,
       public_email: profile.public_email,
@@ -45,17 +49,20 @@ function getDisplayData(profile: PublicProfile): {
     };
   }
 
-  const c = draft.changes;
-  const photoKey = c.photo_url;
+  const c = draft.changes ?? {};
+  const d = draft as Record<string, unknown>;
+  const photoKey = c.photo_url ?? d.photo_url;
   return {
-    bio: c.bio ?? profile.bio,
-    public_email: c.public_email ?? profile.public_email,
-    public_phone: c.public_phone ?? profile.public_phone,
-    city_id: c.city_id ?? cityId,
-    clinic_name: c.clinic_name ?? profile.clinic_name,
-    specialization: c.specialization ?? profile.specialization,
-    academic_degree: c.academic_degree ?? profile.academic_degree,
-    photo_url: photoKey ? resolvePendingPhotoUrl(photoKey) ?? null : profile.photo_url,
+    bio: c.bio ?? d.bio ?? profile.bio,
+    public_email: c.public_email ?? d.public_email ?? profile.public_email,
+    public_phone: c.public_phone ?? d.public_phone ?? profile.public_phone,
+    city_id: c.city_id ?? d.city_id ?? cityId,
+    clinic_name: c.clinic_name ?? d.clinic_name ?? profile.clinic_name,
+    specialization: c.specialization ?? d.specialization ?? profile.specialization,
+    academic_degree: c.academic_degree ?? d.academic_degree ?? profile.academic_degree,
+    photo_url: photoKey
+      ? resolvePendingPhotoUrl(photoKey as string) ?? null
+      : profile.photo_url,
   };
 }
 
@@ -232,7 +239,9 @@ export default function PublicProfilePage() {
           {/* Photo upload */}
           <div className="flex flex-col items-center gap-4">
             {(() => {
-              const draftPhotoKey = profile?.pending_draft?.changes?.photo_url;
+              const draftPhotoKey =
+                profile?.pending_draft?.changes?.photo_url ??
+                (profile?.pending_draft as Record<string, unknown>)?.photo_url;
               const draftPhotoUrl = resolvePendingPhotoUrl(draftPhotoKey);
               const displayPhotoUrl =
                 draftPhotoUrl ?? profile?.photo_url ?? null;

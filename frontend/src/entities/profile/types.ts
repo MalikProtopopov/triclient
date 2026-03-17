@@ -67,6 +67,15 @@ export interface PublicProfileDraft {
     academic_degree?: string | null;
     photo_url?: string;
   };
+  /** Backend may return flat fields at draft level instead of in changes */
+  bio?: string | null;
+  public_email?: string | null;
+  public_phone?: string | null;
+  city_id?: string | null;
+  clinic_name?: string | null;
+  specialization?: string | null;
+  academic_degree?: string | null;
+  photo_url?: string;
   submitted_at: string;
   rejection_reason: string | null;
   reviewed_at: string | null;
