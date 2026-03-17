@@ -9,6 +9,7 @@ export const PUBLIC_PATHS = [
   "/forgot-password",
   "/reset-password",
   "/confirm-email",
+  "/auth/verify-email",
   "/themes",
   "/pravlenie",
   "/payment/success",

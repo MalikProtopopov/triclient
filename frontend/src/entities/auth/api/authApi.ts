@@ -28,6 +28,9 @@ export const authApi = {
   verifyEmail: (data: VerifyEmailRequest): Promise<VerifyEmailResponse> =>
     apiClient.post(API_ENDPOINTS.AUTH.VERIFY_EMAIL, data),
 
+  resendVerificationEmail: (email: string): Promise<{ message?: string }> =>
+    apiClient.post(API_ENDPOINTS.AUTH.RESEND_VERIFICATION_EMAIL, { email }),
+
   forgotPassword: (data: ForgotPasswordRequest): Promise<{ message: string }> =>
     apiClient.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, data),
 
