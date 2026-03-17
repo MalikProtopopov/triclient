@@ -15,6 +15,12 @@ export interface PersonalProfile {
   documents: ProfileDocument[];
 }
 
+/** PATCH request: backend accepts city as string (name) or city_id (UUID) */
+export type UpdatePersonalRequest = Omit<Partial<PersonalProfile>, "city"> & {
+  city?: string | null;
+  city_id?: string;
+};
+
 export interface ProfileDocument {
   id: string;
   name: string;

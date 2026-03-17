@@ -1,7 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { profileApi } from "../api/profileApi";
-import type { PersonalProfile, PublicProfile } from "../types";
+import type {
+  PersonalProfile,
+  PublicProfile,
+  UpdatePersonalRequest,
+} from "../types";
 
 export const profileKeys = {
   all: ["profile"] as const,
@@ -20,7 +24,7 @@ export const usePersonalProfile = (options?: { enabled?: boolean }) =>
 export const useUpdatePersonalMutation = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<PersonalProfile>) => profileApi.updatePersonal(data),
+    mutationFn: (data: UpdatePersonalRequest) => profileApi.updatePersonal(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: profileKeys.personal() });
     },

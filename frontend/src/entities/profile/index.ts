@@ -15,4 +15,5 @@ export type {
   PublicProfileDraft,
   ProfileDocument,
   ProfileEvent,
+  UpdatePersonalRequest,
 } from "./types";

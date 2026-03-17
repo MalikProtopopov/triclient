@@ -11,6 +11,7 @@ import {
   usePersonalProfile,
   useUpdatePersonalMutation,
   useUploadDiplomaMutation,
+  type UpdatePersonalRequest,
 } from "@/entities/profile";
 import { Card, Button, Input, PageLoader } from "@/shared/ui";
 import { formatShortDate } from "@/shared/lib/format";
@@ -87,7 +88,7 @@ export default function PersonalInfoPage() {
     }
     if (Object.keys(changed).length === 0) return;
 
-    updateMutation.mutate(changed as Partial<PersonalFormValues>, {
+    updateMutation.mutate(changed as UpdatePersonalRequest, {
       onSuccess: () => toast.success("Данные сохранены"),
       onError: () => toast.error("Не удалось сохранить данные"),
     });

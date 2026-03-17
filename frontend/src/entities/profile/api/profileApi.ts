@@ -1,13 +1,18 @@
 import { apiClient } from "@/shared/api";
 import { API_ENDPOINTS } from "@/shared/config";
 
-import type { PersonalProfile, PublicProfile, ProfileEvent } from "../types";
+import type {
+  PersonalProfile,
+  PublicProfile,
+  ProfileEvent,
+  UpdatePersonalRequest,
+} from "../types";
 
 export const profileApi = {
   getPersonal: (): Promise<PersonalProfile> =>
     apiClient.get(API_ENDPOINTS.PROFILE.PERSONAL),
 
-  updatePersonal: (data: Partial<PersonalProfile>): Promise<PersonalProfile> =>
+  updatePersonal: (data: UpdatePersonalRequest): Promise<PersonalProfile> =>
     apiClient.patch(API_ENDPOINTS.PROFILE.PERSONAL, data),
 
   getPublic: (): Promise<PublicProfile> =>
