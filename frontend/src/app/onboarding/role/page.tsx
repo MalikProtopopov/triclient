@@ -10,15 +10,16 @@ import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { Button, Card } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
-import { useOnboardingStatus, authApi } from "@/entities/auth";
+import { useOnboardingStatus, useChooseRoleMutation } from "@/entities/auth";
 import { getOnboardingStepRoute } from "@/providers/AuthProvider";
 
 export default function OnboardingRolePage() {
   const router = useRouter();
   const [selectedNonDoctor, setSelectedNonDoctor] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const chooseRoleMutation = useChooseRoleMutation();
 
   const { data: status, isLoading } = useOnboardingStatus();
+  const isSubmitting = chooseRoleMutation.isPending;
 
   if (status && status.next_step !== "choose_role") {
     router.replace(getOnboardingStepRoute(status.next_step));
@@ -26,27 +27,21 @@ export default function OnboardingRolePage() {
   }
 
   const handleDoctorSelect = async () => {
-    setIsSubmitting(true);
     try {
-      await authApi.chooseRole({ role: "doctor" });
+      await chooseRoleMutation.mutateAsync({ role: "doctor" });
       toast.success("Роль сохранена");
       router.push(ROUTES.ONBOARDING_PROFILE);
     } catch {
       toast.error("Ошибка сохранения роли");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const handleNonDoctorSelect = async () => {
-    setIsSubmitting(true);
     try {
-      await authApi.chooseRole({ role: "user" });
+      await chooseRoleMutation.mutateAsync({ role: "user" });
       setSelectedNonDoctor(true);
     } catch {
       toast.error("Ошибка сохранения роли");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

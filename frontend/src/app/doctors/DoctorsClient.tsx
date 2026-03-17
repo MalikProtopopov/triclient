@@ -39,7 +39,7 @@ function DoctorsContent() {
     router.replace(qs ? `?${qs}` : "/doctors", { scroll: false });
   }, [citySlug, debouncedSearch, router]);
 
-  const { data: citiesData } = useCities();
+  const { data: citiesData } = useCities({ withDoctors: true });
   const { data: doctorsData, isLoading } = useDoctors({
     city_slug: citySlug || undefined,
     search: debouncedSearch || undefined,

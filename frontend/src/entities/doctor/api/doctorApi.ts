@@ -15,10 +15,13 @@ export const doctorApi = {
   getBySlug: (slug: string): Promise<DoctorResponseSchema> =>
     apiClient.get(API_ENDPOINTS.DOCTORS.BY_SLUG(slug)),
 
-  getCities: async (): Promise<CityResponseSchema[]> => {
+  getCities: async (params?: { withDoctors?: boolean }): Promise<CityResponseSchema[]> => {
     const response = await apiClient.get<{ data: CityResponseSchema[] }>(
       API_ENDPOINTS.CITIES,
-      { params: { with_doctors: true } },
+      {
+        params:
+          params?.withDoctors === true ? { with_doctors: true } : undefined,
+      },
     );
     return response.data;
   },

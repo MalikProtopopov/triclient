@@ -9,6 +9,7 @@ import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { Button, Input, Select, Card } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
+import { formatPhoneInput, formatPhoneForApi } from "@/shared/lib/phoneMask";
 import { useCities } from "@/entities/doctor";
 import { useOnboardingStatus, authApi } from "@/entities/auth";
 import type { OnboardingNextStep } from "@/entities/auth";
@@ -168,7 +169,7 @@ const VALID_STEPS = new Set(["fill_profile", "upload_documents", "submit"]);
 
 export default function OnboardingProfilePage() {
   const router = useRouter();
-  const { data: citiesData } = useCities();
+  const { data: citiesData } = useCities({ withDoctors: false });
   const { data: status, isLoading: statusLoading } = useOnboardingStatus();
   const cities = citiesData ?? [];
 
@@ -219,7 +220,7 @@ export default function OnboardingProfilePage() {
         last_name: lastName,
         first_name: firstName,
         middle_name: middleName || undefined,
-        phone,
+        phone: formatPhoneForApi(phone),
         passport_data: passport || undefined,
         city_id: cityId,
         clinic_name: clinic || undefined,
@@ -303,7 +304,7 @@ export default function OnboardingProfilePage() {
                   label="Телефон"
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
                   required
                   placeholder="+7 (999) 123-45-67"
                 />

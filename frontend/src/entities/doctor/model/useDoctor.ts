@@ -7,7 +7,8 @@ export const doctorKeys = {
   all: ["doctors"] as const,
   list: (filters?: DoctorFilters) => [...doctorKeys.all, "list", filters] as const,
   detail: (slug: string) => [...doctorKeys.all, "detail", slug] as const,
-  cities: ["cities"] as const,
+  cities: (options?: { withDoctors?: boolean }) =>
+    [...doctorKeys.all, "cities", options?.withDoctors] as const,
 };
 
 export const useDoctors = (filters?: DoctorFilters) => {
