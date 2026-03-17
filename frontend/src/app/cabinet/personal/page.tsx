@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Upload, FileText, Download } from "lucide-react";
+import { Upload, FileText, Download, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -77,17 +77,27 @@ function DocumentsSection({ documents }: { documents: ProfileDocument[] }) {
                       </div>
                     </div>
                     {doc.file_url && (
-                      <a
-                        href={doc.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="shrink-0"
-                      >
-                        <Button variant="ghost" size="sm">
-                          <Download className="mr-1 h-4 w-4" />
-                          Скачать
-                        </Button>
-                      </a>
+                      <div className="flex shrink-0 gap-1">
+                        <a
+                          href={doc.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="ghost" size="sm" title="Просмотреть">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </a>
+                        <a
+                          href={doc.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download
+                        >
+                          <Button variant="ghost" size="sm" title="Скачать">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </a>
+                      </div>
                     )}
                   </div>
                 );
