@@ -18,10 +18,9 @@ import {
   useSaveDoctorProfileMutation,
   useUploadDocumentMutation,
   useSubmitOnboardingMutation,
-  authApi,
   authKeys,
 } from "@/entities/auth";
-import type { OnboardingNextStep, OnboardingStatus } from "@/entities/auth";
+import type { OnboardingNextStep } from "@/entities/auth";
 import { getOnboardingStepRoute } from "@/providers/AuthProvider";
 
 const ACCEPTED_TYPES = ".pdf,.jpg,.jpeg,.png";
@@ -215,22 +214,18 @@ export default function OnboardingProfilePage() {
     setCertificateFile(f ? { file: f, name: f.name, size: f.size } : null);
 
   useEffect(() => {
-    if (!personalProfile || !cities.length) return;
+    if (!personalProfile) return;
     if (lastName || firstName) return;
     setFirstName(personalProfile.first_name || "");
     setLastName(personalProfile.last_name || "");
     setMiddleName(personalProfile.middle_name || "");
     setPhone(personalProfile.phone ? formatPhoneInput(personalProfile.phone) : "");
     setPassport(personalProfile.passport_data || "");
-    const cityId = personalProfile.city
-      ? cities.find((c) => c.name === personalProfile.city)?.id ?? ""
-      : "";
-    setCityId(cityId);
+    setCityId(personalProfile.city?.id ?? "");
     setClinic(personalProfile.clinic_name || "");
     setPosition(personalProfile.position || "");
-    setSpecialization(personalProfile.specialization || "");
     setAcademicDegree(personalProfile.academic_degree || "");
-  }, [personalProfile, cities, lastName, firstName]);
+  }, [personalProfile, lastName, firstName]);
 
   useEffect(() => {
     if (
@@ -288,18 +283,7 @@ export default function OnboardingProfilePage() {
       });
       setOptimisticStep("upload_documents");
       toast.success("Анкета сохранена");
-      await queryClient.refetchQueries({ queryKey: authKeys.onboardingStatus });
-      const updated = queryClient.getQueryData(authKeys.onboardingStatus) as
-        | OnboardingStatus
-        | undefined;
-      if (
-        updated?.next_step === "upload_documents" ||
-        updated?.next_step === "submit"
-      ) {
-        setOptimisticStep(null);
-      } else {
-        window.location.reload();
-      }
+      queryClient.refetchQueries({ queryKey: authKeys.onboardingStatus });
     } catch {
       toast.error("Ошибка при сохранении анкеты");
     }
@@ -316,15 +300,7 @@ export default function OnboardingProfilePage() {
       }
       setOptimisticStep("submit");
       toast.success("Документы загружены");
-      await queryClient.refetchQueries({ queryKey: authKeys.onboardingStatus });
-      const updated = queryClient.getQueryData(authKeys.onboardingStatus) as
-        | OnboardingStatus
-        | undefined;
-      if (updated?.next_step === "submit" || updated?.next_step === "await_moderation") {
-        setOptimisticStep(null);
-      } else {
-        window.location.reload();
-      }
+      queryClient.refetchQueries({ queryKey: authKeys.onboardingStatus });
     } catch {
       toast.error("Ошибка при загрузке документов");
     }

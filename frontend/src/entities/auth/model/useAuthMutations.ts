@@ -52,25 +52,15 @@ export const useChooseRoleMutation = () => {
   });
 };
 
-export const useSaveDoctorProfileMutation = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
+export const useSaveDoctorProfileMutation = () =>
+  useMutation({
     mutationFn: (data: DoctorProfileRequest) => authApi.saveDoctorProfile(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authKeys.onboardingStatus });
-    },
   });
-};
 
-export const useUploadDocumentMutation = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
+export const useUploadDocumentMutation = () =>
+  useMutation({
     mutationFn: (formData: FormData) => authApi.uploadDocument(formData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: authKeys.onboardingStatus });
-    },
   });
-};
 
 export const useSubmitOnboardingMutation = () => {
   const queryClient = useQueryClient();

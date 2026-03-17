@@ -5,7 +5,7 @@ export interface PersonalProfile {
   phone: string | null;
   passport_data: string | null;
   registration_address: string | null;
-  city: string | null;
+  city: { id: string; name: string } | null;
   clinic_name: string | null;
   position: string | null;
   specialization: string | null;

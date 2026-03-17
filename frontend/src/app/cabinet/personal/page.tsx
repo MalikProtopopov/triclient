@@ -70,7 +70,7 @@ export default function PersonalInfoPage() {
         phone: profile.phone,
         passport_data: profile.passport_data,
         registration_address: profile.registration_address,
-        city: profile.city,
+        city: profile.city?.name ?? null,
         clinic_name: profile.clinic_name,
         position: profile.position,
         specialization: profile.specialization,
