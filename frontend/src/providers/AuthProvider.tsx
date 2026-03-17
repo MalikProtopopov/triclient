@@ -34,6 +34,7 @@ function clearSessionCookie() {
 }
 
 const NEXT_STEP_ROUTES: Partial<Record<OnboardingNextStep, string>> = {
+  verify_email: ROUTES.ONBOARDING_VERIFY_EMAIL,
   choose_role: ROUTES.ONBOARDING_ROLE,
   fill_profile: ROUTES.ONBOARDING_PROFILE,
   upload_documents: ROUTES.ONBOARDING_PROFILE,

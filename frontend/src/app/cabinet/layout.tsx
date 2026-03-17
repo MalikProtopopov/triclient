@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Menu, Loader2 } from "lucide-react";
 
 import { CabinetSidebar } from "@/widgets/cabinet-sidebar";
@@ -12,6 +12,7 @@ import { getOnboardingStepRoute } from "@/providers/AuthProvider";
 
 function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: status, isLoading } = useOnboardingStatus();
 
   if (isLoading) {
@@ -23,8 +24,11 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (status && status.next_step !== "completed") {
-    router.replace(getOnboardingStepRoute(status.next_step));
-    return null;
+    const targetRoute = getOnboardingStepRoute(status.next_step);
+    if (targetRoute !== pathname) {
+      router.replace(targetRoute);
+      return null;
+    }
   }
 
   return <>{children}</>;

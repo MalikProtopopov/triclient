@@ -20,6 +20,7 @@ export const ROUTES = {
   ONBOARDING_ROLE: "/onboarding/role",
   ONBOARDING_PROFILE: "/onboarding/profile",
   ONBOARDING_PENDING: "/onboarding/pending",
+  ONBOARDING_VERIFY_EMAIL: "/onboarding/verify-email",
 
   CABINET: "/cabinet",
   CABINET_PERSONAL: "/cabinet/personal",
