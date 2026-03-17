@@ -73,6 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const token = sessionStorage.getItem("access_token");
     if (!token) {
+      clearSessionCookie();
       setIsLoading(false);
       return;
     }

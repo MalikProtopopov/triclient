@@ -18,7 +18,7 @@ import type { ApiError } from "@/entities/auth";
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +30,25 @@ export default function LoginPage() {
       router.replace(ROUTES.LOGIN, { scroll: false });
     }
   }, [searchParams, router]);
+
+  useEffect(() => {
+    if (!isAuthLoading && isAuthenticated) {
+      const redirectParam = searchParams.get("redirect");
+      router.replace(redirectParam || ROUTES.CABINET);
+    }
+  }, [isAuthLoading, isAuthenticated, searchParams, router]);
+
+  if (isAuthLoading || isAuthenticated) {
+    return (
+      <div className="flex min-h-screen flex-col bg-bg">
+        <Header />
+        <main className="flex flex-1 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

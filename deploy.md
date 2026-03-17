@@ -29,6 +29,7 @@ make test-deploy
 
 ```bash
 cd /opt/triclient
+make clean
 make test-rebuild
 ```
 

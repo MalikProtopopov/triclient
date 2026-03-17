@@ -1,32 +1,34 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/providers/AuthProvider";
 import { ROUTES } from "@/shared/config";
 
+const Loader = () => (
+  <div className="flex min-h-screen items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+  </div>
+);
+
 export function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       const redirect = window.location.pathname;
-      router.replace(`${ROUTES.LOGIN}?redirect=${encodeURIComponent(redirect)}`);
+      window.location.replace(
+        `${ROUTES.LOGIN}?redirect=${encodeURIComponent(redirect)}`,
+      );
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated]);
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!isAuthenticated) {
-    return null;
+    return <Loader />;
   }
 
   return <>{children}</>;

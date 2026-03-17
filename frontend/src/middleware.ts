@@ -23,7 +23,7 @@ export function middleware(request: NextRequest): NextResponse {
   const hasSession = request.cookies.get("has_session")?.value === "1";
 
   if (AUTH_ROUTES.has(pathname) && hasSession) {
-    return NextResponse.redirect(new URL("/cabinet", request.url));
+    return NextResponse.next();
   }
 
   if (isPublicRoute(pathname)) {
