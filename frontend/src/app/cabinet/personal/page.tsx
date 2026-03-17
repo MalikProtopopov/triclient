@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Upload, FileText } from "lucide-react";
+import { Upload, FileText, Download } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -12,9 +12,93 @@ import {
   useUpdatePersonalMutation,
   useUploadDiplomaMutation,
   type UpdatePersonalRequest,
+  type ProfileDocument,
+  type ProfileDocumentType,
 } from "@/entities/profile";
 import { Card, Button, Input, PageLoader } from "@/shared/ui";
 import { formatShortDate } from "@/shared/lib/format";
+
+const DOCUMENT_TYPE_LABELS: Record<ProfileDocumentType, string> = {
+  medical_diploma: "Диплом об образовании",
+  retraining_cert: "Сертификат о переподготовке",
+  additional_cert: "Дополнительные сертификаты",
+};
+
+const DOCUMENT_TYPE_ORDER: ProfileDocumentType[] = [
+  "medical_diploma",
+  "retraining_cert",
+  "additional_cert",
+];
+
+function DocumentsSection({ documents }: { documents: ProfileDocument[] }) {
+  const groupedByType = useMemo(() => {
+    const map = new Map<ProfileDocumentType, ProfileDocument[]>();
+    for (const t of DOCUMENT_TYPE_ORDER) map.set(t, []);
+    for (const doc of documents) {
+      const list = map.get(doc.document_type);
+      if (list) list.push(doc);
+    }
+    return DOCUMENT_TYPE_ORDER.map((t) => ({
+      type: t,
+      label: DOCUMENT_TYPE_LABELS[t],
+      docs: map.get(t) ?? [],
+    })).filter((g) => g.docs.length > 0);
+  }, [documents]);
+
+  return (
+    <div className="border-t border-border pt-6">
+      <h3 className="mb-4 text-sm font-medium text-text-primary">
+        Загруженные документы
+      </h3>
+      <div className="space-y-6">
+        {groupedByType.map(({ type, label, docs }) => (
+          <div key={type}>
+            <h4 className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
+              {label}
+            </h4>
+            <div className="space-y-2">
+              {docs.map((doc) => {
+                const displayName =
+                  doc.original_filename ?? doc.name ?? "Документ";
+                return (
+                  <div
+                    key={doc.id}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-secondary px-4 py-3"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <FileText className="h-4 w-4 shrink-0 text-text-muted" />
+                      <div className="min-w-0">
+                        <span className="block truncate text-sm text-text-primary">
+                          {displayName}
+                        </span>
+                        <span className="text-xs text-text-muted">
+                          {formatShortDate(doc.uploaded_at)}
+                        </span>
+                      </div>
+                    </div>
+                    {doc.file_url && (
+                      <a
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0"
+                      >
+                        <Button variant="ghost" size="sm">
+                          <Download className="mr-1 h-4 w-4" />
+                          Скачать
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const personalSchema = z.object({
   first_name: z.string().min(1, "Обязательное поле"),
@@ -194,29 +278,7 @@ export default function PersonalInfoPage() {
 
           {/* Documents */}
           {profile?.documents && profile.documents.length > 0 && (
-            <div className="border-t border-border pt-6">
-              <h3 className="mb-4 text-sm font-medium text-text-primary">
-                Загруженные документы
-              </h3>
-              <ul className="space-y-2">
-                {profile.documents.map((doc) => (
-                  <li key={doc.id} className="flex items-center gap-3">
-                    <FileText className="h-4 w-4 shrink-0 text-text-muted" />
-                    <a
-                      href={doc.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-accent hover:underline"
-                    >
-                      {doc.name}
-                    </a>
-                    <span className="text-xs text-text-muted">
-                      {formatShortDate(doc.uploaded_at)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <DocumentsSection documents={profile.documents} />
           )}
 
           <div className="flex gap-3 pt-4">

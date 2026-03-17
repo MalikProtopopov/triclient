@@ -21,11 +21,20 @@ export type UpdatePersonalRequest = Omit<Partial<PersonalProfile>, "city"> & {
   city_id?: string;
 };
 
+export type ProfileDocumentType =
+  | "medical_diploma"
+  | "retraining_cert"
+  | "additional_cert";
+
 export interface ProfileDocument {
   id: string;
-  name: string;
-  file_url: string;
+  document_type: ProfileDocumentType;
+  original_filename: string;
   uploaded_at: string;
+  /** Optional; backend may omit if download URL is not available */
+  file_url?: string;
+  /** Legacy: backend may still return name instead of original_filename */
+  name?: string;
 }
 
 export interface PublicProfile {

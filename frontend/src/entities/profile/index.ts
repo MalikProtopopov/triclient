@@ -11,9 +11,10 @@ export {
 } from "./model/useProfile";
 export type {
   PersonalProfile,
+  ProfileDocument,
+  ProfileDocumentType,
+  ProfileEvent,
   PublicProfile,
   PublicProfileDraft,
-  ProfileDocument,
-  ProfileEvent,
   UpdatePersonalRequest,
 } from "./types";
