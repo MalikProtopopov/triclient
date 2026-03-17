@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { doctorApi } from "../api/doctorApi";
-import type { DoctorFilters } from "../types";
+import type { DoctorFilters, CityResponseSchema } from "../types";
 
 export const doctorKeys = {
   all: ["doctors"] as const,
@@ -26,9 +26,9 @@ export const useDoctor = (slug: string) => {
   });
 };
 
-export const useCities = () => {
-  return useQuery({
-    queryKey: doctorKeys.cities,
-    queryFn: () => doctorApi.getCities(),
+export const useCities = (options?: { withDoctors?: boolean }) => {
+  return useQuery<CityResponseSchema[]>({
+    queryKey: doctorKeys.cities(options),
+    queryFn: () => doctorApi.getCities(options),
   });
 };
