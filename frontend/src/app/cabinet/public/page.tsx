@@ -50,16 +50,15 @@ function getDisplayData(profile: PublicProfile): {
   }
 
   const c = draft.changes ?? {};
-  const d = draft as Record<string, unknown>;
-  const photoKey = c.photo_url ?? d.photo_url;
+  const photoKey = c.photo_url ?? draft.photo_url;
   return {
-    bio: c.bio ?? d.bio ?? profile.bio,
-    public_email: c.public_email ?? d.public_email ?? profile.public_email,
-    public_phone: c.public_phone ?? d.public_phone ?? profile.public_phone,
-    city_id: c.city_id ?? d.city_id ?? cityId,
-    clinic_name: c.clinic_name ?? d.clinic_name ?? profile.clinic_name,
-    specialization: c.specialization ?? d.specialization ?? profile.specialization,
-    academic_degree: c.academic_degree ?? d.academic_degree ?? profile.academic_degree,
+    bio: c.bio ?? draft.bio ?? profile.bio,
+    public_email: c.public_email ?? draft.public_email ?? profile.public_email,
+    public_phone: c.public_phone ?? draft.public_phone ?? profile.public_phone,
+    city_id: c.city_id ?? draft.city_id ?? cityId,
+    clinic_name: c.clinic_name ?? draft.clinic_name ?? profile.clinic_name,
+    specialization: c.specialization ?? draft.specialization ?? profile.specialization,
+    academic_degree: c.academic_degree ?? draft.academic_degree ?? profile.academic_degree,
     photo_url: photoKey
       ? resolvePendingPhotoUrl(photoKey as string) ?? null
       : profile.photo_url,
@@ -241,7 +240,7 @@ export default function PublicProfilePage() {
             {(() => {
               const draftPhotoKey =
                 profile?.pending_draft?.changes?.photo_url ??
-                (profile?.pending_draft as Record<string, unknown>)?.photo_url;
+                profile?.pending_draft?.photo_url;
               const draftPhotoUrl = resolvePendingPhotoUrl(draftPhotoKey);
               const displayPhotoUrl =
                 draftPhotoUrl ?? profile?.photo_url ?? null;
