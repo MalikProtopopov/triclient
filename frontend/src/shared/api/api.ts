@@ -13,6 +13,10 @@ class ApiClient {
     });
 
     this.instance.interceptors.request.use((config) => {
+      // Для FormData не задаём Content-Type — браузер подставит multipart/form-data с boundary
+      if (config.data instanceof FormData) {
+        delete config.headers["Content-Type"];
+      }
       if (typeof window !== "undefined") {
         const token = sessionStorage.getItem("access_token");
         if (token) {
