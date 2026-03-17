@@ -15,7 +15,7 @@ import {
 } from "@/entities/profile";
 import type { ApiError } from "@/entities/auth";
 import { useCities } from "@/entities/doctor";
-import { Card, Button, Input, Select, PageLoader } from "@/shared/ui";
+import { Card, Button, Input, DropdownSelect, PageLoader } from "@/shared/ui";
 
 const publicSchema = z.object({
   bio: z.string().nullable(),
@@ -188,7 +188,7 @@ export default function PublicProfilePage() {
               label="Публичный телефон"
               {...register("public_phone")}
             />
-            <Select
+            <DropdownSelect
               label="Город"
               options={[{ value: "", label: "Выберите город" }, ...cityOptions]}
               value={cityId ?? ""}

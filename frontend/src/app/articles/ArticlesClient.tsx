@@ -9,7 +9,7 @@ import { Suspense } from "react";
 import { useArticles, useArticleThemes } from "@/entities/article";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Select, Button, SkeletonCard, EmptyState } from "@/shared/ui";
+import { DropdownSelect, Button, SkeletonCard, EmptyState } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
 
@@ -61,7 +61,7 @@ function ArticlesContent() {
 
         {themes.length > 0 && (
           <div className="mb-8 w-full sm:w-56">
-            <Select
+            <DropdownSelect
               options={themeOptions}
               value={themeSlug}
               onChange={(e) => {

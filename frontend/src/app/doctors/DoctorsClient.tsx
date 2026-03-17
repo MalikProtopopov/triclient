@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useDoctors, useCities, DoctorCard } from "@/entities/doctor";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Input, Select, Button, SkeletonCard, EmptyState } from "@/shared/ui";
+import { Input, DropdownSelect, Button, SkeletonCard, EmptyState } from "@/shared/ui";
 
 const PER_PAGE = 12;
 
@@ -96,7 +96,7 @@ function DoctorsContent() {
               />
             </div>
             <div className="w-full sm:w-48">
-              <Select
+              <DropdownSelect
                 options={cityOptions}
                 value={citySlug}
                 onChange={handleCityChange}

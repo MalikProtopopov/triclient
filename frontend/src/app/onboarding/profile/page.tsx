@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Button, Input, Select, Card } from "@/shared/ui";
+import { Button, Input, DropdownSelect, Card } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatPhoneInput, formatPhoneForApi } from "@/shared/lib/phoneMask";
 import { useCities } from "@/entities/doctor";
@@ -316,7 +316,7 @@ export default function OnboardingProfilePage() {
                   onChange={(e) => setPassport(e.target.value)}
                   placeholder="Серия и номер"
                 />
-                <Select
+                <DropdownSelect
                   label="Город"
                   options={cityOptions}
                   value={cityId}
