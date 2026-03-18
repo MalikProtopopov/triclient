@@ -31,7 +31,7 @@ const STATS = [
 
 export default function HomeClient() {
   const { isAuthenticated, user } = useAuth();
-  const isOnboarded = isAuthenticated && user?.onboarding?.next_step === "completed";
+  const isOnboarded = isAuthenticated && (user?.onboarding?.next_step === "completed" || user?.onboarding?.next_step === "done");
   const { data: eventsData, isLoading: eventsLoading } = useEvents({
     period: "upcoming",
     limit: 4,

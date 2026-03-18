@@ -24,6 +24,7 @@ export type UpdatePersonalRequest = Omit<Partial<PersonalProfile>, "city"> & {
 export type ProfileDocumentType =
   | "medical_diploma"
   | "retraining_cert"
+  | "oncology_cert"
   | "additional_cert";
 
 export interface ProfileDocument {

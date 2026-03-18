@@ -11,9 +11,10 @@ export default function CabinetTelegramPage() {
   const { data: binding, isLoading } = useTelegramBinding();
   const generateCodeMutation = useGenerateCode();
   const [codeData, setCodeData] = useState<{
-    code: string;
-    bot_url: string;
+    auth_code: string;
+    bot_link: string;
     expires_at: string;
+    instruction: string;
   } | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
 
@@ -47,7 +48,7 @@ export default function CabinetTelegramPage() {
 
   const handleCopy = () => {
     if (!codeData) return;
-    navigator.clipboard.writeText(codeData.code);
+    navigator.clipboard.writeText(codeData.auth_code);
     toast.success("Код скопирован");
   };
 
@@ -59,7 +60,7 @@ export default function CabinetTelegramPage() {
 
   if (isLoading) return <PageLoader />;
 
-  if (binding?.is_bound) {
+  if (binding?.is_linked) {
     return (
       <div className="space-y-6">
         <h1 className="font-heading text-2xl font-semibold text-text-primary">
@@ -74,9 +75,12 @@ export default function CabinetTelegramPage() {
               <h2 className="mb-2 text-lg font-semibold text-text-primary">
                 Telegram привязан
               </h2>
-              {binding.telegram_username && (
-                <p className="text-text-secondary">
-                  @{binding.telegram_username}
+              {binding.tg_username && (
+                <p className="text-text-secondary">@{binding.tg_username}</p>
+              )}
+              {binding.is_in_channel && (
+                <p className="mt-1 text-sm text-success">
+                  Состоит в канале
                 </p>
               )}
             </div>
@@ -101,11 +105,20 @@ export default function CabinetTelegramPage() {
             <p className="mb-4 text-text-secondary">
               Привяжите Telegram для: уведомлений, доступа к закрытому каналу
             </p>
-            <ol className="mb-6 list-decimal space-y-2 pl-5 text-left text-sm text-text-secondary">
-              <li>Нажмите «Получить код»</li>
-              <li>Перейдите в Telegram-бота</li>
-              <li>Отправьте код боту</li>
-            </ol>
+
+            {codeData?.instruction && (
+              <p className="mb-4 text-sm text-text-secondary">
+                {codeData.instruction}
+              </p>
+            )}
+
+            {!codeData?.instruction && (
+              <ol className="mb-6 list-decimal space-y-2 pl-5 text-left text-sm text-text-secondary">
+                <li>Нажмите «Получить код»</li>
+                <li>Перейдите в Telegram-бота</li>
+                <li>Отправьте код боту</li>
+              </ol>
+            )}
 
             {!codeData ? (
               <Button
@@ -121,7 +134,7 @@ export default function CabinetTelegramPage() {
                 <div className="rounded-xl border border-border bg-bg p-6">
                   <p className="mb-2 text-sm text-text-muted">Ваш код</p>
                   <p className="font-mono text-3xl font-bold tracking-widest text-text-primary">
-                    {codeData.code}
+                    {codeData.auth_code}
                   </p>
                   {timeRemaining > 0 && (
                     <p className="mt-2 text-xs text-text-muted">
@@ -146,7 +159,7 @@ export default function CabinetTelegramPage() {
                     Копировать
                   </Button>
                   <a
-                    href={codeData.bot_url}
+                    href={codeData.bot_link}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

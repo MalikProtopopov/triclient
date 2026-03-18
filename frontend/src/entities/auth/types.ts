@@ -61,8 +61,10 @@ export type OnboardingNextStep =
   | "upload_documents"
   | "submit"
   | "await_moderation"
+  | "wait_moderation"
   | "pay_entry_fee"
-  | "completed";
+  | "completed"
+  | "done";
 
 export interface OnboardingStatus {
   email_verified: boolean;

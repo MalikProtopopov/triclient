@@ -29,6 +29,7 @@ export const ROUTES = {
   CABINET_EVENTS: "/cabinet/events",
   CABINET_CERTIFICATE: "/cabinet/certificate",
   CABINET_TELEGRAM: "/cabinet/telegram",
+  CABINET_COLLEAGUES: "/cabinet/colleagues",
   CABINET_SETTINGS: "/cabinet/settings",
   CABINET_VOTING: "/cabinet/voting",
 

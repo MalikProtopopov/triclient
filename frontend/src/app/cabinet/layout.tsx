@@ -23,7 +23,7 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (status && status.next_step !== "completed") {
+  if (status && status.next_step !== "completed" && status.next_step !== "done") {
     const targetRoute = getOnboardingStepRoute(status.next_step);
     if (targetRoute !== pathname) {
       router.replace(targetRoute);

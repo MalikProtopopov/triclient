@@ -205,6 +205,7 @@ export default function OnboardingProfilePage() {
   const [academicDegree, setAcademicDegree] = useState("");
   const [diplomaFile, setDiplomaFile] = useState<FileState | null>(null);
   const [certificateFile, setCertificateFile] = useState<FileState | null>(null);
+  const [oncologyCertFile, setOncologyCertFile] = useState<FileState | null>(null);
   const [extraFiles, setExtraFiles] = useState<FileState[]>([]);
   const [optimisticStep, setOptimisticStep] = useState<OnboardingNextStep | null>(null);
 
@@ -212,6 +213,8 @@ export default function OnboardingProfilePage() {
     setDiplomaFile(f ? { file: f, name: f.name, size: f.size } : null);
   const setCertificate = (f: File | null) =>
     setCertificateFile(f ? { file: f, name: f.name, size: f.size } : null);
+  const setOncologyCert = (f: File | null) =>
+    setOncologyCertFile(f ? { file: f, name: f.name, size: f.size } : null);
 
   useEffect(() => {
     if (!personalProfile) return;
@@ -295,6 +298,7 @@ export default function OnboardingProfilePage() {
     try {
       if (diplomaFile) await uploadFile(diplomaFile, "medical_diploma");
       if (certificateFile) await uploadFile(certificateFile, "retraining_cert");
+      if (oncologyCertFile) await uploadFile(oncologyCertFile, "oncology_cert");
       for (const extra of extraFiles) {
         if (extra.file) await uploadFile(extra, "additional_cert");
       }
@@ -334,6 +338,7 @@ export default function OnboardingProfilePage() {
   const documentsCount = [
     diplomaFile,
     certificateFile,
+    oncologyCertFile,
     ...extraFiles.filter((f) => f.file),
   ].filter(Boolean).length;
 
@@ -476,6 +481,11 @@ export default function OnboardingProfilePage() {
                       label="Сертификат о переподготовке"
                       file={certificateFile}
                       onFileChange={setCertificate}
+                    />
+                    <FileUploadZone
+                      label="Сертификат онколога"
+                      file={oncologyCertFile}
+                      onFileChange={setOncologyCert}
                     />
                     <FileUploadZone
                       label="Дополнительные сертификаты"

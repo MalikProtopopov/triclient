@@ -13,7 +13,7 @@ export interface EventResponseSchema {
   event_end_date: string;
   location: string;
   cover_image_url: string | null;
-  status?: "upcoming" | "past";
+  status?: "upcoming" | "ongoing" | "finished" | "cancelled";
   tariffs: EventTariff[];
   galleries: EventGallery[];
   recordings: EventRecording[];
@@ -42,13 +42,13 @@ export interface EventGallery {
   id: string;
   title: string;
   access_level: "public" | "members_only";
-  photo_count: number;
+  photos_count: number;
 }
 
 export interface EventRecording {
   id: string;
   title: string;
-  duration: string;
+  duration_seconds: number | null;
   access_level: "public" | "members_only" | "participants_only";
   video_source: string | null;
   video_playback_url: string | null;

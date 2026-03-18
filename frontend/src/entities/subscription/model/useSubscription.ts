@@ -5,7 +5,6 @@ import type { SubscriptionPayRequest } from "../types";
 
 export const subscriptionKeys = {
   status: ["subscription", "status"] as const,
-  plans: ["subscription", "plans"] as const,
 };
 
 export const useSubscriptionStatus = () =>
@@ -14,13 +13,8 @@ export const useSubscriptionStatus = () =>
     queryFn: () => subscriptionApi.getStatus(),
   });
 
-export const useSubscriptionPlans = () =>
-  useQuery({
-    queryKey: subscriptionKeys.plans,
-    queryFn: () => subscriptionApi.getPlans(),
-  });
-
 export const useSubscriptionPayMutation = () =>
   useMutation({
-    mutationFn: (request: SubscriptionPayRequest) => subscriptionApi.pay(request),
+    mutationFn: (request: SubscriptionPayRequest) =>
+      subscriptionApi.pay(request),
   });

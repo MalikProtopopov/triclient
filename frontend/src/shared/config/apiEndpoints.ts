@@ -53,14 +53,11 @@ export const API_ENDPOINTS = {
   },
   SUBSCRIPTIONS: {
     STATUS: "/api/v1/subscriptions/status",
-    PLANS: "/api/v1/subscriptions/plans",
     PAY: "/api/v1/subscriptions/pay",
+    PAYMENTS: "/api/v1/subscriptions/payments",
+    RECEIPT: (id: string) => `/api/v1/subscriptions/payments/${id}/receipt`,
   },
-  PAYMENTS: {
-    LIST: "/api/v1/payments",
-    RECEIPT: (id: string) => `/api/v1/payments/${id}/receipt`,
-    STATUS: (id: string) => `/api/v1/payments/${id}/status`,
-  },
+  COLLEAGUES: "/api/v1/colleagues",
   CERTIFICATES: {
     LIST: "/api/v1/certificates",
     DOWNLOAD: (id: string) => `/api/v1/certificates/${id}/download`,

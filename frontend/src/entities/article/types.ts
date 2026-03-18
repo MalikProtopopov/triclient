@@ -29,6 +29,7 @@ export type ArticleListResponseSchema = PaginatedResponse<ArticleResponseSchema>
 
 export interface ArticleFilters {
   theme_slug?: string;
+  search?: string;
   limit?: number;
   offset?: number;
 }

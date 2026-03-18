@@ -1,3 +1,3 @@
 export { paymentApi } from "./api/paymentApi";
-export { usePayments, usePaymentStatus, paymentKeys } from "./model/usePayment";
-export type { Payment, PaymentListResponse, PaymentStatus } from "./types";
+export { usePayments, paymentKeys } from "./model/usePayment";
+export type { Payment, PaymentListResponse } from "./types";

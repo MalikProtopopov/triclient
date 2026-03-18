@@ -21,6 +21,14 @@ function generateIdempotencyKey(): string {
   return crypto.randomUUID();
 }
 
+function formatDurationSeconds(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0 && m > 0) return `${h} ч ${m} мин`;
+  if (h > 0) return `${h} ч`;
+  return `${m} мин`;
+}
+
 function TariffCard({
   tariff,
   onRegister,
@@ -259,8 +267,8 @@ export default function EventDetailPage() {
     );
   }
 
-  const isUpcoming =
-    (event.status ?? deriveEventStatus(event.event_date)) === "upcoming";
+  const derivedStatus = event.status ?? deriveEventStatus(event.event_date);
+  const isUpcoming = derivedStatus === "upcoming" || derivedStatus === "ongoing";
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -352,7 +360,7 @@ export default function EventDetailPage() {
                           {gallery.access_level === "members_only" ? "Только для членов" : "Публичная"}
                         </Badge>
                         <span className="text-sm text-text-muted">
-                          {gallery.photo_count} фото
+                          {gallery.photos_count} фото
                         </span>
                       </div>
                     </div>
@@ -396,7 +404,11 @@ export default function EventDetailPage() {
                             recording.title
                           )}
                         </p>
-                        <p className="text-sm text-text-muted">{recording.duration}</p>
+                        {recording.duration_seconds != null && (
+                          <p className="text-sm text-text-muted">
+                            {formatDurationSeconds(recording.duration_seconds)}
+                          </p>
+                        )}
                       </div>
                       <Badge
                         variant={

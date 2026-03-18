@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, AlertTriangle, RefreshCw } from "lucide-react";
+import { MapPin, AlertTriangle, RefreshCw, Clock, CreditCard } from "lucide-react";
 
 import { useSubscriptionStatus } from "@/entities/subscription";
 import { useProfileEvents } from "@/entities/profile";
@@ -22,10 +22,13 @@ export default function CabinetPage() {
     ? formatShortDate(currentSub.ends_at)
     : null;
 
+  const nextAction = subscription?.next_action;
   const showEntryFeeBanner =
-    subscription && subscription.has_paid_entry_fee === false;
-  const showRenewBanner =
-    subscription && subscription.next_action === "renew";
+    nextAction === "pay_entry_fee_and_subscription" ||
+    (subscription && !subscription.has_paid_entry_fee);
+  const showRenewBanner = nextAction === "renew";
+  const showPendingPaymentBanner = nextAction === "complete_payment";
+  const showPaySubscriptionBanner = nextAction === "pay_subscription";
 
   return (
     <div className="space-y-8">
@@ -69,12 +72,55 @@ export default function CabinetPage() {
                 Продлите подписку
               </p>
               <p className="text-sm text-text-secondary">
-                Срок вашей подписки подходит к концу
+                Срок вашей подписки истёк
               </p>
             </div>
             <Link href={ROUTES.CABINET_PAYMENTS}>
               <Button size="sm">Продлить</Button>
             </Link>
+          </div>
+        </Card>
+      )}
+
+      {showPaySubscriptionBanner && (
+        <Card className="relative overflow-hidden border-accent/30 bg-accent/5 pl-6">
+          <div
+            className="absolute left-0 top-0 h-full w-1 bg-accent"
+            aria-hidden
+          />
+          <div className="flex items-center gap-3">
+            <CreditCard className="h-5 w-5 shrink-0 text-accent" />
+            <div className="flex-1">
+              <p className="font-medium text-text-primary">
+                Оформите подписку
+              </p>
+              <p className="text-sm text-text-secondary">
+                Для доступа ко всем функциям необходимо оформить подписку
+              </p>
+            </div>
+            <Link href={ROUTES.CABINET_PAYMENTS}>
+              <Button size="sm">Оформить</Button>
+            </Link>
+          </div>
+        </Card>
+      )}
+
+      {showPendingPaymentBanner && (
+        <Card className="relative overflow-hidden border-amber-300/30 bg-amber-50/50 pl-6">
+          <div
+            className="absolute left-0 top-0 h-full w-1 bg-amber-400"
+            aria-hidden
+          />
+          <div className="flex items-center gap-3">
+            <Clock className="h-5 w-5 shrink-0 text-amber-600" />
+            <div className="flex-1">
+              <p className="font-medium text-text-primary">
+                Незавершённый платёж
+              </p>
+              <p className="text-sm text-text-secondary">
+                Дождитесь завершения обработки платежа
+              </p>
+            </div>
           </div>
         </Card>
       )}

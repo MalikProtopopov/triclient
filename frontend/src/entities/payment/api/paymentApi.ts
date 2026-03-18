@@ -1,15 +1,17 @@
 import { API_ENDPOINTS } from "@/shared/config";
 import { apiClient } from "@/shared/api";
 
-import type { PaymentListResponse, PaymentStatus } from "../types";
+import type { PaymentListResponse } from "../types";
 
 export const paymentApi = {
-  getList: (): Promise<PaymentListResponse> =>
-    apiClient.get(API_ENDPOINTS.PAYMENTS.LIST),
+  getList: (params?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<PaymentListResponse> =>
+    apiClient.get(API_ENDPOINTS.SUBSCRIPTIONS.PAYMENTS, { params }),
 
-  getReceipt: (id: string): Promise<{ receipt_url: string }> =>
-    apiClient.get(API_ENDPOINTS.PAYMENTS.RECEIPT(id)),
-
-  getStatus: (id: string): Promise<PaymentStatus> =>
-    apiClient.get(API_ENDPOINTS.PAYMENTS.STATUS(id)),
+  getReceipt: (id: string): Promise<Blob> =>
+    apiClient.get(API_ENDPOINTS.SUBSCRIPTIONS.RECEIPT(id), {
+      responseType: "blob",
+    }),
 };

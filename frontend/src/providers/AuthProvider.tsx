@@ -40,8 +40,10 @@ const NEXT_STEP_ROUTES: Partial<Record<OnboardingNextStep, string>> = {
   upload_documents: ROUTES.ONBOARDING_PROFILE,
   submit: ROUTES.ONBOARDING_PROFILE,
   await_moderation: ROUTES.ONBOARDING_PENDING,
+  wait_moderation: ROUTES.ONBOARDING_PENDING,
   pay_entry_fee: ROUTES.CABINET_PAYMENTS,
   completed: ROUTES.CABINET,
+  done: ROUTES.CABINET,
 };
 
 export function getPostLoginRedirect(

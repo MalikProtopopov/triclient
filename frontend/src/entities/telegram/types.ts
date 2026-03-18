@@ -1,11 +1,12 @@
 export interface TelegramBinding {
-  is_bound: boolean;
-  telegram_username: string | null;
-  bound_at: string | null;
+  is_linked: boolean;
+  tg_username: string | null;
+  is_in_channel: boolean;
 }
 
 export interface GenerateCodeResponse {
-  code: string;
-  bot_url: string;
+  auth_code: string;
   expires_at: string;
+  bot_link: string;
+  instruction: string;
 }

@@ -21,12 +21,14 @@ import { formatShortDate } from "@/shared/lib/format";
 const DOCUMENT_TYPE_LABELS: Record<ProfileDocumentType, string> = {
   medical_diploma: "Диплом об образовании",
   retraining_cert: "Сертификат о переподготовке",
+  oncology_cert: "Сертификат онколога",
   additional_cert: "Дополнительные сертификаты",
 };
 
 const DOCUMENT_TYPE_ORDER: ProfileDocumentType[] = [
   "medical_diploma",
   "retraining_cert",
+  "oncology_cert",
   "additional_cert",
 ];
 

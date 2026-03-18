@@ -18,6 +18,9 @@ export const articleApi = {
   getThemes: async (): Promise<ArticleTheme[]> => {
     const response = await apiClient.get<{ data: ArticleTheme[] }>(
       API_ENDPOINTS.ARTICLE_THEMES,
+      {
+        params: { active: true, has_articles: true },
+      },
     );
     return response.data;
   },

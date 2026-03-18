@@ -1,7 +1,6 @@
 export { subscriptionApi } from "./api/subscriptionApi";
 export {
   useSubscriptionStatus,
-  useSubscriptionPlans,
   useSubscriptionPayMutation,
   subscriptionKeys,
 } from "./model/useSubscription";

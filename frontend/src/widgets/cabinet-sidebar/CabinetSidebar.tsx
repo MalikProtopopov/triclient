@@ -13,6 +13,7 @@ import {
   MessageCircle,
   Settings,
   Vote,
+  Users,
   ArrowLeft,
   LogOut,
 } from "lucide-react";
@@ -36,6 +37,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
   { sectionKey: "public", label: "Публичный профиль", href: ROUTES.CABINET_PUBLIC, icon: Globe },
   { sectionKey: "payments", label: "Оплаты и подписка", href: ROUTES.CABINET_PAYMENTS, icon: CreditCard },
   { sectionKey: "events", label: "Мероприятия", href: ROUTES.CABINET_EVENTS, icon: Calendar },
+  { sectionKey: "colleagues", label: "Коллеги", href: ROUTES.CABINET_COLLEAGUES, icon: Users },
   { sectionKey: "certificate", label: "Сертификат", href: ROUTES.CABINET_CERTIFICATE, icon: Award },
   { sectionKey: "telegram", label: "Telegram", href: ROUTES.CABINET_TELEGRAM, icon: MessageCircle },
   { sectionKey: "settings", label: "Настройки", href: ROUTES.CABINET_SETTINGS, icon: Settings },

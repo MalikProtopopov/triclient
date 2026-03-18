@@ -1,92 +1,103 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { CheckCircle, Clock, Download } from "lucide-react";
+import { CheckCircle, Clock, AlertCircle } from "lucide-react";
 
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { usePaymentStatus, paymentApi } from "@/entities/payment";
+import { subscriptionApi } from "@/entities/subscription";
 import { Button } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
-import { formatPrice } from "@/shared/lib/format";
-import { toast } from "sonner";
+
+type PollState = "polling" | "success" | "timeout";
+
+const POLL_INTERVAL_MS = 3000;
+const POLL_TIMEOUT_MS = 30000;
 
 function SuccessContent() {
-  const searchParams = useSearchParams();
-  const paymentId = searchParams.get("payment_id");
+  const [state, setState] = useState<PollState>("polling");
+  const startedAt = useRef(Date.now());
 
-  const { data: paymentStatus } = usePaymentStatus(paymentId ?? "", !!paymentId);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
 
-  const isSucceeded = paymentStatus?.status === "completed";
-  const isPending = paymentId && !isSucceeded;
+    const poll = async () => {
+      try {
+        const status = await subscriptionApi.getStatus();
+        if (
+          status.has_subscription &&
+          status.current_subscription?.status === "active"
+        ) {
+          setState("success");
+          return;
+        }
+      } catch {
+        /* keep polling */
+      }
 
-  const handleReceipt = async () => {
-    if (!paymentId) return;
-    try {
-      const data = await paymentApi.getReceipt(paymentId);
-      window.open(data.receipt_url, "_blank");
-    } catch {
-      toast.error("Не удалось получить чек");
-    }
-  };
+      if (Date.now() - startedAt.current >= POLL_TIMEOUT_MS) {
+        setState("timeout");
+        return;
+      }
+
+      timer = setTimeout(poll, POLL_INTERVAL_MS);
+    };
+
+    poll();
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (state === "success") {
+    return (
+      <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center">
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
+          <CheckCircle className="h-8 w-8 text-green-500" />
+        </div>
+        <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
+          Подписка активирована!
+        </h1>
+        <p className="mb-6 text-sm text-text-secondary">
+          Оплата прошла успешно. Чек отправлен на ваш email.
+        </p>
+        <Link href={ROUTES.CABINET} className="w-full">
+          <Button fullWidth>Перейти в личный кабинет</Button>
+        </Link>
+      </main>
+    );
+  }
+
+  if (state === "timeout") {
+    return (
+      <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center">
+        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
+          <AlertCircle className="h-8 w-8 text-amber-500" />
+        </div>
+        <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
+          Обработка платежа
+        </h1>
+        <p className="mb-8 text-sm text-text-secondary">
+          Обработка может занять несколько минут. Статус подписки обновится в
+          личном кабинете.
+        </p>
+        <Link href={ROUTES.CABINET} className="w-full">
+          <Button fullWidth>Перейти в личный кабинет</Button>
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center">
-      {isSucceeded ? (
-        <>
-          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
-            <CheckCircle className="h-8 w-8 text-green-500" />
-          </div>
-          <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
-            Оплата прошла успешно!
-          </h1>
-          <p className="mb-6 text-sm text-text-secondary">
-            Чек отправлен на ваш email.
-          </p>
-          <div className="flex w-full flex-col gap-3">
-            <Link href={ROUTES.CABINET}>
-              <Button fullWidth>Перейти в личный кабинет</Button>
-            </Link>
-            <Button variant="outline" fullWidth onClick={handleReceipt}>
-              <Download className="h-4 w-4" />
-              Скачать чек
-            </Button>
-          </div>
-        </>
-      ) : isPending ? (
-        <>
-          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
-            <Clock className="h-8 w-8 text-amber-500" />
-          </div>
-          <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
-            Платёж обрабатывается
-          </h1>
-          <p className="mb-8 text-sm text-text-secondary">
-            Мы обновим статус платежа в вашем личном кабинете. Обычно это
-            занимает не более минуты.
-          </p>
-          <Link href={ROUTES.CABINET}>
-            <Button fullWidth>Перейти в личный кабинет</Button>
-          </Link>
-        </>
-      ) : (
-        <>
-          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
-            <CheckCircle className="h-8 w-8 text-green-500" />
-          </div>
-          <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
-            Оплата прошла успешно!
-          </h1>
-          <p className="mb-6 text-sm text-text-secondary">
-            Чек отправлен на ваш email.
-          </p>
-          <Link href={ROUTES.CABINET}>
-            <Button fullWidth>Перейти в личный кабинет</Button>
-          </Link>
-        </>
-      )}
+      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
+        <Clock className="h-8 w-8 animate-pulse text-amber-500" />
+      </div>
+      <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
+        Проверяем оплату...
+      </h1>
+      <p className="text-sm text-text-secondary">
+        Обычно это занимает не более минуты.
+      </p>
     </main>
   );
 }

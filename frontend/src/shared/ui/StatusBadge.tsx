@@ -1,17 +1,22 @@
 import { Badge } from "./Badge";
 
-type PaymentStatus = "pending" | "completed" | "failed" | "refunded" | "partially_refunded";
+type PaymentStatus = "pending" | "succeeded" | "failed" | "refunded";
 type ModerationStatus = "new" | "pending" | "approved" | "rejected";
 
-const paymentStatusMap: Record<PaymentStatus, { label: string; variant: "warning" | "success" | "error" | "muted" }> = {
+const paymentStatusMap: Record<
+  PaymentStatus,
+  { label: string; variant: "warning" | "success" | "error" | "muted" }
+> = {
   pending: { label: "Ожидает", variant: "warning" },
-  completed: { label: "Оплачен", variant: "success" },
+  succeeded: { label: "Оплачен", variant: "success" },
   failed: { label: "Ошибка", variant: "error" },
   refunded: { label: "Возврат", variant: "muted" },
-  partially_refunded: { label: "Частичный возврат", variant: "muted" },
 };
 
-const moderationStatusMap: Record<ModerationStatus, { label: string; variant: "muted" | "warning" | "success" | "error" }> = {
+const moderationStatusMap: Record<
+  ModerationStatus,
+  { label: string; variant: "muted" | "warning" | "success" | "error" }
+> = {
   new: { label: "Новый", variant: "muted" },
   pending: { label: "На модерации", variant: "warning" },
   approved: { label: "Одобрен", variant: "success" },
@@ -20,10 +25,14 @@ const moderationStatusMap: Record<ModerationStatus, { label: string; variant: "m
 
 export const PaymentStatusBadge = ({ status }: { status: PaymentStatus }) => {
   const config = paymentStatusMap[status];
-  return <Badge variant={config.variant}>{config.label}</Badge>;
+  return <Badge variant={config?.variant ?? "muted"}>{config?.label ?? status}</Badge>;
 };
 
-export const ModerationStatusBadge = ({ status }: { status: ModerationStatus }) => {
+export const ModerationStatusBadge = ({
+  status,
+}: {
+  status: ModerationStatus;
+}) => {
   const config = moderationStatusMap[status];
-  return <Badge variant={config.variant}>{config.label}</Badge>;
+  return <Badge variant={config?.variant ?? "muted"}>{config?.label ?? status}</Badge>;
 };
