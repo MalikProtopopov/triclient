@@ -1,8 +1,22 @@
+"use client";
+
 import Link from "next/link";
 
+import { usePublicSettings } from "@/entities/settings";
 import { ROUTES } from "@/shared/config";
 
+const FALLBACK = {
+  contact_email: "info@trichologia.ru",
+  contact_phone: "+7 (495) 545-43-75",
+  site_name: "Профессиональное общество трихологов",
+};
+
 export const Footer = () => {
+  const { data: settings } = usePublicSettings();
+  const email = settings?.contact_email ?? FALLBACK.contact_email;
+  const phone = settings?.contact_phone ?? FALLBACK.contact_phone;
+  const siteName = settings?.site_name ?? FALLBACK.site_name;
+
   return (
     <footer className="border-t border-border bg-[#4a4a4a]">
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
@@ -14,7 +28,7 @@ export const Footer = () => {
                 <span className="text-sm font-bold text-accent-contrast">АТ</span>
               </div>
               <span className="font-heading text-base font-semibold text-white">
-                Профессиональное общество трихологов
+                {siteName}
               </span>
             </div>
             <p className="max-w-xs text-xs leading-relaxed text-white/40">
@@ -83,11 +97,11 @@ export const Footer = () => {
               Контакты
             </h4>
             <div className="flex flex-col gap-2.5 text-sm text-white/50">
-              <a href="mailto:info@trichologia.ru" className="transition-colors hover:text-white">
-                info@trichologia.ru
+              <a href={`mailto:${email}`} className="transition-colors hover:text-white">
+                {email}
               </a>
-              <a href="tel:+74955454375" className="transition-colors hover:text-white">
-                +7 (495) 545-43-75
+              <a href={`tel:${phone.replace(/\D/g, "")}`} className="transition-colors hover:text-white">
+                {phone}
               </a>
               <span className="text-xs leading-relaxed">
                 Москва, Спартаковская пл., д.&nbsp;14, стр.&nbsp;4, офис 4107
@@ -98,7 +112,7 @@ export const Footer = () => {
 
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center">
           <p className="text-xs text-white/25">
-            &copy; {new Date().getFullYear()} Ассоциация трихологов. Все права защищены.
+            &copy; {new Date().getFullYear()} {siteName}. Все права защищены.
           </p>
           <div className="flex gap-4 text-xs text-white/25">
             <Link href={ROUTES.DOCUMENTS} className="transition-colors hover:text-white/50">

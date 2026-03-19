@@ -42,7 +42,10 @@ function DoctorsContent() {
   const { data: citiesData } = useCities({ withDoctors: true });
   const { data: doctorsData, isLoading } = useDoctors({
     city_slug: citySlug || undefined,
-    search: debouncedSearch || undefined,
+    search:
+      debouncedSearch && debouncedSearch.length >= 2
+        ? debouncedSearch
+        : undefined,
     limit: PER_PAGE,
     offset: (page - 1) * PER_PAGE,
   });

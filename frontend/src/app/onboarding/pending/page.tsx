@@ -28,7 +28,9 @@ export default function OnboardingPendingPage() {
   const { data: status, isLoading } = useOnboardingStatus({ refetchInterval: 30_000 });
 
   useEffect(() => {
-    if (status?.next_step === "await_moderation" && sessionStorage.getItem("onboarding_submitted") === "1") {
+    const isWaiting =
+      status?.next_step === "await_moderation" || status?.next_step === "wait_moderation";
+    if (isWaiting && sessionStorage.getItem("onboarding_submitted") === "1") {
       toast.success("Заявка успешно отправлена");
       sessionStorage.removeItem("onboarding_submitted");
     }
@@ -41,7 +43,9 @@ export default function OnboardingPendingPage() {
       router.replace(target);
       return null;
     }
-    if (status.next_step !== "await_moderation" && status.moderation_status !== "rejected") {
+    const isWaiting =
+      status.next_step === "await_moderation" || status.next_step === "wait_moderation";
+    if (!isWaiting && status.moderation_status !== "rejected") {
       router.replace(getOnboardingStepRoute(status.next_step));
       return null;
     }

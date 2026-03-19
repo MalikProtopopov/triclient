@@ -2,11 +2,9 @@ export interface SubscriptionPlanSchema {
   id: string;
   code: string;
   name: string;
-  description: string;
+  plan_type: "entry_fee" | "subscription";
   price: number;
   duration_months: number;
-  plan_type: "entry_fee" | "subscription";
-  is_available: boolean;
 }
 
 export interface SubscriptionStatusResponse {

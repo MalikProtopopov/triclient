@@ -227,13 +227,14 @@ export default function OnboardingProfilePage() {
     setCityId(personalProfile.city?.id ?? "");
     setClinic(personalProfile.clinic_name || "");
     setPosition(personalProfile.position || "");
+    setSpecialization(personalProfile.specialization || "");
     setAcademicDegree(personalProfile.academic_degree || "");
   }, [personalProfile, lastName, firstName]);
 
   useEffect(() => {
     if (
       status?.next_step &&
-      ["upload_documents", "submit", "await_moderation"].includes(status.next_step)
+      ["upload_documents", "submit", "await_moderation", "wait_moderation"].includes(status.next_step)
     ) {
       setOptimisticStep(null);
     }

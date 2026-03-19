@@ -1,34 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, AlertTriangle, RefreshCw, Clock, CreditCard } from "lucide-react";
+import {
+  MapPin,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  CreditCard,
+} from "lucide-react";
 
+import { useAuth } from "@/providers/AuthProvider";
 import { useSubscriptionStatus } from "@/entities/subscription";
 import { useProfileEvents } from "@/entities/profile";
 import { useEvents } from "@/entities/event";
 import { Card, Button, Badge } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
-import { formatDate, formatShortDate } from "@/shared/lib/format";
+import { formatDate, formatShortDate, formatPrice } from "@/shared/lib/format";
 
 export default function CabinetPage() {
-  const { data: subscription } = useSubscriptionStatus();
+  const { user } = useAuth();
+  const isDoctor = user?.role === "doctor";
+
+  const { data: subscription } = useSubscriptionStatus({
+    enabled: isDoctor,
+  });
   const { data: registrations = [] } = useProfileEvents();
   const { data: eventsData } = useEvents({ period: "upcoming", limit: 3 });
 
   const events = eventsData?.data ?? [];
-  const currentSub = subscription?.current_subscription;
-  const isActive = currentSub?.status === "active";
-  const endDate = currentSub?.ends_at
-    ? formatShortDate(currentSub.ends_at)
-    : null;
-
-  const nextAction = subscription?.next_action;
-  const showEntryFeeBanner =
-    nextAction === "pay_entry_fee_and_subscription" ||
-    (subscription && !subscription.has_paid_entry_fee);
-  const showRenewBanner = nextAction === "renew";
-  const showPendingPaymentBanner = nextAction === "complete_payment";
-  const showPaySubscriptionBanner = nextAction === "pay_subscription";
 
   return (
     <div className="space-y-8">
@@ -36,108 +35,10 @@ export default function CabinetPage() {
         Личный кабинет
       </h1>
 
-      {showEntryFeeBanner && (
-        <Card className="relative overflow-hidden border-warning/30 bg-warning/5 pl-6">
-          <div
-            className="absolute left-0 top-0 h-full w-1 bg-warning"
-            aria-hidden
-          />
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-warning" />
-            <div className="flex-1">
-              <p className="font-medium text-text-primary">
-                Оплатите вступительный взнос
-              </p>
-              <p className="text-sm text-text-secondary">
-                Для активации членства необходимо оплатить вступительный взнос
-              </p>
-            </div>
-            <Link href={ROUTES.CABINET_PAYMENTS}>
-              <Button size="sm">Оплатить</Button>
-            </Link>
-          </div>
-        </Card>
+      {isDoctor && subscription && (
+        <SubscriptionWidget subscription={subscription} />
       )}
 
-      {showRenewBanner && (
-        <Card className="relative overflow-hidden border-accent/30 bg-accent/5 pl-6">
-          <div
-            className="absolute left-0 top-0 h-full w-1 bg-accent"
-            aria-hidden
-          />
-          <div className="flex items-center gap-3">
-            <RefreshCw className="h-5 w-5 shrink-0 text-accent" />
-            <div className="flex-1">
-              <p className="font-medium text-text-primary">
-                Продлите подписку
-              </p>
-              <p className="text-sm text-text-secondary">
-                Срок вашей подписки истёк
-              </p>
-            </div>
-            <Link href={ROUTES.CABINET_PAYMENTS}>
-              <Button size="sm">Продлить</Button>
-            </Link>
-          </div>
-        </Card>
-      )}
-
-      {showPaySubscriptionBanner && (
-        <Card className="relative overflow-hidden border-accent/30 bg-accent/5 pl-6">
-          <div
-            className="absolute left-0 top-0 h-full w-1 bg-accent"
-            aria-hidden
-          />
-          <div className="flex items-center gap-3">
-            <CreditCard className="h-5 w-5 shrink-0 text-accent" />
-            <div className="flex-1">
-              <p className="font-medium text-text-primary">
-                Оформите подписку
-              </p>
-              <p className="text-sm text-text-secondary">
-                Для доступа ко всем функциям необходимо оформить подписку
-              </p>
-            </div>
-            <Link href={ROUTES.CABINET_PAYMENTS}>
-              <Button size="sm">Оформить</Button>
-            </Link>
-          </div>
-        </Card>
-      )}
-
-      {showPendingPaymentBanner && (
-        <Card className="relative overflow-hidden border-amber-300/30 bg-amber-50/50 pl-6">
-          <div
-            className="absolute left-0 top-0 h-full w-1 bg-amber-400"
-            aria-hidden
-          />
-          <div className="flex items-center gap-3">
-            <Clock className="h-5 w-5 shrink-0 text-amber-600" />
-            <div className="flex-1">
-              <p className="font-medium text-text-primary">
-                Незавершённый платёж
-              </p>
-              <p className="text-sm text-text-secondary">
-                Дождитесь завершения обработки платежа
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {isActive && endDate && (
-        <Card className="relative overflow-hidden bg-success/5 pl-6">
-          <div
-            className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-accent to-accent/70"
-            aria-hidden
-          />
-          <p className="text-lg font-medium text-success">
-            Подписка активна до {endDate}
-          </p>
-        </Card>
-      )}
-
-      {/* My Registrations */}
       {registrations.length > 0 && (
         <section>
           <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
@@ -206,7 +107,6 @@ export default function CabinetPage() {
         </section>
       )}
 
-      {/* Upcoming Events */}
       <section>
         <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
           Ближайшие мероприятия
@@ -243,4 +143,130 @@ export default function CabinetPage() {
       </section>
     </div>
   );
+}
+
+/* ── Subscription Widget ── */
+
+type SubStatus = NonNullable<ReturnType<typeof useSubscriptionStatus>["data"]>;
+
+function SubscriptionWidget({ subscription }: { subscription: SubStatus }) {
+  const currentSub = subscription.current_subscription;
+  const nextAction = subscription.next_action;
+  const isActive = currentSub?.status === "active";
+
+  if (nextAction === "complete_payment") {
+    return (
+      <Card className="relative overflow-hidden border-amber-300/30 bg-amber-50/50 pl-6">
+        <div
+          className="absolute left-0 top-0 h-full w-1 bg-amber-400"
+          aria-hidden
+        />
+        <div className="flex items-center gap-3">
+          <Clock className="h-5 w-5 shrink-0 text-amber-600" />
+          <div className="flex-1">
+            <p className="font-medium text-text-primary">
+              Платёж обрабатывается
+            </p>
+            <p className="text-sm text-text-secondary">
+              Дождитесь завершения обработки платежа
+            </p>
+          </div>
+          <Link href={ROUTES.CABINET_PAYMENTS}>
+            <Button size="sm" variant="outline">
+              Подробнее
+            </Button>
+          </Link>
+        </div>
+      </Card>
+    );
+  }
+
+  if (isActive && currentSub) {
+    const endDate = formatShortDate(currentSub.ends_at);
+    const daysRemaining = currentSub.days_remaining ?? 0;
+
+    return (
+      <Card className="relative overflow-hidden border-success/30 bg-success/5 pl-6">
+        <div
+          className="absolute left-0 top-0 h-full w-1 bg-success"
+          aria-hidden
+        />
+        <div className="flex items-center gap-3">
+          <CheckCircle className="h-5 w-5 shrink-0 text-success" />
+          <div className="flex-1">
+            <p className="font-medium text-success">
+              Подписка активна до {endDate}
+            </p>
+            <p className="text-sm text-text-secondary">
+              {currentSub.plan.name} — осталось {daysRemaining} дн.
+            </p>
+          </div>
+          {subscription.can_renew && (
+            <Link href={ROUTES.CABINET_PAYMENTS}>
+              <Button size="sm">Продлить</Button>
+            </Link>
+          )}
+        </div>
+      </Card>
+    );
+  }
+
+  const { label, description, buttonText, accentColor, Icon } =
+    getActionConfig(subscription);
+
+  return (
+    <Card
+      className={`relative overflow-hidden border-${accentColor}/30 bg-${accentColor}/5 pl-6`}
+    >
+      <div
+        className={`absolute left-0 top-0 h-full w-1 bg-${accentColor}`}
+        aria-hidden
+      />
+      <div className="flex items-center gap-3">
+        <Icon className={`h-5 w-5 shrink-0 text-${accentColor}`} />
+        <div className="flex-1">
+          <p className="font-medium text-text-primary">{label}</p>
+          <p className="text-sm text-text-secondary">{description}</p>
+        </div>
+        <Link href={ROUTES.CABINET_PAYMENTS}>
+          <Button size="sm">{buttonText}</Button>
+        </Link>
+      </div>
+    </Card>
+  );
+}
+
+function getActionConfig(subscription: SubStatus) {
+  const nextAction = subscription.next_action;
+
+  if (nextAction === "pay_entry_fee_and_subscription") {
+    const total =
+      (subscription.entry_fee_plan?.price ?? 0) +
+      (subscription.available_plans[0]?.price ?? 0);
+    return {
+      label: "Оплатите вступительный и членский взнос",
+      description: `Для активации членства — ${formatPrice(total)}`,
+      buttonText: "Оплатить",
+      accentColor: "warning",
+      Icon: AlertTriangle,
+    };
+  }
+
+  if (nextAction === "renew") {
+    return {
+      label: "Продлите подписку",
+      description: "Срок вашей подписки истёк",
+      buttonText: "Продлить",
+      accentColor: "accent",
+      Icon: CreditCard,
+    };
+  }
+
+  return {
+    label: "Оформите подписку",
+    description: "Для доступа ко всем функциям необходимо оформить подписку",
+    buttonText: "Оформить",
+    accentColor: "accent",
+    Icon: CreditCard,
+  };
 }

@@ -59,7 +59,10 @@ export const authApi = {
     apiClient.post(API_ENDPOINTS.ONBOARDING.SUBMIT),
 
   changeEmail: (data: ChangeEmailRequest): Promise<{ message: string }> =>
-    apiClient.post(API_ENDPOINTS.AUTH.CHANGE_EMAIL, data),
+    apiClient.post(API_ENDPOINTS.AUTH.CHANGE_EMAIL, {
+      new_email: data.new_email,
+      password: data.current_password,
+    }),
 
   changePassword: (data: ChangePasswordRequest): Promise<{ message: string }> =>
     apiClient.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, data),

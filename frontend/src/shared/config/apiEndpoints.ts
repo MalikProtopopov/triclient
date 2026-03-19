@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
     BY_SLUG: (slug: string) => `/api/v1/organization-documents/${slug}`,
   },
   CITIES: "/api/v1/cities",
+  CITY_BY_SLUG: (slug: string) => `/api/v1/cities/${slug}`,
   PROFILE: {
     PERSONAL: "/api/v1/profile/personal",
     PUBLIC: "/api/v1/profile/public",

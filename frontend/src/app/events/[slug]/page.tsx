@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Play, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import { useEvent, useEventRegisterMutation } from "@/entities/event";
 import type { EventTariff, EventRegistrationResponse } from "@/entities/event";
@@ -19,6 +20,22 @@ import { useAuth } from "@/providers/AuthProvider";
 
 function generateIdempotencyKey(): string {
   return crypto.randomUUID();
+}
+
+function getRegistrationErrorMessage(error: unknown): string {
+  const msg =
+    (error as { response?: { data?: { error?: { message?: string } } } })
+      ?.response?.data?.error?.message ?? "";
+  if (/no seats available/i.test(msg)) return "Места закончились";
+  if (/invalid verification code/i.test(msg)) {
+    const m = msg.match(/(\d+)\s*attempt/i);
+    return m ? `Неверный код. Осталось попыток: ${m[1]}` : "Неверный код подтверждения";
+  }
+  if (/verification code expired/i.test(msg)) return "Код истёк. Запросите новый";
+  if (/too many verification attempts/i.test(msg)) return "Запросите новый код";
+  if (/too many verification codes sent/i.test(msg)) return "Попробуйте позже";
+  if (/registration is closed/i.test(msg)) return "Регистрация закрыта";
+  return msg || "Ошибка регистрации. Попробуйте ещё раз.";
 }
 
 function formatDurationSeconds(seconds: number): string {

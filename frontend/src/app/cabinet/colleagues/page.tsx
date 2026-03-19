@@ -2,7 +2,8 @@
 
 import { useState, useDeferredValue } from "react";
 import Link from "next/link";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, Phone, Mail } from "lucide-react";
+import { AxiosError } from "axios";
 
 import { useColleagues } from "@/entities/colleague";
 import { Card, Button, EmptyState } from "@/shared/ui";
@@ -15,16 +16,17 @@ export default function ColleaguesPage() {
   const [offset, setOffset] = useState(0);
   const deferredSearch = useDeferredValue(search);
 
-  const { data, isLoading, isError } = useColleagues({
+  const { data, isLoading, isError, error } = useColleagues({
     limit: PAGE_SIZE,
     offset,
-    search: deferredSearch || undefined,
+    search: deferredSearch.length >= 2 ? deferredSearch : undefined,
   });
 
   const colleagues = data?.data ?? [];
   const total = data?.total ?? 0;
   const hasNext = offset + PAGE_SIZE < total;
   const hasPrev = offset > 0;
+  const is403 = error instanceof AxiosError && error.response?.status === 403;
 
   return (
     <div className="space-y-6">
@@ -49,8 +51,9 @@ export default function ColleaguesPage() {
       {isError && (
         <Card className="border-error/30 bg-error/5">
           <p className="text-sm text-error">
-            Не удалось загрузить список коллег. Возможно, нужна активная
-            подписка.
+            {is403
+              ? "Для доступа к разделу коллег нужна активная подписка."
+              : "Не удалось загрузить список коллег. Возможно, нужна активная подписка."}
           </p>
         </Card>
       )}
@@ -67,41 +70,82 @@ export default function ColleaguesPage() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {colleagues.map((colleague) => (
-          <Link key={colleague.id} href={ROUTES.DOCTOR(colleague.slug)}>
-            <Card hover className="flex items-center gap-4 p-4">
-              {colleague.photo_url ? (
-                <img
-                  src={colleague.photo_url}
-                  alt={`${colleague.last_name} ${colleague.first_name}`}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
-                  {colleague.first_name?.[0]}
-                  {colleague.last_name?.[0]}
+        {colleagues.map((colleague) => {
+          const doctorSlug = colleague.slug ?? colleague.id;
+          const middleName =
+            colleague.middle_name ?? colleague.patronymic ?? "";
+          return (
+            <Link key={colleague.id} href={ROUTES.DOCTOR(doctorSlug)}>
+              <Card hover className="flex flex-col gap-3 p-4">
+                <div className="flex items-center gap-4">
+                  {colleague.photo_url ? (
+                    <img
+                      src={colleague.photo_url}
+                      alt={`${colleague.last_name} ${colleague.first_name}`}
+                      className="h-12 w-12 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
+                      {colleague.first_name?.[0]}
+                      {colleague.last_name?.[0]}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-text-primary">
+                      {colleague.last_name} {colleague.first_name}
+                      {middleName ? ` ${middleName}` : ""}
+                    </p>
+                    {colleague.specialization && (
+                      <p className="truncate text-xs text-text-secondary">
+                        {colleague.specialization}
+                      </p>
+                    )}
+                    {colleague.city && (
+                      <p className="flex items-center gap-1 text-xs text-text-muted">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        {colleague.city}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-text-primary">
-                  {colleague.last_name} {colleague.first_name}
-                  {colleague.patronymic ? ` ${colleague.patronymic}` : ""}
-                </p>
-                {colleague.specialization && (
-                  <p className="truncate text-xs text-text-secondary">
-                    {colleague.specialization}
-                  </p>
+                {(colleague.public_phone ||
+                  colleague.public_email ||
+                  colleague.colleague_contacts) && (
+                  <div className="flex flex-col gap-1 border-t border-border pt-3 text-xs text-text-muted">
+                    {colleague.public_phone && (
+                      <a
+                        href={`tel:${colleague.public_phone.replace(/\D/g, "")}`}
+                        className="flex items-center gap-2 hover:text-accent"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Phone className="h-3 w-3 shrink-0" />
+                        {colleague.public_phone}
+                      </a>
+                    )}
+                    {colleague.public_email && (
+                      <a
+                        href={`mailto:${colleague.public_email}`}
+                        className="flex items-center gap-2 hover:text-accent"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Mail className="h-3 w-3 shrink-0" />
+                        {colleague.public_email}
+                      </a>
+                    )}
+                    {colleague.colleague_contacts && (
+                      <p className="flex items-start gap-2">
+                        <span className="shrink-0">Контакты:</span>
+                        <span className="break-words">
+                          {colleague.colleague_contacts}
+                        </span>
+                      </p>
+                    )}
+                  </div>
                 )}
-                {colleague.city && (
-                  <p className="flex items-center gap-1 text-xs text-text-muted">
-                    <MapPin className="h-3 w-3" />
-                    {colleague.city}
-                  </p>
-                )}
-              </div>
-            </Card>
-          </Link>
-        ))}
+              </Card>
+            </Link>
+          );
+        })}
       </div>
 
       {(hasPrev || hasNext) && (

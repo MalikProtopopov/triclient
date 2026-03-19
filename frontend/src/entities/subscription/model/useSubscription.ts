@@ -7,10 +7,11 @@ export const subscriptionKeys = {
   status: ["subscription", "status"] as const,
 };
 
-export const useSubscriptionStatus = () =>
+export const useSubscriptionStatus = (options?: { enabled?: boolean }) =>
   useQuery({
     queryKey: subscriptionKeys.status,
     queryFn: () => subscriptionApi.getStatus(),
+    enabled: options?.enabled,
   });
 
 export const useSubscriptionPayMutation = () =>

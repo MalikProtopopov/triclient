@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { useAuth } from "@/providers/AuthProvider";
+import { usePublicSettings } from "@/entities/settings";
 import { cn } from "@/shared/lib";
 import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui";
@@ -23,6 +24,8 @@ export const Header = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout } = useAuth();
+  const { data: settings } = usePublicSettings();
+  const siteName = settings?.site_name ?? "Профессиональное общество трихологов";
 
   useEffect(() => {
     const handleScroll = (): void => {
@@ -49,7 +52,7 @@ export const Header = () => {
             <span className="text-sm font-bold text-accent-contrast">АТ</span>
           </div>
           <span className="hidden text-sm font-semibold text-text-primary sm:block">
-            Профессиональное общество трихологов
+            {siteName}
           </span>
         </Link>
 

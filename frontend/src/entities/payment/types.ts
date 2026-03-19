@@ -8,7 +8,17 @@ export interface Payment {
   description: string;
   created_at: string;
   paid_at: string | null;
-  receipt_url: string | null;
 }
 
 export type PaymentListResponse = PaginatedResponse<Payment>;
+
+export interface ReceiptResponse {
+  id: string;
+  receipt_type: string;
+  receipt_url: string;
+  fiscal_number?: string;
+  fiscal_document?: string;
+  fiscal_sign?: string;
+  amount: number;
+  status: string;
+}

@@ -28,10 +28,15 @@ export const profileApi = {
   uploadDiplomaPhoto: (formData: FormData): Promise<{ diploma_photo_url: string }> =>
     apiClient.post(API_ENDPOINTS.PROFILE.DIPLOMA_PHOTO, formData),
 
-  getEvents: async (): Promise<ProfileEvent[]> => {
+  getEvents: async (params?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<ProfileEvent[]> => {
     const response = await apiClient.get<{ data: ProfileEvent[] }>(
       API_ENDPOINTS.PROFILE.EVENTS,
+      { params },
     );
-    return response.data;
+    const body = response.data as { data?: ProfileEvent[] };
+    return Array.isArray(body) ? body : (body.data ?? []);
   },
 };
