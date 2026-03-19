@@ -39,5 +39,5 @@ export interface SubscriptionPayResponse {
   payment_id: string;
   payment_url: string;
   amount: number;
-  expires_at: string | null;
+  expires_at: string;
 }

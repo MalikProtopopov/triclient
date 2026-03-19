@@ -1,6 +1,12 @@
 import { Badge } from "./Badge";
 
-type PaymentStatus = "pending" | "succeeded" | "failed" | "refunded";
+type PaymentStatus =
+  | "pending"
+  | "succeeded"
+  | "failed"
+  | "refunded"
+  | "expired"
+  | "partially_refunded";
 type ModerationStatus = "new" | "pending" | "approved" | "rejected";
 
 const paymentStatusMap: Record<
@@ -9,8 +15,10 @@ const paymentStatusMap: Record<
 > = {
   pending: { label: "Ожидает", variant: "warning" },
   succeeded: { label: "Оплачен", variant: "success" },
-  failed: { label: "Ошибка", variant: "error" },
+  failed: { label: "Отклонён", variant: "error" },
   refunded: { label: "Возврат", variant: "muted" },
+  expired: { label: "Истёк", variant: "muted" },
+  partially_refunded: { label: "Частичный возврат", variant: "muted" },
 };
 
 const moderationStatusMap: Record<
@@ -23,9 +31,16 @@ const moderationStatusMap: Record<
   rejected: { label: "Отклонён", variant: "error" },
 };
 
-export const PaymentStatusBadge = ({ status }: { status: PaymentStatus }) => {
+export const PaymentStatusBadge = ({
+  status,
+  statusLabel,
+}: {
+  status: PaymentStatus;
+  statusLabel?: string;
+}) => {
   const config = paymentStatusMap[status];
-  return <Badge variant={config?.variant ?? "muted"}>{config?.label ?? status}</Badge>;
+  const label = statusLabel ?? config?.label ?? status;
+  return <Badge variant={config?.variant ?? "muted"}>{label}</Badge>;
 };
 
 export const ModerationStatusBadge = ({

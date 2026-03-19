@@ -1,15 +1,45 @@
 "use client";
 
 import { Suspense } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { XCircle, RotateCcw, Mail } from "lucide-react";
+import { toast } from "sonner";
 
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { Button } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
+import { useSubscriptionPayMutation } from "@/entities/subscription";
+import {
+  getSavedIdempotencyKey,
+  getSavedPlanId,
+} from "@/shared/lib/paymentStorage";
 
 function FailContent() {
+  const router = useRouter();
+  const payMutation = useSubscriptionPayMutation();
+
+  const handleRetry = () => {
+    const planId = getSavedPlanId();
+    const idempotencyKey = getSavedIdempotencyKey();
+    if (planId && idempotencyKey) {
+      payMutation.mutate(
+        { plan_id: planId, idempotency_key: idempotencyKey },
+        {
+          onSuccess: (data) => {
+            window.location.href = data.payment_url;
+          },
+          onError: () => {
+            toast.error("Не удалось повторить оплату");
+            router.push(ROUTES.CABINET_PAYMENTS);
+          },
+        },
+      );
+    } else {
+      router.push(ROUTES.CABINET_PAYMENTS);
+    }
+  };
+
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4 py-16 text-center">
       <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
@@ -26,12 +56,14 @@ function FailContent() {
       </p>
 
       <div className="flex w-full flex-col gap-3">
-        <Link href={ROUTES.CABINET_PAYMENTS} className="w-full">
-          <Button fullWidth>
-            <RotateCcw className="h-4 w-4" />
-            Попробовать снова
-          </Button>
-        </Link>
+        <Button
+          fullWidth
+          onClick={handleRetry}
+          disabled={payMutation.isPending}
+        >
+          <RotateCcw className="h-4 w-4" />
+          {payMutation.isPending ? "Перенаправление..." : "Попробовать снова"}
+        </Button>
         <Button variant="outline" fullWidth>
           <Mail className="h-4 w-4" />
           Связаться с поддержкой

@@ -9,6 +9,7 @@ import { Footer } from "@/widgets/footer";
 import { subscriptionApi } from "@/entities/subscription";
 import { Button } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
+import { clearPendingPayment } from "@/shared/lib/paymentStorage";
 
 type PollState = "polling" | "success" | "timeout";
 
@@ -29,6 +30,7 @@ function SuccessContent() {
           status.has_subscription &&
           status.current_subscription?.status === "active"
         ) {
+          clearPendingPayment();
           setState("success");
           return;
         }

@@ -18,9 +18,14 @@ import {
 } from "@/entities/subscription";
 import type { SubscriptionPlanSchema } from "@/entities/subscription";
 import { usePayments, paymentApi } from "@/entities/payment";
+import type { Payment } from "@/entities/payment";
 import type { ApiError } from "@/entities/auth";
 import { Card, Button, PaymentStatusBadge, EmptyState } from "@/shared/ui";
 import { formatShortDate, formatPrice } from "@/shared/lib/format";
+import {
+  savePendingPayment,
+  getSavedIdempotencyKey,
+} from "@/shared/lib/paymentStorage";
 
 function getSubscriptionMessage(status: {
   entry_fee_required: boolean;
@@ -61,10 +66,20 @@ export default function PaymentsPage() {
     nextAction != null && nextAction !== "complete_payment";
 
   const handlePay = (planId: string) => {
+    const idempotencyKey =
+      getSavedIdempotencyKey() ?? crypto.randomUUID();
     payMutation.mutate(
-      { plan_id: planId, idempotency_key: crypto.randomUUID() },
+      { plan_id: planId, idempotency_key: idempotencyKey },
       {
         onSuccess: (data) => {
+          savePendingPayment({
+            idempotencyKey,
+            paymentId: data.payment_id,
+            expiresAt:
+              data.expires_at ??
+              new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            planId,
+          });
           window.location.href = data.payment_url;
         },
         onError: (error) => {
@@ -80,6 +95,27 @@ export default function PaymentsPage() {
         },
       },
     );
+  };
+
+  const handleGoToPay = async () => {
+    try {
+      const res = await paymentApi.getList({ limit: 5 });
+      const list = res.data ?? [];
+      const pending = list.find(
+        (p) =>
+          p.status === "pending" &&
+          p.payment_url &&
+          p.expires_at &&
+          new Date(p.expires_at) > new Date(),
+      );
+      if (pending?.payment_url) {
+        window.location.href = pending.payment_url;
+      } else {
+        toast.info("Срок оплаты истёк. Создайте новый платёж");
+      }
+    } catch {
+      toast.error("Не удалось загрузить данные");
+    }
   };
 
   const handleReceipt = async (paymentId: string, isRetry = false) => {
@@ -128,6 +164,7 @@ export default function PaymentsPage() {
         <SubscriptionStatusCard
           subscription={subscription}
           currentSub={currentSub ?? null}
+          onGoToPay={handleGoToPay}
         />
       )}
 
@@ -241,7 +278,7 @@ export default function PaymentsPage() {
                     Статус
                   </th>
                   <th className="px-6 py-4 text-right text-sm font-medium text-text-secondary">
-                    Чек
+                    Действия
                   </th>
                 </tr>
               </thead>
@@ -261,22 +298,16 @@ export default function PaymentsPage() {
                       {formatPrice(payment.amount)}
                     </td>
                     <td className="px-6 py-4">
-                      <PaymentStatusBadge status={payment.status} />
+                      <PaymentStatusBadge
+                        status={payment.status}
+                        statusLabel={payment.status_label}
+                      />
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {payment.status === "succeeded" ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-text-secondary"
-                          onClick={() => handleReceipt(payment.id)}
-                        >
-                          <Download className="mr-1.5 h-4 w-4" />
-                          Скачать чек
-                        </Button>
-                      ) : (
-                        <span className="text-sm text-text-muted">—</span>
-                      )}
+                      <PaymentRowActions
+                        payment={payment}
+                        onReceipt={handleReceipt}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -301,29 +332,90 @@ export default function PaymentsPage() {
 
 /* ── Sub-components ── */
 
+function PaymentRowActions({
+  payment,
+  onReceipt,
+}: {
+  payment: Payment;
+  onReceipt: (id: string) => void;
+}) {
+  const isPendingExpired =
+    payment.expires_at && new Date(payment.expires_at) < new Date();
+  const canPay =
+    payment.status === "pending" &&
+    payment.payment_url &&
+    !isPendingExpired;
+
+  if (payment.status === "succeeded") {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-text-secondary"
+        onClick={() => onReceipt(payment.id)}
+      >
+        <Download className="mr-1.5 h-4 w-4" />
+        Скачать чек
+      </Button>
+    );
+  }
+  if (canPay) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          if (payment.payment_url) window.location.href = payment.payment_url;
+        }}
+      >
+        Оплатить
+      </Button>
+    );
+  }
+  if (payment.status === "pending" && (!payment.payment_url || isPendingExpired)) {
+    return (
+      <span className="text-sm text-text-muted">
+        Срок истёк. Создайте новый платёж
+      </span>
+    );
+  }
+  if (payment.status === "expired") {
+    return (
+      <span className="text-sm text-text-muted">Время оплаты вышло</span>
+    );
+  }
+  return <span className="text-sm text-text-muted">—</span>;
+}
+
 function SubscriptionStatusCard({
   subscription,
   currentSub,
+  onGoToPay,
 }: {
   subscription: NonNullable<ReturnType<typeof useSubscriptionStatus>["data"]>;
   currentSub: NonNullable<
     ReturnType<typeof useSubscriptionStatus>["data"]
   >["current_subscription"];
+  onGoToPay: () => void | Promise<void>;
 }) {
   if (subscription.next_action === "complete_payment") {
     return (
       <Card className="border-amber-300/30 bg-amber-50/50">
-        <div className="flex items-center gap-3">
-          <Clock className="h-5 w-5 shrink-0 text-amber-600" />
-          <div className="flex-1">
-            <p className="font-medium text-text-primary">
-              Платёж обрабатывается
-            </p>
-            <p className="text-sm text-text-secondary">
-              Дождитесь завершения обработки предыдущего платежа или попробуйте
-              позже.
-            </p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Clock className="h-5 w-5 shrink-0 text-amber-600" />
+            <div>
+              <p className="font-medium text-text-primary">
+                У вас есть незавершённый платёж
+              </p>
+              <p className="text-sm text-text-secondary">
+                Перейдите к оплате или дождитесь завершения обработки.
+              </p>
+            </div>
           </div>
+          <Button size="sm" onClick={onGoToPay}>
+            Перейти к оплате
+          </Button>
         </div>
       </Card>
     );

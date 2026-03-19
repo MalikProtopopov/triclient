@@ -4,10 +4,19 @@ export interface Payment {
   id: string;
   amount: number;
   product_type: "entry_fee" | "subscription" | "event";
-  status: "pending" | "succeeded" | "failed" | "refunded";
+  status:
+    | "pending"
+    | "succeeded"
+    | "failed"
+    | "refunded"
+    | "expired"
+    | "partially_refunded";
+  status_label?: string;
   description: string;
   created_at: string;
   paid_at: string | null;
+  payment_url?: string | null;
+  expires_at?: string | null;
 }
 
 export type PaymentListResponse = PaginatedResponse<Payment>;

@@ -165,16 +165,14 @@ function SubscriptionWidget({ subscription }: { subscription: SubStatus }) {
           <Clock className="h-5 w-5 shrink-0 text-amber-600" />
           <div className="flex-1">
             <p className="font-medium text-text-primary">
-              Платёж обрабатывается
+              У вас есть незавершённый платёж
             </p>
             <p className="text-sm text-text-secondary">
-              Дождитесь завершения обработки платежа
+              Перейдите к оплате или дождитесь завершения обработки
             </p>
           </div>
           <Link href={ROUTES.CABINET_PAYMENTS}>
-            <Button size="sm" variant="outline">
-              Подробнее
-            </Button>
+            <Button size="sm">Перейти к оплате</Button>
           </Link>
         </div>
       </Card>
