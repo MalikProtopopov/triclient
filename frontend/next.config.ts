@@ -46,9 +46,14 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
     return [
       { source: "/sitemap.xml", destination: `${API_URL}/sitemap.xml` },
       { source: "/robots.txt", destination: `${API_URL}/robots.txt` },
+      {
+        source: "/api/v1/:path*",
+        destination: `${apiBase.replace(/\/$/, "")}/:path*`,
+      },
     ];
   },
 };
