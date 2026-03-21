@@ -62,6 +62,8 @@ export const API_ENDPOINTS = {
   CERTIFICATES: {
     LIST: "/api/v1/certificates",
     DOWNLOAD: (id: string) => `/api/v1/certificates/${id}/download`,
+    PUBLIC_VERIFY: (number: string) =>
+      `/api/v1/public/certificates/verify/${encodeURIComponent(number)}`,
   },
   TELEGRAM: {
     BINDING: "/api/v1/telegram/binding",

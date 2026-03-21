@@ -35,6 +35,8 @@ export const ROUTES = {
   CABINET_SETTINGS: "/cabinet/settings",
   CABINET_VOTING: "/cabinet/voting",
 
+  CERTIFICATE_VERIFY: (number: string) => `/certificates/verify/${number}`,
+
   PAYMENT_SUCCESS: "/payment/success",
   PAYMENT_FAIL: "/payment/fail",
 } as const;

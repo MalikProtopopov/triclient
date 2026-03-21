@@ -33,6 +33,16 @@ const nextConfig: NextConfig = {
         destination: "/confirm-email",
         permanent: true,
       },
+      {
+        source: "/cities",
+        destination: "/doctors/cities",
+        permanent: true,
+      },
+      {
+        source: "/cities/",
+        destination: "/doctors/cities",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

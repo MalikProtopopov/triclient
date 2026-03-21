@@ -29,4 +29,5 @@ export const PUBLIC_DYNAMIC_PREFIXES = [
   "/events/",
   "/articles/",
   "/documents/",
+  "/certificates/",
 ] as const;

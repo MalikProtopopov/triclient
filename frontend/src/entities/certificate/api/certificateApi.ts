@@ -5,9 +5,10 @@ import type { Certificate } from "../types";
 
 export const certificateApi = {
   getList: async (): Promise<Certificate[]> => {
-    const response = await apiClient.get<{ data: Certificate[] }>(
+    const response = await apiClient.get<{ data: Certificate[] } | Certificate[]>(
       API_ENDPOINTS.CERTIFICATES.LIST,
     );
+    if (Array.isArray(response)) return response;
     return response.data;
   },
 

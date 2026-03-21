@@ -1,35 +1,63 @@
 "use client";
 
-import { Award, Download, Check, X } from "lucide-react";
+import { Award, Download, Check, X, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
 import { useCertificates, certificateApi } from "@/entities/certificate";
+import { useSubscriptionStatus } from "@/entities/subscription";
 import { Card, Button, Badge, EmptyState, PageLoader } from "@/shared/ui";
 import { formatShortDate } from "@/shared/lib/format";
 
 export default function CabinetCertificatePage() {
   const { data: certificates, isLoading } = useCertificates();
+  const { data: subscription, isLoading: subLoading } = useSubscriptionStatus();
 
-  const handleDownload = async (id: string) => {
+  const handleDownload = (downloadUrl: string) => {
+    window.open(downloadUrl, "_blank");
+  };
+
+  const handleDownloadById = async (id: string) => {
     try {
       const url = await certificateApi.download(id);
       window.open(url, "_blank");
-    } catch {
-      toast.error("Не удалось скачать сертификат");
+    } catch (err) {
+      const status = (err as AxiosError)?.response?.status;
+      if (status === 403) {
+        toast.error("Сертификат больше недействителен");
+      } else {
+        toast.error("Не удалось скачать сертификат");
+      }
     }
   };
 
-  if (isLoading) return <PageLoader />;
+  const handleShare = async (verifyUrl: string) => {
+    try {
+      await navigator.clipboard.writeText(verifyUrl);
+      toast.success("Ссылка скопирована");
+    } catch {
+      toast.error("Не удалось скопировать ссылку");
+    }
+  };
+
+  if (isLoading || subLoading) return <PageLoader />;
 
   if (!certificates || certificates.length === 0) {
+    const isActive =
+      subscription?.current_subscription?.status === "active";
+
     return (
       <div className="space-y-6">
         <h1 className="font-heading text-2xl font-semibold text-text-primary">
           Сертификаты
         </h1>
         <EmptyState
-          title="Нет сертификатов"
-          description="Сертификат будет доступен после оплаты членского взноса"
+          title={isActive ? "Сертификат генерируется" : "Нет сертификатов"}
+          description={
+            isActive
+              ? "Сертификат генерируется, пожалуйста подождите"
+              : "Оплатите подписку для получения сертификата"
+          }
         />
       </div>
     );
@@ -43,7 +71,10 @@ export default function CabinetCertificatePage() {
 
       <div className="space-y-4">
         {certificates.map((cert) => (
-          <Card key={cert.id} className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <Card
+            key={cert.id}
+            className="flex flex-col gap-4 sm:flex-row sm:items-center"
+          >
             <div className="flex shrink-0 items-center justify-center rounded-xl bg-accent/10 p-4">
               <Award className="h-8 w-8 text-accent" />
             </div>
@@ -51,7 +82,7 @@ export default function CabinetCertificatePage() {
               <div className="flex items-center gap-2">
                 <p className="font-medium text-text-primary">
                   {cert.certificate_type === "member"
-                    ? "Членский сертификат"
+                    ? `Сертификат члена ассоциации${cert.year ? ` ${cert.year}` : ""}`
                     : "Сертификат мероприятия"}
                 </p>
                 <Badge variant={cert.is_active ? "success" : "error"}>
@@ -67,22 +98,40 @@ export default function CabinetCertificatePage() {
                 </Badge>
               </div>
               {cert.event && (
-                <p className="text-sm text-text-secondary">{cert.event.title}</p>
+                <p className="text-sm text-text-secondary">
+                  {cert.event.title}
+                </p>
               )}
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-text-muted">
                 <span>№ {cert.certificate_number}</span>
-                <span>{cert.year} г.</span>
+                {cert.year && <span>{cert.year} г.</span>}
                 <span>Выдан {formatShortDate(cert.generated_at)}</span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleDownload(cert.id)}
-            >
-              <Download className="mr-1.5 h-4 w-4" />
-              Скачать PDF
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  cert.download_url
+                    ? handleDownload(cert.download_url)
+                    : handleDownloadById(cert.id)
+                }
+              >
+                <Download className="mr-1.5 h-4 w-4" />
+                Скачать PDF
+              </Button>
+              {cert.verify_url && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleShare(cert.verify_url)}
+                >
+                  <Share2 className="mr-1.5 h-4 w-4" />
+                  Поделиться
+                </Button>
+              )}
+            </div>
           </Card>
         ))}
       </div>
