@@ -25,4 +25,7 @@ export const doctorApi = {
     );
     return response.data;
   },
+
+  getCityBySlug: (slug: string): Promise<CityResponseSchema> =>
+    apiClient.get(API_ENDPOINTS.CITY_BY_SLUG(slug)),
 };

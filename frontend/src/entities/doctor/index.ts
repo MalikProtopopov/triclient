@@ -1,5 +1,11 @@
 export { doctorApi } from "./api/doctorApi";
-export { useDoctors, useDoctor, useCities, doctorKeys } from "./model/useDoctor";
+export {
+  useDoctors,
+  useDoctor,
+  useCities,
+  useCityBySlug,
+  doctorKeys,
+} from "./model/useDoctor";
 export { DoctorCard } from "./DoctorCard";
 export type {
   DoctorResponseSchema,

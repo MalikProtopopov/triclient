@@ -2,49 +2,42 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 
-import { useDoctors, useCities, DoctorCard } from "@/entities/doctor";
+import {
+  useDoctors,
+  useCities,
+  useCityBySlug,
+  DoctorCard,
+} from "@/entities/doctor";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Input, DropdownSelect, Button, SkeletonCard, EmptyState } from "@/shared/ui";
+import {
+  Input,
+  DropdownSelect,
+  Button,
+  SkeletonCard,
+  EmptyState,
+} from "@/shared/ui";
 import { useDebouncedValue } from "@/shared/lib/useDebouncedValue";
 import { ROUTES } from "@/shared/config";
 
 const PER_PAGE = 12;
 
-function DoctorsContent() {
+function DoctorsByCityContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
+  const citySlug = typeof params.citySlug === "string" ? params.citySlug : "";
 
-  const cityFromUrl = searchParams.get("city") ?? "";
-  const citySlug = ""; // /doctors always shows all doctors; city selection navigates to /doctors/cities/[slug]
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
   const [page, setPage] = useState(1);
 
   const debouncedSearch = useDebouncedValue(search, 300);
 
-  // Redirect /doctors?city=moscow -> /doctors/cities/moscow
-  useEffect(() => {
-    if (cityFromUrl) {
-      const target = debouncedSearch && debouncedSearch.length >= 2
-        ? `${ROUTES.DOCTORS_CITY(cityFromUrl)}?search=${encodeURIComponent(debouncedSearch)}`
-        : ROUTES.DOCTORS_CITY(cityFromUrl);
-      router.replace(target, { scroll: false });
-      return;
-    }
-  }, [cityFromUrl, debouncedSearch, router]);
-
-  useEffect(() => {
-    if (cityFromUrl) return; // city param handled by redirect above
-    const params = new URLSearchParams();
-    if (debouncedSearch) params.set("search", debouncedSearch);
-    const qs = params.toString();
-    router.replace(qs ? `?${qs}` : "/doctors", { scroll: false });
-  }, [cityFromUrl, debouncedSearch, router]);
-
+  const { data: city, isLoading: cityLoading, isError: cityError } = useCityBySlug(citySlug);
   const { data: citiesData } = useCities({ withDoctors: true });
-  const { data: doctorsData, isLoading } = useDoctors({
+  const { data: doctorsData, isLoading: doctorsLoading } = useDoctors({
     city_slug: citySlug || undefined,
     search:
       debouncedSearch && debouncedSearch.length >= 2
@@ -59,15 +52,29 @@ function DoctorsContent() {
   const total = doctorsData?.total ?? 0;
   const totalPages = Math.ceil(total / PER_PAGE);
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-    setPage(1);
-  }, []);
+  useEffect(() => {
+    const urlParams = new URLSearchParams();
+    if (debouncedSearch) urlParams.set("search", debouncedSearch);
+    const qs = urlParams.toString();
+    const target = `${ROUTES.DOCTORS_CITY(citySlug)}${qs ? `?${qs}` : ""}`;
+    router.replace(target, { scroll: false });
+  }, [citySlug, debouncedSearch, router]);
+
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearch(e.target.value);
+      setPage(1);
+    },
+    [],
+  );
 
   const handleCityChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newSlug = e.target.value;
-      if (!newSlug) return; // "Все города" selected - stay on /doctors
+      if (!newSlug) {
+        router.push(ROUTES.DOCTORS);
+        return;
+      }
       router.push(
         debouncedSearch && debouncedSearch.length >= 2
           ? `${ROUTES.DOCTORS_CITY(newSlug)}?search=${encodeURIComponent(debouncedSearch)}`
@@ -85,6 +92,33 @@ function DoctorsContent() {
       .map((c) => ({ value: c.slug, label: c.name })),
   ];
 
+  const isLoading = cityLoading || doctorsLoading;
+
+  if (cityError || (!cityLoading && !city)) {
+    return (
+      <div className="flex min-h-screen flex-col bg-bg">
+        <Header />
+        <main className="flex flex-1 items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-text-primary">
+              Город не найден
+            </h2>
+            <p className="mt-2 text-sm text-text-secondary">
+              Проверьте ссылку или выберите город из списка
+            </p>
+            <Link
+              href={ROUTES.DOCTORS_CITIES}
+              className="mt-4 inline-block text-accent hover:underline"
+            >
+              ← Все города
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-bg">
       <Header />
@@ -96,19 +130,26 @@ function DoctorsContent() {
               Ассоциация трихологов
             </p>
             <h1 className="font-heading text-4xl font-bold text-text-primary lg:text-5xl">
-              Врачи — члены ассоциации
+              Трихологи в {city?.name ?? "..."}
             </h1>
             <p className="mt-3 max-w-xl text-text-secondary">
-              Только верифицированные специалисты с подтверждённой квалификацией
+              Врачи-трихологи — члены ассоциации в выбранном городе
             </p>
           </div>
 
-          <div className="mb-6">
+          <div className="mb-6 flex flex-wrap gap-2">
+            <Link
+              href={ROUTES.DOCTORS}
+              className="text-sm text-text-secondary transition-colors hover:text-accent"
+            >
+              ← Все врачи
+            </Link>
+            <span className="text-text-muted">·</span>
             <Link
               href={ROUTES.DOCTORS_CITIES}
               className="text-sm text-text-secondary transition-colors hover:text-accent"
             >
-              По городам →
+              По городам
             </Link>
           </div>
 
@@ -139,13 +180,10 @@ function DoctorsContent() {
           ) : doctors.length === 0 ? (
             <EmptyState
               title="Врачи не найдены"
-              description="Попробуйте изменить параметры поиска или фильтры"
+              description="Попробуйте изменить параметры поиска или выберите другой город"
               action={{
-                label: "Сбросить фильтры",
-                onClick: () => {
-                  setSearch("");
-                  setPage(1);
-                },
+                label: "Все города",
+                onClick: () => router.push(ROUTES.DOCTORS_CITIES),
               }}
             />
           ) : (
@@ -172,7 +210,9 @@ function DoctorsContent() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      setPage((p) => Math.min(totalPages, p + 1))
+                    }
                     disabled={page >= totalPages}
                   >
                     Вперёд
@@ -189,7 +229,7 @@ function DoctorsContent() {
   );
 }
 
-export default function DoctorsClient() {
+export default function DoctorsByCityClient() {
   return (
     <Suspense
       fallback={
@@ -208,7 +248,7 @@ export default function DoctorsClient() {
         </div>
       }
     >
-      <DoctorsContent />
+      <DoctorsByCityContent />
     </Suspense>
   );
 }

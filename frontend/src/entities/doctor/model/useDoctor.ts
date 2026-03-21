@@ -9,6 +9,7 @@ export const doctorKeys = {
   detail: (slug: string) => [...doctorKeys.all, "detail", slug] as const,
   cities: (options?: { withDoctors?: boolean }) =>
     [...doctorKeys.all, "cities", options?.withDoctors] as const,
+  city: (slug: string) => [...doctorKeys.all, "city", slug] as const,
 };
 
 export const useDoctors = (filters?: DoctorFilters) => {
@@ -30,5 +31,13 @@ export const useCities = (options?: { withDoctors?: boolean }) => {
   return useQuery<CityResponseSchema[]>({
     queryKey: doctorKeys.cities(options),
     queryFn: () => doctorApi.getCities(options),
+  });
+};
+
+export const useCityBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: doctorKeys.city(slug),
+    queryFn: () => doctorApi.getCityBySlug(slug),
+    enabled: !!slug,
   });
 };

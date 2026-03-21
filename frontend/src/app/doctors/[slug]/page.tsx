@@ -96,9 +96,17 @@ export default function DoctorProfilePage() {
           </Link>
 
           <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
-            <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-accent/20 text-3xl font-semibold text-text-primary sm:h-40 sm:w-40">
-              {initials}
-            </div>
+            {doctor.photo_url ? (
+              <img
+                src={doctor.photo_url}
+                alt={fullName}
+                className="h-32 w-32 shrink-0 rounded-full object-cover sm:h-40 sm:w-40"
+              />
+            ) : (
+              <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-accent/20 text-3xl font-semibold text-text-primary sm:h-40 sm:w-40">
+                {initials}
+              </div>
+            )}
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-text-primary">{fullName}</h1>
               <p className="mt-2 text-text-secondary">{doctor.specialization}</p>

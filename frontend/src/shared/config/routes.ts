@@ -1,6 +1,8 @@
 export const ROUTES = {
   HOME: "/",
   DOCTORS: "/doctors",
+  DOCTORS_CITIES: "/doctors/cities",
+  DOCTORS_CITY: (slug: string) => `/doctors/cities/${slug}`,
   DOCTOR: (slug: string) => `/doctors/${slug}`,
   EVENTS: "/events",
   EVENT: (slug: string) => `/events/${slug}`,

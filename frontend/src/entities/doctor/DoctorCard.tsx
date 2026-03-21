@@ -42,12 +42,20 @@ export const DoctorCard = ({ doctor, className }: DoctorCardProps) => {
         <div className="p-5">
           {/* Аватар + имя в одной строке */}
           <div className="flex items-start gap-4">
-            <div
-              className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl text-base font-semibold text-[#4a4a4a] transition-transform duration-300 group-hover:scale-105"
-              style={{ background: "linear-gradient(135deg, rgba(237,190,204,0.25), rgba(237,190,204,0.1))" }}
-            >
-              {initials}
-            </div>
+            {doctor.photo_url ? (
+              <img
+                src={doctor.photo_url}
+                alt={fullName}
+                className="h-14 w-14 flex-shrink-0 rounded-xl object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : (
+              <div
+                className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl text-base font-semibold text-[#4a4a4a] transition-transform duration-300 group-hover:scale-105"
+                style={{ background: "linear-gradient(135deg, rgba(237,190,204,0.25), rgba(237,190,204,0.1))" }}
+              >
+                {initials}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <h3 className="truncate font-heading text-sm font-semibold leading-snug text-text-primary">
                 {fullName}
