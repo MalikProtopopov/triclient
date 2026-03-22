@@ -79,6 +79,8 @@ export interface EventRegistrationResponse {
   is_member_price: boolean | null;
   action: "verify_existing" | "verify_new_email" | null;
   masked_email: string | null;
+  access_token: string | null;
+  refresh_token: string | null;
 }
 
 export interface ConfirmGuestRegistrationRequest {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,7 +8,11 @@ import { MapPin, Play, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
-import { useEvent, useEventRegisterMutation } from "@/entities/event";
+import {
+  useEvent,
+  useEventRegisterMutation,
+  useConfirmGuestMutation,
+} from "@/entities/event";
 import type { EventTariff, EventRegistrationResponse } from "@/entities/event";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
@@ -32,9 +36,10 @@ function getRegistrationErrorMessage(error: unknown): string {
     return m ? `Неверный код. Осталось попыток: ${m[1]}` : "Неверный код подтверждения";
   }
   if (/verification code expired/i.test(msg)) return "Код истёк. Запросите новый";
-  if (/too many verification attempts/i.test(msg)) return "Запросите новый код";
-  if (/too many verification codes sent/i.test(msg)) return "Попробуйте позже";
+  if (/too many verification attempts/i.test(msg)) return "Слишком много попыток. Запросите новый код";
+  if (/too many verification codes sent/i.test(msg)) return "Слишком много запросов. Попробуйте через 10 минут";
   if (/registration is closed/i.test(msg)) return "Регистрация закрыта";
+  if (/not found/i.test(msg)) return "Мероприятие или тариф не найдены";
   return msg || "Ошибка регистрации. Попробуйте ещё раз.";
 }
 
@@ -115,72 +120,276 @@ function TariffCard({
   );
 }
 
+const OTP_LENGTH = 6;
+const RESEND_COOLDOWN_SEC = 60;
+const CODE_VALID_MINUTES = 10;
+
+function OtpInput({
+  value,
+  onChange,
+  onComplete,
+  error,
+  disabled,
+}: {
+  value: string[];
+  onChange: (digits: string[]) => void;
+  onComplete: () => void;
+  error: string | null;
+  disabled: boolean;
+}) {
+  const inputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleChange = (index: number, digit: string) => {
+    if (!/^\d*$/.test(digit)) return;
+    const next = [...value];
+    next[index] = digit.slice(-1);
+    onChange(next);
+    if (digit && index < OTP_LENGTH - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
+    if (next.every(Boolean) && next.length === OTP_LENGTH) {
+      onComplete();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !value[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
+    if (pasted.length > 0) {
+      const next = pasted.split("").concat(Array(OTP_LENGTH).fill("")).slice(0, OTP_LENGTH);
+      onChange(next);
+      const focusIdx = Math.min(pasted.length, OTP_LENGTH - 1);
+      inputRefs.current[focusIdx]?.focus();
+      if (next.every(Boolean)) onComplete();
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-center gap-2" onPaste={handlePaste}>
+        {Array.from({ length: OTP_LENGTH }).map((_, i) => (
+          <input
+            key={i}
+            ref={(el) => { inputRefs.current[i] = el; }}
+            type="text"
+            inputMode="numeric"
+            maxLength={1}
+            value={value[i] ?? ""}
+            onChange={(e) => handleChange(i, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(i, e)}
+            disabled={disabled}
+            className="h-12 w-11 rounded-lg border border-border bg-bg text-center text-lg font-medium focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:opacity-50"
+          />
+        ))}
+      </div>
+      {error && <p className="text-center text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
+
 function GuestModal({
   isOpen,
   onClose,
-  onSubmit,
-  isLoading,
+  eventId,
+  selectedTariffId,
+  tariffName,
+  tariffPrice,
+  onStep1Submit,
+  onStep2Submit,
+  registerLoading,
+  confirmLoading,
   actionType,
   maskedEmail,
+  step1Error,
+  step2Error,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { email: string; full_name: string; workplace: string; specialization: string }) => void;
-  isLoading: boolean;
+  eventId: string;
+  selectedTariffId: string;
+  tariffName: string;
+  tariffPrice: number;
+  onStep1Submit: (data: {
+    email: string;
+    guest_full_name?: string;
+    guest_workplace?: string;
+    guest_specialization?: string;
+  }) => void;
+  onStep2Submit: (data: { email: string; code: string }) => void;
+  registerLoading: boolean;
+  confirmLoading: boolean;
   actionType: "verify_existing" | "verify_new_email" | null;
   maskedEmail: string | null;
+  step1Error: string | null;
+  step2Error: string | null;
 }) {
+  const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [workplace, setWorkplace] = useState("");
   const [specialization, setSpecialization] = useState("");
+  const [otpDigits, setOtpDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [codeExpiresAt, setCodeExpiresAt] = useState<number | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const isOtpStep = step === 2 && actionType;
+
+  const resetToStep1 = () => {
+    setStep(1);
+    setOtpDigits(Array(OTP_LENGTH).fill(""));
+  };
+
+  const handleStep1Submit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ email, full_name: fullName, workplace, specialization });
+    onStep1Submit({
+      email,
+      guest_full_name: fullName || undefined,
+      guest_workplace: workplace || undefined,
+      guest_specialization: specialization || undefined,
+    });
+  };
+
+  const handleStep2Submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = otpDigits.join("");
+    if (code.length !== OTP_LENGTH) return;
+    onStep2Submit({ email, code });
+  };
+
+  const handleOtpComplete = () => {
+    const code = otpDigits.join("");
+    if (code.length === OTP_LENGTH) {
+      onStep2Submit({ email, code });
+    }
+  };
+
+  const handleResend = () => {
+    if (resendCooldown > 0) return;
+    setResendCooldown(RESEND_COOLDOWN_SEC);
+    setCodeExpiresAt(Date.now() + CODE_VALID_MINUTES * 60 * 1000);
+    onStep1Submit({
+      email,
+      guest_full_name: fullName || undefined,
+      guest_workplace: workplace || undefined,
+      guest_specialization: specialization || undefined,
+    });
+  };
+
+  useEffect(() => {
+    if (actionType && maskedEmail) {
+      setStep(2);
+      setCodeExpiresAt(Date.now() + CODE_VALID_MINUTES * 60 * 1000);
+      setResendCooldown(RESEND_COOLDOWN_SEC);
+    }
+  }, [actionType, maskedEmail]);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(() => setResendCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [resendCooldown]);
+
+  const handleClose = () => {
+    setStep(1);
+    setEmail("");
+    setFullName("");
+    setWorkplace("");
+    setSpecialization("");
+    setOtpDigits(Array(OTP_LENGTH).fill(""));
+    onClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Регистрация на мероприятие">
-      {actionType && maskedEmail && (
-        <div className="mb-4 rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
-          {actionType === "verify_existing"
-            ? `Аккаунт с email ${maskedEmail} уже существует. Проверьте почту для подтверждения.`
-            : `Код подтверждения отправлен на ${maskedEmail}.`}
-        </div>
+    <Modal isOpen={isOpen} onClose={handleClose} title="Регистрация на мероприятие">
+      {isOtpStep ? (
+        <form onSubmit={handleStep2Submit} className="space-y-4">
+          <div className="mb-4 rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+            Код подтверждения отправлен на {maskedEmail ?? email}. Введите 6 цифр из письма.
+          </div>
+          {step1Error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+              {step1Error}
+            </div>
+          )}
+          <OtpInput
+            value={otpDigits}
+            onChange={setOtpDigits}
+            onComplete={handleOtpComplete}
+            error={step2Error}
+            disabled={confirmLoading}
+          />
+          {codeExpiresAt != null && (
+            <p className="text-center text-xs text-text-muted">
+              Код действителен 10 минут
+            </p>
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            fullWidth
+            disabled={resendCooldown > 0 || registerLoading}
+            onClick={handleResend}
+          >
+            {resendCooldown > 0
+              ? `Отправить повторно (${resendCooldown} с)`
+              : "Отправить повторно"}
+          </Button>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={resetToStep1} className="flex-1">
+              Назад
+            </Button>
+            <Button type="submit" isLoading={confirmLoading} disabled={otpDigits.join("").length !== OTP_LENGTH} className="flex-1">
+              Подтвердить
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <form onSubmit={handleStep1Submit} className="space-y-4">
+          <p className="text-sm text-text-muted">
+            Тариф: {tariffName} — {formatPrice(tariffPrice)}
+          </p>
+          {step1Error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400">
+              {step1Error}
+            </div>
+          )}
+          <Input
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="example@mail.ru"
+          />
+          <Input
+            label="ФИО"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Иванов Иван Иванович"
+          />
+          <Input
+            label="Место работы"
+            value={workplace}
+            onChange={(e) => setWorkplace(e.target.value)}
+            placeholder="Клиника"
+          />
+          <Input
+            label="Специализация"
+            value={specialization}
+            onChange={(e) => setSpecialization(e.target.value)}
+            placeholder="Трихология"
+          />
+          <Button type="submit" fullWidth isLoading={registerLoading}>
+            Продолжить
+          </Button>
+        </form>
       )}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          placeholder="example@mail.ru"
-        />
-        <Input
-          label="ФИО"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          required
-          placeholder="Иванов Иван Иванович"
-        />
-        <Input
-          label="Место работы"
-          value={workplace}
-          onChange={(e) => setWorkplace(e.target.value)}
-          placeholder="Клиника"
-        />
-        <Input
-          label="Специализация"
-          value={specialization}
-          onChange={(e) => setSpecialization(e.target.value)}
-          placeholder="Трихология"
-        />
-        <Button type="submit" fullWidth isLoading={isLoading}>
-          Зарегистрироваться
-        </Button>
-      </form>
     </Modal>
   );
 }
@@ -188,22 +397,32 @@ function GuestModal({
 export default function EventDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
 
   const { data: event, isLoading, error } = useEvent(slug);
   const registerMutation = useEventRegisterMutation(event?.id ?? "");
+  const confirmMutation = useConfirmGuestMutation(event?.id ?? "");
 
   const [showGuestModal, setShowGuestModal] = useState(false);
+  const [selectedTariffId, setSelectedTariffId] = useState<string | null>(null);
   const [registrationResult, setRegistrationResult] = useState<EventRegistrationResponse | null>(null);
+  const [step1Error, setStep1Error] = useState<string | null>(null);
+  const [step2Error, setStep2Error] = useState<string | null>(null);
 
   const isRegistered = !!event?.user_registration?.registration_id;
 
+  const selectedTariff = event?.tariffs?.find((t) => t.id === selectedTariffId);
+
   const handleRegister = async (tariffId: string) => {
     if (!isAuthenticated) {
+      setSelectedTariffId(tariffId);
+      setStep1Error(null);
+      setStep2Error(null);
       setShowGuestModal(true);
       return;
     }
 
+    setStep1Error(null);
     try {
       const result = await registerMutation.mutateAsync({
         tariff_id: tariffId,
@@ -214,44 +433,72 @@ export default function EventDetailPage() {
         window.location.href = result.payment_url;
       } else if (result.action) {
         setRegistrationResult(result);
+        setSelectedTariffId(tariffId);
         setShowGuestModal(true);
       } else {
         toast.success("Вы успешно зарегистрированы!");
       }
-    } catch {
-      toast.error("Ошибка регистрации. Попробуйте ещё раз.");
+    } catch (err) {
+      toast.error(getRegistrationErrorMessage(err));
     }
   };
 
-  const handleGuestSubmit = async (data: {
+  const handleGuestStep1Submit = async (data: {
     email: string;
-    full_name: string;
-    workplace: string;
-    specialization: string;
+    guest_full_name?: string;
+    guest_workplace?: string;
+    guest_specialization?: string;
   }) => {
-    if (!event?.tariffs[0]) return;
-
+    if (!selectedTariffId || !event?.id) return;
+    setStep1Error(null);
     try {
       const result = await registerMutation.mutateAsync({
-        tariff_id: event.tariffs[0].id,
+        tariff_id: selectedTariffId,
         idempotency_key: generateIdempotencyKey(),
         guest_email: data.email,
-        guest_full_name: data.full_name,
-        guest_workplace: data.workplace,
-        guest_specialization: data.specialization,
+        guest_full_name: data.guest_full_name,
+        guest_workplace: data.guest_workplace,
+        guest_specialization: data.guest_specialization,
       });
 
       if (result.payment_url) {
         window.location.href = result.payment_url;
       } else if (result.action) {
         setRegistrationResult(result);
-        toast.info("Проверьте почту для подтверждения");
       } else {
         toast.success("Вы успешно зарегистрированы!");
         setShowGuestModal(false);
       }
-    } catch {
-      toast.error("Ошибка регистрации");
+    } catch (err) {
+      setStep1Error(getRegistrationErrorMessage(err));
+    }
+  };
+
+  const handleGuestStep2Submit = async (data: { email: string; code: string }) => {
+    if (!selectedTariffId || !event?.id) return;
+    setStep2Error(null);
+    try {
+      const result = await confirmMutation.mutateAsync({
+        email: data.email,
+        code: data.code,
+        tariff_id: selectedTariffId,
+        idempotency_key: generateIdempotencyKey(),
+      });
+
+      if (result.access_token) {
+        await login(result.access_token);
+        if (result.refresh_token) {
+          sessionStorage.setItem("refresh_token", result.refresh_token);
+        }
+      }
+      if (result.payment_url) {
+        window.location.href = result.payment_url;
+      } else {
+        toast.success("Вы успешно зарегистрированы!");
+        setShowGuestModal(false);
+      }
+    } catch (err) {
+      setStep2Error(getRegistrationErrorMessage(err));
     }
   };
 
@@ -449,14 +696,30 @@ export default function EventDetailPage() {
         )}
       </main>
 
-      <GuestModal
-        isOpen={showGuestModal}
-        onClose={() => setShowGuestModal(false)}
-        onSubmit={handleGuestSubmit}
-        isLoading={registerMutation.isPending}
-        actionType={registrationResult?.action ?? null}
-        maskedEmail={registrationResult?.masked_email ?? null}
-      />
+      {selectedTariff && (
+        <GuestModal
+          isOpen={showGuestModal}
+          onClose={() => {
+            setShowGuestModal(false);
+            setSelectedTariffId(null);
+            setRegistrationResult(null);
+            setStep1Error(null);
+            setStep2Error(null);
+          }}
+          eventId={event.id}
+          selectedTariffId={selectedTariffId!}
+          tariffName={selectedTariff.name}
+          tariffPrice={selectedTariff.price}
+          onStep1Submit={handleGuestStep1Submit}
+          onStep2Submit={handleGuestStep2Submit}
+          registerLoading={registerMutation.isPending}
+          confirmLoading={confirmMutation.isPending}
+          actionType={registrationResult?.action ?? null}
+          maskedEmail={registrationResult?.masked_email ?? null}
+          step1Error={step1Error}
+          step2Error={step2Error}
+        />
+      )}
 
       <Footer />
     </div>
