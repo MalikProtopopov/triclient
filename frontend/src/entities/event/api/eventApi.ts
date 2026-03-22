@@ -18,8 +18,8 @@ export const eventApi = {
     apiClient.get(API_ENDPOINTS.EVENTS.BY_SLUG(slug)),
 
   register: (eventId: string, data: EventRegistrationRequest): Promise<EventRegistrationResponse> =>
-    apiClient.post(API_ENDPOINTS.EVENTS.PUBLIC_REGISTER(eventId), data),
+    apiClient.post(API_ENDPOINTS.EVENTS.REGISTER(eventId), data),
 
   confirmGuest: (eventId: string, data: ConfirmGuestRegistrationRequest): Promise<EventRegistrationResponse> =>
-    apiClient.post(API_ENDPOINTS.EVENTS.PUBLIC_CONFIRM_GUEST(eventId), data),
+    apiClient.post(API_ENDPOINTS.EVENTS.CONFIRM_GUEST(eventId), data),
 };
