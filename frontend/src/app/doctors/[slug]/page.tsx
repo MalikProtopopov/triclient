@@ -11,6 +11,11 @@ import { Footer } from "@/widgets/footer";
 import { Card, SkeletonCard, DocumentContentBlockRenderer } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 
+const BOARD_ROLE_LABELS: Record<string, string> = {
+  president: "Президент",
+  pravlenie: "Член правления",
+};
+
 function getInitials(firstName: string, lastName: string): string {
   const first = firstName?.charAt(0) ?? "";
   const last = lastName?.charAt(0) ?? "";
@@ -110,8 +115,25 @@ export default function DoctorProfilePage() {
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-text-primary">{fullName}</h1>
               <p className="mt-2 text-text-secondary">{doctor.specialization}</p>
-              {doctor.academic_degree && (
-                <p className="mt-1 text-accent">{doctor.academic_degree}</p>
+              {(doctor.board_role || doctor.academic_degree) && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {doctor.board_role && (
+                    <span
+                      className="inline-block rounded-full px-3 py-1 text-xs font-medium text-[#4a4a4a]"
+                      style={{ background: "rgba(237,190,204,0.25)" }}
+                    >
+                      {BOARD_ROLE_LABELS[doctor.board_role]}
+                    </span>
+                  )}
+                  {doctor.academic_degree && (
+                    <span
+                      className="inline-block rounded-full px-3 py-1 text-xs font-medium text-accent"
+                      style={{ background: "rgba(237,190,204,0.25)" }}
+                    >
+                      {doctor.academic_degree}
+                    </span>
+                  )}
+                </div>
               )}
               <div className="mt-2 flex items-center gap-2 text-text-muted">
                 <MapPin className="h-4 w-4 shrink-0" />

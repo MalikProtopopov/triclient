@@ -4,6 +4,8 @@ import type {
   ContentBlockPublicNested,
 } from "@/shared/types";
 
+export type BoardRole = "president" | "pravlenie";
+
 export interface DoctorResponseSchema {
   id: string;
   first_name: string;
@@ -22,6 +24,7 @@ export interface DoctorResponseSchema {
   is_active: boolean;
   seo: SeoMeta | null;
   content_blocks: ContentBlockPublicNested[];
+  board_role: BoardRole | null;
 }
 
 export type DoctorListResponseSchema = PaginatedResponse<DoctorResponseSchema>;
@@ -31,6 +34,7 @@ export interface DoctorFilters {
   city_slug?: string;
   specialization?: string;
   search?: string;
+  board_role?: BoardRole[];
   limit?: number;
   offset?: number;
 }

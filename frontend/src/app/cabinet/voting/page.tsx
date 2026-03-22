@@ -1,19 +1,44 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Vote } from "lucide-react";
+import { Check, Vote, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 import { AxiosError } from "axios";
 
-import { useActiveVoting, useVoteMutation } from "@/entities/voting";
+import {
+  useActiveVoting,
+  useVoteMutation,
+  votingKeys,
+} from "@/entities/voting";
 import type { ApiError } from "@/entities/auth";
+import { useQueryClient } from "@tanstack/react-query";
+import { ROUTES } from "@/shared/config";
 import { Card, Button, Modal, EmptyState, PageLoader } from "@/shared/ui";
 
+const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+};
+
+function formatVotingPeriod(startsAt: string, endsAt: string): string {
+  return `${new Date(startsAt).toLocaleDateString("ru-RU", DATE_OPTIONS)} — ${new Date(endsAt).toLocaleDateString("ru-RU", DATE_OPTIONS)}`;
+}
+
 export default function CabinetVotingPage() {
+  const queryClient = useQueryClient();
   const { data: voting, isLoading } = useActiveVoting();
   const voteMutation = useVoteMutation(voting?.id ?? "");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showForbiddenBanner, setShowForbiddenBanner] = useState(false);
+
+  const sortedCandidates = [...(voting?.candidates ?? [])].sort(
+    (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+  );
 
   const handleVote = () => {
     if (!selectedId || !voting) return;
@@ -25,12 +50,23 @@ export default function CabinetVotingPage() {
       },
       onError: (error) => {
         const axiosErr = error as AxiosError<ApiError>;
+        const status = axiosErr.response?.status;
         const code = axiosErr.response?.data?.error?.code;
-        if (code === "ALREADY_VOTED") {
-          toast.error("Вы уже проголосовали");
-        } else {
-          toast.error("Не удалось проголосовать");
+
+        if (status === 409 || code === "ALREADY_VOTED") {
+          toast.error("Вы уже проголосовали в этом голосовании");
+          queryClient.invalidateQueries({ queryKey: votingKeys.active() });
+          voteMutation.reset();
+          return;
         }
+        if (status === 403) {
+          toast.error(
+            "Только активные члены ассоциации могут голосовать. Проверьте статус подписки.",
+          );
+          setShowForbiddenBanner(true);
+          return;
+        }
+        toast.error("Не удалось проголосовать");
       },
     });
   };
@@ -82,6 +118,26 @@ export default function CabinetVotingPage() {
         Голосование
       </h1>
 
+      {showForbiddenBanner && (
+        <Card className="max-w-2xl border-amber-200/50 bg-amber-50/50 dark:border-amber-900/30 dark:bg-amber-950/20">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500" />
+            <div>
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                Только активные члены ассоциации с действующей подпиской могут
+                участвовать в голосовании.
+              </p>
+              <Link
+                href={ROUTES.CABINET_PAYMENTS}
+                className="mt-2 inline-block text-sm font-medium text-amber-700 hover:underline dark:text-amber-300"
+              >
+                Оформить подписку →
+              </Link>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <Card className="max-w-2xl">
         <div className="space-y-6">
           <div>
@@ -94,17 +150,12 @@ export default function CabinetVotingPage() {
               </p>
             )}
             <p className="text-sm text-text-muted">
-              Голосование до:{" "}
-              {new Date(voting.ends_at).toLocaleDateString("ru-RU", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              {formatVotingPeriod(voting.starts_at, voting.ends_at)}
             </p>
           </div>
 
           <div className="space-y-3">
-            {voting.candidates.map((c) => (
+            {sortedCandidates.map((c) => (
               <label
                 key={c.id}
                 className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-bg p-4 transition-colors hover:bg-bg-secondary/50 has-[:checked]:border-accent has-[:checked]:bg-accent/5"

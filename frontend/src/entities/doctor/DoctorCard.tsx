@@ -8,6 +8,11 @@ import { cn } from "@/shared/lib";
 
 import type { DoctorResponseSchema } from "./types";
 
+const BOARD_ROLE_LABELS: Record<NonNullable<DoctorResponseSchema["board_role"]>, string> = {
+  president: "Президент",
+  pravlenie: "Член правления",
+};
+
 function getInitials(doctor: DoctorResponseSchema): string {
   const first = doctor.first_name?.charAt(0) ?? "";
   const last = doctor.last_name?.charAt(0) ?? "";
@@ -60,14 +65,24 @@ export const DoctorCard = ({ doctor, className }: DoctorCardProps) => {
               <h3 className="truncate font-heading text-sm font-semibold leading-snug text-text-primary">
                 {fullName}
               </h3>
-              {doctor.academic_degree && (
-                <span
-                  className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-[#4a4a4a]"
-                  style={{ background: "rgba(237,190,204,0.25)" }}
-                >
-                  {doctor.academic_degree}
-                </span>
-              )}
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                {doctor.board_role && (
+                  <span
+                    className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-[#4a4a4a]"
+                    style={{ background: "rgba(237,190,204,0.25)" }}
+                  >
+                    {BOARD_ROLE_LABELS[doctor.board_role]}
+                  </span>
+                )}
+                {doctor.academic_degree && (
+                  <span
+                    className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-[#4a4a4a]"
+                    style={{ background: "rgba(237,190,204,0.25)" }}
+                  >
+                    {doctor.academic_degree}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

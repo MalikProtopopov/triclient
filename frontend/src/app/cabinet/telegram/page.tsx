@@ -121,17 +121,14 @@ export default function CabinetTelegramPage() {
               Привяжите Telegram для: уведомлений, доступа к закрытому каналу
             </p>
 
-            {codeData?.instruction && (
+            {codeData ? (
               <p className="mb-4 text-sm text-text-secondary">
-                {codeData.instruction}
+                Нажмите кнопку «Открыть Telegram» — код отправится автоматически
               </p>
-            )}
-
-            {!codeData?.instruction && (
+            ) : (
               <ol className="mb-6 list-decimal space-y-2 pl-5 text-left text-sm text-text-secondary">
                 <li>Нажмите «Получить код»</li>
-                <li>Перейдите в Telegram-бота</li>
-                <li>Отправьте код боту</li>
+                <li>Нажмите «Открыть Telegram» — код отправится автоматически</li>
               </ol>
             )}
 
@@ -174,13 +171,17 @@ export default function CabinetTelegramPage() {
                     Копировать
                   </Button>
                   <a
-                    href={codeData.bot_link}
+                    href={
+                      codeData.bot_link.includes("start=")
+                        ? codeData.bot_link
+                        : `${codeData.bot_link}${codeData.bot_link.includes("?") ? "&" : "?"}start=${codeData.auth_code}`
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <Button variant="outline">
                       <ExternalLink className="mr-1.5 h-4 w-4" />
-                      Открыть Telegram-бота
+                      Открыть Telegram
                     </Button>
                   </a>
                 </div>
