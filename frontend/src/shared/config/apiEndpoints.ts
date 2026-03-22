@@ -57,6 +57,8 @@ export const API_ENDPOINTS = {
     PAY: "/api/v1/subscriptions/pay",
     PAYMENTS: "/api/v1/subscriptions/payments",
     RECEIPT: (id: string) => `/api/v1/subscriptions/payments/${id}/receipt`,
+    PAYMENT_STATUS: (id: string) =>
+      `/api/v1/subscriptions/payments/${id}/status`,
   },
   COLLEAGUES: "/api/v1/colleagues",
   CERTIFICATES: {

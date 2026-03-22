@@ -31,3 +31,14 @@ export interface ReceiptResponse {
   amount: number;
   status: string;
 }
+
+export interface PaymentStatusResponse {
+  payment_id: string;
+  status: "pending" | "succeeded" | "failed" | "expired";
+  product_type: "entry_fee" | "subscription" | "event";
+  amount: number;
+  created_at: string;
+  paid_at: string | null;
+  event_id: string | null;
+  event_title: string | null;
+}

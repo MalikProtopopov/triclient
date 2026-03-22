@@ -1,7 +1,11 @@
 import { API_ENDPOINTS } from "@/shared/config";
 import { apiClient } from "@/shared/api";
 
-import type { PaymentListResponse, ReceiptResponse } from "../types";
+import type {
+  PaymentListResponse,
+  PaymentStatusResponse,
+  ReceiptResponse,
+} from "../types";
 
 export const paymentApi = {
   getList: (params?: {
@@ -12,4 +16,7 @@ export const paymentApi = {
 
   getReceipt: (id: string): Promise<ReceiptResponse> =>
     apiClient.get(API_ENDPOINTS.SUBSCRIPTIONS.RECEIPT(id)),
+
+  getStatus: (paymentId: string): Promise<PaymentStatusResponse> =>
+    apiClient.get(API_ENDPOINTS.SUBSCRIPTIONS.PAYMENT_STATUS(paymentId)),
 };
