@@ -89,12 +89,13 @@ export interface UploadPhotoResponse {
 }
 
 export interface ProfileEvent {
-  id: string;
+  registration_id: string;
   event_id: string;
-  event_title: string;
   event_slug: string;
+  title: string;
   event_date: string;
-  tariff_name: string | null;
   status: "pending" | "confirmed" | "cancelled";
-  registered_at: string;
+  applied_price: number;
+  is_member_price: boolean;
+  tariff_name: string | null;
 }

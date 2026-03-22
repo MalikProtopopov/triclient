@@ -12,10 +12,12 @@ export const certificateApi = {
     return response.data;
   },
 
-  download: async (id: string): Promise<string> => {
-    const data = await apiClient.get<{ redirect_url: string }>(
+  /** Скачивает сертификат как blob (запрос с Bearer через apiClient) */
+  downloadBlob: async (id: string): Promise<Blob> => {
+    const blob = await apiClient.get<Blob>(
       API_ENDPOINTS.CERTIFICATES.DOWNLOAD(id),
+      { responseType: "blob" },
     );
-    return data.redirect_url;
+    return blob;
   },
 };

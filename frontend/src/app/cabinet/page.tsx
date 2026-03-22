@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   MapPin,
@@ -65,7 +66,7 @@ export default function CabinetPage() {
               <tbody>
                 {registrations.map((reg) => (
                   <tr
-                    key={reg.id}
+                    key={reg.registration_id}
                     className="border-b border-border last:border-0"
                   >
                     <td className="px-4 py-3 text-sm text-text-primary">
@@ -73,7 +74,7 @@ export default function CabinetPage() {
                         href={ROUTES.EVENT(reg.event_slug)}
                         className="hover:text-accent hover:underline"
                       >
-                        {reg.event_title}
+                        {reg.title}
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-sm text-text-secondary">
@@ -114,7 +115,17 @@ export default function CabinetPage() {
         <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {events.map((event) => (
             <Card key={event.id} hover className="overflow-hidden p-0">
-              <div className="aspect-video w-full bg-gradient-to-br from-metal-light to-accent/20" />
+              <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-metal-light to-accent/20">
+                {event.cover_image_url ? (
+                  <Image
+                    src={event.cover_image_url}
+                    alt={event.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                ) : null}
+              </div>
               <div className="p-4">
                 <p className="mb-1 text-sm text-text-muted">
                   {formatDate(event.event_date)}

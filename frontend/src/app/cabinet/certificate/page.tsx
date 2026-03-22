@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { Award, Download, Check, X, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
-import { useCertificates, certificateApi } from "@/entities/certificate";
+import {
+  useCertificates,
+  certificateApi,
+  type Certificate,
+} from "@/entities/certificate";
 import { useSubscriptionStatus } from "@/entities/subscription";
 import { Card, Button, Badge, EmptyState, PageLoader } from "@/shared/ui";
 import { formatShortDate } from "@/shared/lib/format";
@@ -13,14 +18,18 @@ export default function CabinetCertificatePage() {
   const { data: certificates, isLoading } = useCertificates();
   const { data: subscription, isLoading: subLoading } = useSubscriptionStatus();
 
-  const handleDownload = (downloadUrl: string) => {
-    window.open(downloadUrl, "_blank");
-  };
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const handleDownloadById = async (id: string) => {
+  const handleDownload = async (cert: Certificate) => {
+    setDownloadingId(cert.id);
     try {
-      const url = await certificateApi.download(id);
-      window.open(url, "_blank");
+      const blob = await certificateApi.downloadBlob(cert.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${cert.certificate_number}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
       const status = (err as AxiosError)?.response?.status;
       if (status === 403) {
@@ -28,6 +37,8 @@ export default function CabinetCertificatePage() {
       } else {
         toast.error("Не удалось скачать сертификат");
       }
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -112,14 +123,11 @@ export default function CabinetCertificatePage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  cert.download_url
-                    ? handleDownload(cert.download_url)
-                    : handleDownloadById(cert.id)
-                }
+                onClick={() => handleDownload(cert)}
+                disabled={downloadingId === cert.id}
               >
                 <Download className="mr-1.5 h-4 w-4" />
-                Скачать PDF
+                {downloadingId === cert.id ? "Загрузка…" : "Скачать PDF"}
               </Button>
               {cert.verify_url && (
                 <Button
