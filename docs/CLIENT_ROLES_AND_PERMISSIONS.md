@@ -19,7 +19,7 @@
 | payments    | Оплаты и подписка   | ✓      |      |
 | events      | Мероприятия         | ✓      | ✓    |
 | certificate | Сертификат          | ✓      |      |
-| telegram    | Telegram            | ✓      |      |
+| telegram    | Telegram            | ✓      | ✓    |
 | settings    | Настройки           | ✓      | ✓    |
 | voting      | Голосование         | ✓      |      |
 
@@ -73,6 +73,7 @@
   "sidebar_sections": [
     "cabinet",
     "events",
+    "telegram",
     "settings"
   ]
 }

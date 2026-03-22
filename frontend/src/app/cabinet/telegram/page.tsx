@@ -1,13 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Check, Copy, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { AxiosError } from "axios";
 
-import { useTelegramBinding, useGenerateCode } from "@/entities/telegram";
+import {
+  useTelegramBinding,
+  useGenerateCode,
+  telegramKeys,
+} from "@/entities/telegram";
 import { Card, Button, PageLoader } from "@/shared/ui";
 
 export default function CabinetTelegramPage() {
+  const queryClient = useQueryClient();
   const { data: binding, isLoading } = useTelegramBinding();
   const generateCodeMutation = useGenerateCode();
   const [codeData, setCodeData] = useState<{
@@ -42,7 +49,15 @@ export default function CabinetTelegramPage() {
       onSuccess: (data) => {
         setCodeData(data);
       },
-      onError: () => toast.error("Не удалось получить код"),
+      onError: (err) => {
+        const status = (err as AxiosError)?.response?.status;
+        if (status === 409) {
+          queryClient.invalidateQueries({ queryKey: telegramKeys.binding() });
+          toast.info("Telegram уже привязан");
+        } else {
+          toast.error("Не удалось получить код");
+        }
+      },
     });
   };
 
