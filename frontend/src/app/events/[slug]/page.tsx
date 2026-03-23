@@ -47,7 +47,6 @@ function getRegistrationErrorMessage(error: unknown): string {
   if (/not found/i.test(msg)) return "Мероприятие или тариф не найдены";
   return msg || "Ошибка регистрации. Попробуйте ещё раз.";
 }
-}
 
 function isAlreadyRegisteredError(error: unknown): boolean {
   const status = (error as { response?: { status?: number } })?.response?.status;
