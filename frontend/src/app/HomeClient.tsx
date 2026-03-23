@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowRight, Check, Calendar, MapPin } from "lucide-react";
+import { ArrowRight, Check, Calendar, MapPin, Star, Users, BookOpen } from "lucide-react";
 
 import { useEvents } from "@/entities/event";
 import { useArticles } from "@/entities/article";
@@ -13,6 +13,8 @@ import { Button } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
 import { useAuth } from "@/providers/AuthProvider";
+import { useGSAP } from "@/shared/lib/useGSAP";
+import { staggerReveal, parallaxY } from "@/shared/lib/animations";
 
 const BENEFITS = [
   "Публикация в каталоге верифицированных врачей",
@@ -28,6 +30,122 @@ const STATS = [
   { num: "XXII", label: "конференции" },
   { num: "EHRS", label: "международный партнёр" },
 ];
+
+const HOME_MISSION = [
+  {
+    num: "01",
+    icon: Star,
+    title: "Стандарты качества",
+    desc: "Строгая сертификация и контроль квалификации. Только верифицированные специалисты попадают в открытый каталог.",
+    metric: "500+",
+    metricLabel: "врачей в каталоге",
+    tag: "Сертификация",
+    accentColor: "#edbecc",
+    accentBg: "rgba(237,190,204,0.15)",
+  },
+  {
+    num: "02",
+    icon: Users,
+    title: "Профессиональное сообщество",
+    desc: "Закрытый Telegram-канал, обмен клиническими случаями, профессиональная поддержка коллег.",
+    metric: "14",
+    metricLabel: "лет объединяем врачей",
+    tag: "Сообщество",
+    accentColor: "#5BB5A2",
+    accentBg: "rgba(91,181,162,0.12)",
+  },
+  {
+    num: "03",
+    icon: BookOpen,
+    title: "Образование и развитие",
+    desc: "Ежегодные конференции, семинары и вебинары по льготным ценам. Доступ к записям и мастер-классам.",
+    metric: "30+",
+    metricLabel: "городов присутствия",
+    tag: "Обучение",
+    accentColor: "#edbecc",
+    accentBg: "rgba(237,190,204,0.15)",
+  },
+];
+
+function HomeMissionSection() {
+  const ref = useGSAP((_ctx, el) => {
+    staggerReveal("[data-hm-card]", el, { y: 50, stagger: 0.15, duration: 0.8 });
+    parallaxY("[data-hm-num]", el, 20);
+  });
+
+  return (
+    <section ref={ref} className="py-20 lg:py-28">
+      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+        <div className="mb-14 flex items-end justify-between">
+          <div>
+            <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted">
+              01 · Миссия
+            </p>
+            <h2 className="font-heading text-4xl font-bold text-text-primary lg:text-5xl">
+              Зачем нужна ассоциация
+            </h2>
+          </div>
+          <Link
+            href={ROUTES.DOCUMENTS}
+            className="hidden text-sm text-text-muted transition-colors hover:text-text-primary lg:block"
+          >
+            Документы организации →
+          </Link>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {HOME_MISSION.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.num}
+                data-hm-card
+                className="group relative min-h-[280px] overflow-hidden rounded-2xl border border-border bg-bg-secondary p-8 transition-all duration-500 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lg lg:p-10"
+              >
+                <div
+                  className="absolute left-0 top-0 h-1 w-full"
+                  style={{ background: `linear-gradient(90deg, ${item.accentColor}, transparent)` }}
+                />
+                <div
+                  data-hm-num
+                  className="pointer-events-none absolute -right-2 -top-4 font-heading text-[100px] font-bold leading-none select-none"
+                  style={{ color: `${item.accentColor}12` }}
+                >
+                  {item.num}
+                </div>
+                <div className="relative">
+                  <div
+                    className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110"
+                    style={{ background: item.accentBg }}
+                  >
+                    <Icon className="h-7 w-7" style={{ color: item.accentColor }} />
+                  </div>
+                  <h3 className="mb-2 font-heading text-xl font-semibold text-text-primary lg:text-2xl">
+                    {item.title}
+                  </h3>
+                  <p className="mb-6 max-w-xl text-sm leading-relaxed text-text-secondary lg:text-base">
+                    {item.desc}
+                  </p>
+                  <div className="mt-auto flex items-end justify-between border-t border-border pt-5">
+                    <div>
+                      <div className="font-heading text-3xl font-bold" style={{ color: item.accentColor }}>
+                        {item.metric}
+                      </div>
+                      <div className="mt-0.5 text-xs text-text-muted">{item.metricLabel}</div>
+                    </div>
+                    <span className="inline-block rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-text-primary">
+                      {item.tag}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function HomeClient() {
   const { isAuthenticated, user } = useAuth();
@@ -157,78 +275,8 @@ export default function HomeClient() {
           </div>
         </section>
 
-        {/* ══════════ МИССИЯ (список, не grid) ══════════ */}
-        <section className="py-20 lg:py-28">
-          <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <div className="mb-14 flex items-end justify-between">
-              <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted">
-                  01 · Миссия
-                </p>
-                <h2 className="font-heading text-4xl font-bold text-text-primary lg:text-5xl">
-                  Зачем нужна ассоциация
-                </h2>
-              </div>
-              <Link
-                href={ROUTES.DOCUMENTS}
-                className="hidden text-sm text-text-muted transition-colors hover:text-text-primary lg:block"
-              >
-                Документы организации →
-              </Link>
-            </div>
-
-            <div className="space-y-0 divide-y divide-border">
-              {[
-                {
-                  num: "01",
-                  title: "Стандарты качества",
-                  desc: "Строгая сертификация и контроль квалификации обеспечивают высочайший уровень медицинской помощи. Только верифицированные специалисты попадают в открытый каталог.",
-                  tag: "Сертификация",
-                },
-                {
-                  num: "02",
-                  title: "Профессиональное сообщество",
-                  desc: "Закрытый Telegram-канал, обмен клиническими случаями, профессиональная поддержка коллег. Ассоциация — это живое сообщество, а не формальная структура.",
-                  tag: "Сообщество",
-                },
-                {
-                  num: "03",
-                  title: "Образование и развитие",
-                  desc: "Ежегодные конференции, семинары и вебинары по льготным ценам. Доступ к записям докладов, мастер-классам и фотоархивам прошедших мероприятий.",
-                  tag: "Обучение",
-                },
-              ].map((item) => (
-                <motion.div
-                  key={item.num}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.45 }}
-                  className="group grid gap-6 py-10 lg:grid-cols-[96px_1fr_220px] lg:items-center"
-                >
-                  <div
-                    className="font-heading text-6xl font-bold leading-none text-border-light transition-colors duration-500 group-hover:text-accent/30 lg:text-7xl"
-                  >
-                    {item.num}
-                  </div>
-                  <div>
-                    <h3 className="mb-2 font-heading text-xl font-semibold text-text-primary lg:text-2xl">
-                      {item.title}
-                    </h3>
-                    <p className="max-w-xl text-sm leading-relaxed text-text-secondary lg:text-base">
-                      {item.desc}
-                    </p>
-                  </div>
-                  <div className="lg:text-right">
-                    <span className="inline-block rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-text-primary">
-                      {item.tag}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* ══════════ МИССИЯ ══════════ */}
+        <HomeMissionSection />
 
         {/* ══════════ CTA (асимметричный split) ══════════ */}
         <section className="overflow-hidden bg-bg-secondary">

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { MapPin, ArrowUpRight } from "lucide-react";
 
 import { ROUTES } from "@/shared/config";
 import { cn } from "@/shared/lib";
@@ -22,77 +23,77 @@ function getInitials(doctor: DoctorResponseSchema): string {
 interface DoctorCardProps {
   doctor: DoctorResponseSchema;
   className?: string;
+  featured?: boolean;
 }
 
-export const DoctorCard = ({ doctor, className }: DoctorCardProps) => {
+export const DoctorCard = ({ doctor, className, featured }: DoctorCardProps) => {
   const initials = getInitials(doctor);
   const fullName = [doctor.last_name, doctor.first_name, doctor.middle_name]
     .filter(Boolean)
     .join(" ");
 
   return (
-    <Link href={ROUTES.DOCTOR(doctor.slug || doctor.id)}>
+    <Link href={ROUTES.DOCTOR(doctor.slug || doctor.id)} className="block h-full">
       <div
         className={cn(
-          "group relative overflow-hidden rounded-2xl border border-border bg-bg-secondary transition-all duration-300 hover:border-accent/40 hover:shadow-[0_4px_24px_rgba(237,190,204,0.15)]",
+          "group relative h-full overflow-hidden rounded-2xl border border-border bg-bg-secondary transition-all duration-500",
+          "hover:border-accent/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)]",
+          "hover:-translate-y-1",
           className,
         )}
+        style={{ perspective: "800px" }}
       >
-        {/* Accent линия сверху — bookmark эффект */}
-        <div
-          className="absolute left-0 top-0 h-[2px] w-0 transition-all duration-500 group-hover:w-full"
-          style={{ background: "#edbecc" }}
-        />
-
-        <div className="p-5">
-          {/* Аватар + имя в одной строке */}
-          <div className="flex items-start gap-4">
-            {doctor.photo_url ? (
-              <img
-                src={doctor.photo_url}
-                alt={fullName}
-                className="h-14 w-14 flex-shrink-0 rounded-xl object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            ) : (
-              <div
-                className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl text-base font-semibold text-[#4a4a4a] transition-transform duration-300 group-hover:scale-105"
-                style={{ background: "linear-gradient(135deg, rgba(237,190,204,0.25), rgba(237,190,204,0.1))" }}
-              >
+        <div className="relative overflow-hidden" style={{ height: featured ? 280 : 200 }}>
+          {doctor.photo_url ? (
+            <Image
+              src={doctor.photo_url}
+              alt={fullName}
+              fill
+              className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.06]"
+              sizes={featured ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent/20 to-accent/5">
+              <span className="font-heading text-4xl font-bold text-accent/40">
                 {initials}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <h3 className="truncate font-heading text-sm font-semibold leading-snug text-text-primary">
-                {fullName}
-              </h3>
-              <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                {doctor.board_role && (
-                  <span
-                    className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-[#4a4a4a]"
-                    style={{ background: "rgba(237,190,204,0.25)" }}
-                  >
-                    {BOARD_ROLE_LABELS[doctor.board_role]}
-                  </span>
-                )}
-                {doctor.academic_degree && (
-                  <span
-                    className="inline-block rounded-full px-2 py-0.5 text-[10px] font-medium text-[#4a4a4a]"
-                    style={{ background: "rgba(237,190,204,0.25)" }}
-                  >
-                    {doctor.academic_degree}
-                  </span>
-                )}
-              </div>
+              </span>
             </div>
+          )}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+
+          {(doctor.board_role || doctor.academic_degree) && (
+            <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+              {doctor.board_role && (
+                <span className="rounded-lg bg-accent/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                  {BOARD_ROLE_LABELS[doctor.board_role]}
+                </span>
+              )}
+              {doctor.academic_degree && (
+                <span className="rounded-lg bg-white/80 px-2.5 py-1 text-[10px] font-bold text-text-primary backdrop-blur-sm">
+                  {doctor.academic_degree}
+                </span>
+              )}
+            </div>
+          )}
+
+          <div className="absolute bottom-0 left-0 right-0 p-4">
+            <h3 className={cn(
+              "font-heading font-bold leading-tight text-white",
+              featured ? "text-xl" : "text-base",
+            )}>
+              {fullName}
+            </h3>
           </div>
+        </div>
 
-          {/* Специализация */}
-          <p className="mt-3 text-xs text-text-secondary line-clamp-1">
-            {doctor.specialization}
-          </p>
+        <div className="relative p-4">
+          {doctor.specialization && (
+            <p className="text-xs leading-relaxed text-text-secondary line-clamp-2">
+              {doctor.specialization}
+            </p>
+          )}
 
-          {/* Город + клиника */}
-          <div className="mt-2 space-y-1">
+          <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs text-text-muted">
               <MapPin className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">
@@ -100,15 +101,9 @@ export const DoctorCard = ({ doctor, className }: DoctorCardProps) => {
                 {doctor.clinic_name && ` · ${doctor.clinic_name}`}
               </span>
             </div>
-          </div>
-
-          {/* CTA — появляется при ховере */}
-          <div className="mt-4 flex items-center justify-between">
-            <div className="h-px flex-1 bg-border-light" />
-            <span className="ml-3 flex items-center gap-1 text-[11px] font-medium text-text-muted transition-all duration-300 group-hover:gap-2 group-hover:text-text-primary">
-              Профиль
-              <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
-            </span>
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-accent/10 transition-all duration-300 group-hover:bg-accent group-hover:text-white">
+              <ArrowUpRight className="h-3.5 w-3.5 text-accent transition-colors group-hover:text-white" />
+            </div>
           </div>
         </div>
       </div>

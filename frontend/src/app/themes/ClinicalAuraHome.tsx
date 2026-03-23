@@ -14,13 +14,15 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import { useEvents } from "@/entities/event";
 import { useArticles } from "@/entities/article";
 import { useAuth } from "@/providers/AuthProvider";
 import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
+import { useGSAP } from "@/shared/lib/useGSAP";
+import { staggerReveal, parallaxY } from "@/shared/lib/animations";
 
 const PINK = "#E8638B";
 const TEAL = "#5BB5A2";
@@ -59,6 +61,110 @@ const sectionReveal = {
   viewport: { once: true, margin: "-80px" },
   transition: { duration: 0.55, ease: "easeOut" as const },
 };
+
+const MISSION_CARDS = [
+  {
+    num: "01",
+    icon: Star,
+    title: "Стандарты качества",
+    desc: "Строгая сертификация и постоянный контроль квалификации. Только верифицированные специалисты попадают в каталог.",
+    metric: "500+",
+    metricLabel: "врачей в каталоге",
+    accent: PINK,
+    accentBg: "#FCE4EC",
+  },
+  {
+    num: "02",
+    icon: Users,
+    title: "Профессиональное сообщество",
+    desc: "Закрытый Telegram-канал, разбор клинических случаев, поддержка коллег. Живое сообщество практиков.",
+    metric: "14",
+    metricLabel: "лет объединяем врачей",
+    accent: TEAL,
+    accentBg: "#E0F2F1",
+  },
+  {
+    num: "03",
+    icon: BookOpen,
+    title: "Образование и конференции",
+    desc: "Ежегодные конференции, семинары и вебинары по льготным ценам. Доступ к записям и мастер-классам.",
+    metric: "30+",
+    metricLabel: "городов присутствия",
+    accent: PINK,
+    accentBg: "#FCE4EC",
+  },
+];
+
+function MissionSection() {
+  const ref = useGSAP((_ctx, el) => {
+    staggerReveal("[data-mission-card]", el, { y: 50, stagger: 0.15, duration: 0.8 });
+    parallaxY("[data-mission-num]", el, 20);
+  });
+
+  return (
+    <section ref={ref} style={{ background: SURFACE, padding: "96px 0" }}>
+      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+        <div className="mb-14 max-w-2xl">
+          <span
+            className="mb-4 inline-block rounded-[6px] px-3 py-1.5 text-xs font-bold uppercase tracking-wider"
+            style={{ background: "#E0F2F1", color: TEAL }}
+          >
+            Миссия
+          </span>
+          <h2 className="font-heading text-4xl font-extrabold text-[#1A1D23] lg:text-5xl">
+            Зачем нужна ассоциация
+          </h2>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {MISSION_CARDS.map((card) => {
+            const Icon = card.icon;
+            return (
+              <div
+                key={card.num}
+                data-mission-card
+                className="group relative min-h-[280px] overflow-hidden rounded-2xl bg-white p-8 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl lg:p-10"
+                style={{ boxShadow: "0 4px 12px -2px rgba(0,0,0,0.06)" }}
+              >
+                <div
+                  className="absolute left-0 top-0 h-1 w-full transition-all duration-500 group-hover:h-1.5"
+                  style={{ background: `linear-gradient(90deg, ${card.accent}, ${card.accent}80)` }}
+                />
+                <div
+                  data-mission-num
+                  className="pointer-events-none absolute -right-2 -top-4 font-heading text-[100px] font-extrabold leading-none select-none transition-colors duration-500 group-hover:opacity-15"
+                  style={{ color: `${card.accent}10` }}
+                >
+                  {card.num}
+                </div>
+                <div className="relative">
+                  <div
+                    className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110"
+                    style={{ background: card.accentBg }}
+                  >
+                    <Icon className="h-7 w-7" style={{ color: card.accent }} />
+                  </div>
+                  <h3 className="font-heading mb-3 text-xl font-bold text-[#1A1D23] lg:text-2xl">
+                    {card.title}
+                  </h3>
+                  <p className="mb-6 text-sm leading-relaxed text-[#6B6F80] lg:text-base">
+                    {card.desc}
+                  </p>
+                  <div className="mt-auto border-t border-[#E2E4EA] pt-5">
+                    <div className="font-heading text-3xl font-extrabold" style={{ color: card.accent }}>
+                      {card.metric}
+                    </div>
+                    <div className="mt-0.5 text-xs text-[#9095A5]">{card.metricLabel}</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 /* ─────────────────────── COMPONENT ─────────────────────── */
 
@@ -255,93 +361,7 @@ export const ClinicalAuraHome = () => {
         </section>
 
         {/* ════════ MISSION ════════ */}
-        <section style={{ background: SURFACE, padding: "96px 0" }}>
-          <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <motion.div {...sectionReveal} className="mb-14 max-w-2xl">
-              <span
-                className="mb-4 inline-block rounded-[6px] px-3 py-1.5 text-xs font-bold uppercase tracking-wider"
-                style={{ background: "#E0F2F1", color: TEAL }}
-              >
-                Миссия
-              </span>
-              <h2 className="font-heading text-4xl font-extrabold text-[#1A1D23] lg:text-5xl">
-                Зачем нужна ассоциация
-              </h2>
-            </motion.div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Large card */}
-              <motion.div
-                {...sectionReveal}
-                className="row-span-2 overflow-hidden rounded-2xl bg-white p-8 lg:p-10"
-                style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.07)" }}
-              >
-                <div
-                  className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl"
-                  style={{ background: "#FCE4EC" }}
-                >
-                  <Star className="h-6 w-6" style={{ color: PINK }} />
-                </div>
-                <h3 className="font-heading mb-3 text-2xl font-bold text-[#1A1D23]">
-                  Стандарты качества
-                </h3>
-                <p className="text-sm leading-relaxed text-[#6B6F80] lg:text-base">
-                  Строгая сертификация и постоянный контроль квалификации
-                  обеспечивают высочайший уровень медицинской помощи. Только
-                  верифицированные специалисты попадают в открытый каталог.
-                  Пациенты получают гарантию профессионализма каждого врача.
-                </p>
-                <div
-                  className="mt-6 h-1 w-16 rounded-full"
-                  style={{ background: PINK }}
-                />
-              </motion.div>
-
-              {/* Small cards */}
-              <motion.div
-                {...sectionReveal}
-                transition={{ ...sectionReveal.transition, delay: 0.1 }}
-                className="overflow-hidden rounded-2xl bg-white p-8"
-                style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.07)" }}
-              >
-                <div
-                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
-                  style={{ background: "#E0F2F1" }}
-                >
-                  <Users className="h-6 w-6" style={{ color: TEAL }} />
-                </div>
-                <h3 className="font-heading mb-2 text-xl font-bold text-[#1A1D23]">
-                  Профессиональное сообщество
-                </h3>
-                <p className="text-sm leading-relaxed text-[#6B6F80]">
-                  Закрытый Telegram-канал, обмен клиническими случаями и
-                  поддержка коллег. Живое сообщество практиков.
-                </p>
-              </motion.div>
-
-              <motion.div
-                {...sectionReveal}
-                transition={{ ...sectionReveal.transition, delay: 0.2 }}
-                className="overflow-hidden rounded-2xl bg-white p-8"
-                style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.07)" }}
-              >
-                <div
-                  className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
-                  style={{ background: "#FCE4EC" }}
-                >
-                  <BookOpen className="h-6 w-6" style={{ color: PINK }} />
-                </div>
-                <h3 className="font-heading mb-2 text-xl font-bold text-[#1A1D23]">
-                  Образование и конференции
-                </h3>
-                <p className="text-sm leading-relaxed text-[#6B6F80]">
-                  Ежегодные конференции, семинары и вебинары по льготным ценам.
-                  Доступ к записям и мастер-классам.
-                </p>
-              </motion.div>
-            </div>
-          </div>
-        </section>
+        <MissionSection />
 
         {/* ════════ CTA / MEMBERSHIP ════════ */}
         <section style={{ padding: "64px 0" }}>
