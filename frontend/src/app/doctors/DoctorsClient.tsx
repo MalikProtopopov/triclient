@@ -171,7 +171,7 @@ function DoctorsContent() {
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
@@ -192,22 +192,11 @@ function DoctorsContent() {
             <>
               <div
                 ref={gridRef}
-                className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4"
               >
-                {doctors.map((doctor, i) => (
-                  <div
-                    key={doctor.id}
-                    data-doctor-card
-                    className={
-                      i === 0 && page === 1
-                        ? "sm:col-span-2 sm:row-span-1 lg:col-span-2"
-                        : ""
-                    }
-                  >
-                    <DoctorCard
-                      doctor={doctor}
-                      featured={i === 0 && page === 1}
-                    />
+                {doctors.map((doctor) => (
+                  <div key={doctor.id} data-doctor-card>
+                    <DoctorCard doctor={doctor} />
                   </div>
                 ))}
               </div>
@@ -271,7 +260,7 @@ export default function DoctorsClient() {
           <Header />
           <main className="flex-1">
             <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <SkeletonCard key={i} />
                 ))}
