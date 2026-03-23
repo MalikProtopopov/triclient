@@ -19,9 +19,12 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+import Image from "next/image";
+
 import { useAuth } from "@/providers/AuthProvider";
-import { usePersonalProfile } from "@/entities/profile";
+import { usePersonalProfile, usePublicProfile } from "@/entities/profile";
 import { ROUTES } from "@/shared/config";
+import { resolvePendingPhotoUrl } from "@/shared/config";
 import { cn } from "@/shared/lib";
 
 interface NavItem {
@@ -52,6 +55,9 @@ export const CabinetSidebar = () => {
   const hasPersonalSection = sidebarSections?.includes("personal") ?? false;
 
   const { data: profile } = usePersonalProfile({ enabled: hasPersonalSection });
+  const { data: publicProfile } = usePublicProfile();
+
+  const photoUrl = resolvePendingPhotoUrl(publicProfile?.photo_url ?? undefined);
 
   const visibleNav = useMemo(() => {
     if (!sidebarSections?.length) return ALL_NAV_ITEMS;
@@ -76,9 +82,21 @@ export const CabinetSidebar = () => {
     <aside className="flex h-full w-60 flex-col border-r border-border bg-bg-secondary">
       <div className="border-b border-border p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-contrast">
-            {initials}
-          </div>
+          {photoUrl ? (
+            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+              <Image
+                src={photoUrl}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="40px"
+              />
+            </div>
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-contrast">
+              {initials}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-text-primary">
               {displayName}

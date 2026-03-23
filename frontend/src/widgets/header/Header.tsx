@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { useAuth } from "@/providers/AuthProvider";
-import { usePublicSettings } from "@/entities/settings";
 import { cn } from "@/shared/lib";
 import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui";
@@ -24,9 +24,6 @@ export const Header = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout } = useAuth();
-  const { data: settings } = usePublicSettings();
-  const siteName = settings?.site_name ?? "Профессиональное общество трихологов";
-
   useEffect(() => {
     const handleScroll = (): void => {
       setIsScrolled(window.scrollY > 0);
@@ -47,13 +44,13 @@ export const Header = () => {
       )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
-        <Link href={ROUTES.HOME} className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent">
-            <span className="text-sm font-bold text-accent-contrast">АТ</span>
-          </div>
-          <span className="hidden text-sm font-semibold text-text-primary sm:block">
-            {siteName}
-          </span>
+        <Link href={ROUTES.HOME} className="relative block h-9 w-32">
+          <Image
+            src="/logo.png"
+            alt="Профессиональное общество трихологов"
+            fill
+            className="object-contain object-left"
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

@@ -114,7 +114,10 @@ export const Footer = () => {
           <p className="text-xs text-white/25">
             &copy; {new Date().getFullYear()} {siteName}. Все права защищены.
           </p>
-          <div className="flex gap-4 text-xs text-white/25">
+          <div className="flex flex-wrap items-center gap-4 text-xs text-white/25">
+            <Link href={ROUTES.UI_KIT} className="transition-colors hover:text-white/50">
+              UI Kit
+            </Link>
             <Link href={ROUTES.DOCUMENTS} className="transition-colors hover:text-white/50">
               Политика конфиденциальности
             </Link>
