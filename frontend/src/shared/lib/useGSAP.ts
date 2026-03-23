@@ -18,8 +18,8 @@ export function useGSAP<T extends HTMLElement = HTMLDivElement>(
     const el = containerRef.current;
     if (!el) return;
 
-    const ctx = gsap.context(() => {
-      setup(ctx as unknown as gsap.Context, el);
+    const ctx = gsap.context((context) => {
+      setup(context as unknown as gsap.Context, el);
     }, el);
 
     return () => ctx.revert();
