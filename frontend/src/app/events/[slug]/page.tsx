@@ -30,6 +30,7 @@ function getRegistrationErrorMessage(error: unknown): string {
   const msg =
     (error as { response?: { data?: { error?: { message?: string } } } })
       ?.response?.data?.error?.message ?? "";
+  if (/email is required for guest registration/i.test(msg)) return "Войдите в аккаунт или укажите email для регистрации гостя";
   if (/no seats available/i.test(msg)) return "Места закончились";
   if (/invalid verification code/i.test(msg)) {
     const m = msg.match(/(\d+)\s*attempt/i);
@@ -406,6 +407,7 @@ export default function EventDetailPage() {
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [selectedTariffId, setSelectedTariffId] = useState<string | null>(null);
   const [registrationResult, setRegistrationResult] = useState<EventRegistrationResponse | null>(null);
+  const [guestIdempotencyKey, setGuestIdempotencyKey] = useState<string | null>(null);
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [step2Error, setStep2Error] = useState<string | null>(null);
 
@@ -451,10 +453,12 @@ export default function EventDetailPage() {
   }) => {
     if (!selectedTariffId || !event?.id) return;
     setStep1Error(null);
+    const idempotencyKey = generateIdempotencyKey();
+    setGuestIdempotencyKey(idempotencyKey);
     try {
       const result = await registerMutation.mutateAsync({
         tariff_id: selectedTariffId,
-        idempotency_key: generateIdempotencyKey(),
+        idempotency_key: idempotencyKey,
         guest_email: data.email,
         guest_full_name: data.guest_full_name,
         guest_workplace: data.guest_workplace,
@@ -477,12 +481,13 @@ export default function EventDetailPage() {
   const handleGuestStep2Submit = async (data: { email: string; code: string }) => {
     if (!selectedTariffId || !event?.id) return;
     setStep2Error(null);
+    const idempotencyKey = guestIdempotencyKey ?? generateIdempotencyKey();
     try {
       const result = await confirmMutation.mutateAsync({
         email: data.email,
         code: data.code,
         tariff_id: selectedTariffId,
-        idempotency_key: generateIdempotencyKey(),
+        idempotency_key: idempotencyKey,
       });
 
       if (result.access_token) {
@@ -703,6 +708,7 @@ export default function EventDetailPage() {
             setShowGuestModal(false);
             setSelectedTariffId(null);
             setRegistrationResult(null);
+            setGuestIdempotencyKey(null);
             setStep1Error(null);
             setStep2Error(null);
           }}
