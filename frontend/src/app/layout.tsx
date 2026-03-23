@@ -6,6 +6,13 @@ import {
   Mulish,
   Libre_Baskerville,
   Nunito,
+  Plus_Jakarta_Sans,
+  Inter,
+  Instrument_Serif,
+  DM_Sans,
+  Space_Grotesk,
+  IBM_Plex_Sans,
+  IBM_Plex_Mono,
 } from "next/font/google";
 
 import { Toaster } from "sonner";
@@ -52,6 +59,51 @@ const nunito = Nunito({
   display: "swap",
 });
 
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin", "cyrillic-ext"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex-sans",
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Ассоциация трихологов",
@@ -83,7 +135,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${playfair.variable} ${raleway.variable} ${cormorant.variable} ${mulish.variable} ${libre.variable} ${nunito.variable} theme-clinical`}
+      className={`${playfair.variable} ${raleway.variable} ${cormorant.variable} ${mulish.variable} ${libre.variable} ${nunito.variable} ${jakarta.variable} ${inter.variable} ${instrumentSerif.variable} ${dmSans.variable} ${spaceGrotesk.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} theme-clinical`}
     >
       <body className="min-h-screen antialiased">
         <Providers>

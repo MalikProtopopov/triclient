@@ -2,27 +2,27 @@
 
 import { useState } from "react";
 
-import { ClinicalElegance } from "./ClinicalElegance";
-import { ModernMedical } from "./ModernMedical";
-import { WarmProfessionalism } from "./WarmProfessionalism";
+import { ClinicalAuraHome } from "./ClinicalAuraHome";
+import { EditorialLuxeHome } from "./EditorialLuxeHome";
+import { SwissPrecisionHome } from "./SwissPrecisionHome";
 
-type VariantKey = "clinical" | "modern" | "warm";
+type VariantKey = "clinical-aura" | "editorial-luxe" | "swiss-precision";
 
 const variants: { key: VariantKey; label: string; sublabel: string }[] = [
-  { key: "clinical", label: "Клиническая элегантность", sublabel: "Clinical Elegance" },
-  { key: "modern", label: "Современная медицина", sublabel: "Modern Medical" },
-  { key: "warm", label: "Тёплый профессионализм", sublabel: "Warm Professionalism" },
+  { key: "clinical-aura", label: "Clinical Aura", sublabel: "Светлый, glassmorphism, bento-grid" },
+  { key: "editorial-luxe", label: "Editorial Luxe", sublabel: "Премиум, serif, тёмный/светлый" },
+  { key: "swiss-precision", label: "Swiss Precision", sublabel: "Минимализм, mono, flat" },
 ];
 
 export default function ThemesPage() {
-  const [active, setActive] = useState<VariantKey>("clinical");
+  const [active, setActive] = useState<VariantKey>("clinical-aura");
 
   return (
     <div className="min-h-screen bg-[#f5f5f5]">
-      <div className="sticky top-0 z-50 border-b border-[#e0e0e0] bg-white/95 backdrop-blur-sm">
+      <div className="sticky top-0 z-[60] border-b border-[#e0e0e0] bg-white/95 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 py-4">
           <h1 className="mb-3 text-center text-xl font-bold text-[#4a4a4a]">
-            Ассоциация трихологов — Прототипы дизайна
+            Прототипы дизайна — выберите вариант
           </h1>
           <div className="flex justify-center gap-2">
             {variants.map((v) => (
@@ -43,10 +43,10 @@ export default function ThemesPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        {active === "clinical" && <ClinicalElegance />}
-        {active === "modern" && <ModernMedical />}
-        {active === "warm" && <WarmProfessionalism />}
+      <div>
+        {active === "clinical-aura" && <ClinicalAuraHome />}
+        {active === "editorial-luxe" && <EditorialLuxeHome />}
+        {active === "swiss-precision" && <SwissPrecisionHome />}
       </div>
     </div>
   );

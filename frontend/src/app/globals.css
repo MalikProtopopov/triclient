@@ -57,7 +57,7 @@
   --font-family-body: var(--font-raleway), system-ui, sans-serif;
 }
 
-/* ═══ VARIANT 1: Clinical Elegance ═══ */
+/* ═══ VARIANT 1: Clinical Elegance (default) ═══ */
 .theme-clinical {
   --font-family-heading: var(--font-playfair), Georgia, serif;
   --font-family-body: var(--font-raleway), system-ui, sans-serif;
@@ -73,6 +73,87 @@
 .theme-warm {
   --font-family-heading: var(--font-libre), Georgia, serif;
   --font-family-body: var(--font-nunito), system-ui, sans-serif;
+}
+
+/* ═══ PROTOTYPE: Clinical Aura ═══ */
+.theme-clinical-aura {
+  --accent: #E8638B;
+  --accent-hover: #D4507A;
+  --accent-light: rgba(232, 99, 139, 0.12);
+  --accent-contrast: #ffffff;
+  --bg: #ffffff;
+  --bg-secondary: #F8F9FB;
+  --text-primary: #1A1D23;
+  --text-secondary: #5F6B7A;
+  --text-muted: #7E8A9A;
+  --border-color: #E2E6EB;
+  --border-light: #E2E6EB;
+  --border-mid: #D0D5DC;
+  --border-dark: #7E8A9A;
+  --metal: #E2E6EB;
+  --metal-light: #F0F2F5;
+  --metal-dark: #D0D5DC;
+  --font-family-heading: var(--font-jakarta), system-ui, sans-serif;
+  --font-family-body: var(--font-inter), system-ui, sans-serif;
+  --ca-secondary: #5BB5A2;
+  --ca-secondary-light: #E0F2F1;
+  --ca-surface-alt: #F0F2F5;
+}
+
+/* ═══ PROTOTYPE: Editorial Luxe ═══ */
+.theme-editorial-luxe {
+  --accent: #A31555;
+  --accent-hover: #8C1248;
+  --accent-light: rgba(163, 21, 85, 0.1);
+  --accent-contrast: #ffffff;
+  --bg: #FFFAF5;
+  --bg-secondary: #ffffff;
+  --text-primary: #1A1520;
+  --text-secondary: #6B5B73;
+  --text-muted: #9E8FA6;
+  --border-color: #E5DDE0;
+  --border-light: #E5DDE0;
+  --border-mid: #D0C5CC;
+  --border-dark: #6B5B73;
+  --metal: #E5DDE0;
+  --metal-light: #F5ECD7;
+  --metal-dark: #D0C5CC;
+  --font-family-heading: var(--font-instrument), Georgia, serif;
+  --font-family-body: var(--font-dm-sans), system-ui, sans-serif;
+  --el-gold: #C9A96E;
+  --el-gold-light: #F5ECD7;
+  --el-bg-dark: #0F0B13;
+  --el-surface-dark: #1A1520;
+  --el-text-on-dark: #F5F0F2;
+  --el-text-secondary-dark: #9E8FA6;
+  --el-border-dark: #2A2433;
+}
+
+/* ═══ PROTOTYPE: Swiss Precision ═══ */
+.theme-swiss-precision {
+  --accent: #D4637A;
+  --accent-hover: #C05068;
+  --accent-light: rgba(212, 99, 122, 0.08);
+  --accent-contrast: #ffffff;
+  --bg: #FAFAFA;
+  --bg-secondary: #ffffff;
+  --text-primary: #141414;
+  --text-secondary: #5C6370;
+  --text-muted: #8B9BB0;
+  --border-color: #DCDFE4;
+  --border-light: #DCDFE4;
+  --border-mid: #B8BEC8;
+  --border-dark: #5C6370;
+  --metal: #DCDFE4;
+  --metal-light: #F0F1F3;
+  --metal-dark: #B8BEC8;
+  --font-family-heading: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-family-body: var(--font-ibm-plex-sans), system-ui, sans-serif;
+  --sp-mono: var(--font-ibm-plex-mono), monospace;
+  --sp-secondary: #2C3340;
+  --sp-secondary-light: #4A5568;
+  --sp-surface-alt: #F0F1F3;
+  --sp-border-strong: #B8BEC8;
 }
 
 body {
