@@ -135,7 +135,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${playfair.variable} ${raleway.variable} ${cormorant.variable} ${mulish.variable} ${libre.variable} ${nunito.variable} ${jakarta.variable} ${inter.variable} ${instrumentSerif.variable} ${dmSans.variable} ${spaceGrotesk.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} theme-clinical`}
+      className={`${playfair.variable} ${raleway.variable} ${cormorant.variable} ${mulish.variable} ${libre.variable} ${nunito.variable} ${jakarta.variable} ${inter.variable} ${instrumentSerif.variable} ${dmSans.variable} ${spaceGrotesk.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} theme-clinical-aura`}
     >
       <body className="min-h-screen antialiased">
         <Providers>
