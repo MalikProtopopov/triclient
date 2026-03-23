@@ -36,73 +36,72 @@ export const DoctorCard = ({ doctor, className, featured }: DoctorCardProps) => 
     <Link href={ROUTES.DOCTOR(doctor.slug || doctor.id)} className="block h-full">
       <div
         className={cn(
-          "group relative h-full overflow-hidden rounded-2xl border border-border bg-bg-secondary transition-all duration-500",
-          "hover:border-accent/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)]",
+          "group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-bg-secondary transition-all duration-300",
+          "hover:border-accent/40 hover:shadow-lg",
           "hover:-translate-y-1",
           className,
         )}
-        style={{ perspective: "800px" }}
       >
-        <div className="relative overflow-hidden" style={{ height: featured ? 280 : 200 }}>
+        {/* Фото — вертикальный портрет */}
+        <div
+          className={cn(
+            "relative w-full shrink-0 overflow-hidden bg-gradient-to-br from-accent/15 to-accent/5",
+            featured ? "aspect-[4/5]" : "aspect-[3/4]",
+          )}
+        >
           {doctor.photo_url ? (
             <Image
               src={doctor.photo_url}
               alt={fullName}
               fill
-              className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.06]"
+              className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.04]"
               sizes={featured ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-accent/20 to-accent/5">
-              <span className="font-heading text-4xl font-bold text-accent/40">
+            <div className="flex h-full w-full items-center justify-center">
+              <span className="font-heading text-5xl font-bold text-accent/30">
                 {initials}
               </span>
             </div>
           )}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-
           {(doctor.board_role || doctor.academic_degree) && (
             <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
               {doctor.board_role && (
-                <span className="rounded-lg bg-accent/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm">
+                <span className="rounded-md bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                   {BOARD_ROLE_LABELS[doctor.board_role]}
                 </span>
               )}
               {doctor.academic_degree && (
-                <span className="rounded-lg bg-white/80 px-2.5 py-1 text-[10px] font-bold text-text-primary backdrop-blur-sm">
+                <span className="rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-text-primary shadow-sm">
                   {doctor.academic_degree}
                 </span>
               )}
             </div>
           )}
-
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <h3 className={cn(
-              "font-heading font-bold leading-tight text-white",
-              featured ? "text-xl" : "text-base",
-            )}>
-              {fullName}
-            </h3>
-          </div>
         </div>
 
-        <div className="relative p-4">
+        {/* Подпись под фото */}
+        <div className="flex flex-1 flex-col p-4">
+          <h3 className="font-heading text-lg font-bold leading-snug text-text-primary">
+            {fullName}
+          </h3>
           {doctor.specialization && (
-            <p className="text-xs leading-relaxed text-text-secondary line-clamp-2">
+            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-text-secondary">
               {doctor.specialization}
             </p>
           )}
-
-          <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs text-text-muted">
-              <MapPin className="h-3 w-3 flex-shrink-0" />
-              <span className="truncate">
-                {doctor.city}
-                {doctor.clinic_name && ` · ${doctor.clinic_name}`}
-              </span>
-            </div>
-            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-accent/10 transition-all duration-300 group-hover:bg-accent group-hover:text-white">
-              <ArrowUpRight className="h-3.5 w-3.5 text-accent transition-colors group-hover:text-white" />
+          {(doctor.city || doctor.clinic_name) && (
+            <div className="mt-3 flex items-center gap-1.5 text-xs text-text-muted">
+            <MapPin className="h-3 w-3 flex-shrink-0" />
+            <span className="truncate">
+              {[doctor.city, doctor.clinic_name].filter(Boolean).join(" · ")}
+            </span>
+          </div>
+          )}
+          <div className="mt-auto flex items-center justify-between pt-4">
+            <span className="text-xs font-medium text-accent">Подробнее</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-accent transition-all duration-300 group-hover:bg-accent group-hover:text-white">
+              <ArrowUpRight className="h-4 w-4" />
             </div>
           </div>
         </div>
