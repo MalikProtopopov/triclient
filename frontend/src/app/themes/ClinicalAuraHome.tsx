@@ -22,7 +22,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
 import { useGSAP } from "@/shared/lib/useGSAP";
-import { staggerReveal, parallaxY } from "@/shared/lib/animations";
+import { staggerReveal, parallaxY, gsap } from "@/shared/lib/animations";
 
 const PINK = "#E8638B";
 const TEAL = "#5BB5A2";
@@ -187,6 +187,13 @@ export const ClinicalAuraHome = () => {
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const heroRef = useGSAP((_ctx, el) => {
+    staggerReveal("[data-ca-hero-text]", el, { y: 40, stagger: 0.12, duration: 0.7, start: "top 95%" });
+    const orb = el.querySelector("[data-ca-orb]");
+    if (orb) gsap.fromTo(orb, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.3 });
+    staggerReveal("[data-ca-stat]", el, { y: 24, stagger: 0.08, duration: 0.5, start: "top 95%" });
+  });
+
   return (
     <div className="theme-clinical-aura font-body min-h-screen bg-white text-[#2D2D3A]">
       {/* ════════ HEADER ════════ */}
@@ -277,86 +284,125 @@ export const ClinicalAuraHome = () => {
 
       <main>
         {/* ════════ HERO ════════ */}
-        <section className="relative overflow-hidden bg-white" style={{ padding: "120px 0 80px" }}>
+        <section
+          ref={heroRef}
+          className="relative overflow-hidden"
+          style={{
+            padding: "100px 0 64px",
+            background: `
+              radial-gradient(ellipse 80% 50% at 15% 60%, rgba(232,99,139,0.10) 0%, transparent 100%),
+              radial-gradient(ellipse 60% 80% at 78% 20%, rgba(91,181,162,0.09) 0%, transparent 100%),
+              radial-gradient(ellipse 50% 50% at 50% 100%, rgba(232,99,139,0.04) 0%, transparent 100%),
+              #ffffff
+            `,
+          }}
+        >
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <div className="grid items-center gap-12 lg:grid-cols-2">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <span
-                  className="mb-6 inline-block rounded-[6px] px-3 py-1.5 text-xs font-bold uppercase tracking-wider"
-                  style={{ background: "#FCE4EC", color: PINK }}
+            <div className="grid items-center gap-8 lg:grid-cols-[1fr_380px]">
+              {/* Text */}
+              <div>
+                <div data-ca-hero-text>
+                  <span
+                    className="inline-block rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.15em]"
+                    style={{ background: "#FCE4EC", color: PINK }}
+                  >
+                    Профессиональное сообщество · с 2012
+                  </span>
+                </div>
+                <h1
+                  data-ca-hero-text
+                  className="font-heading mt-6 text-5xl font-extrabold leading-[1.05] text-[#1A1D23] lg:text-7xl xl:text-[82px]"
                 >
-                  Профессиональное сообщество
-                </span>
-                <h1 className="font-heading mb-6 text-5xl font-extrabold leading-[1.05] text-[#1A1D23] lg:text-6xl xl:text-[68px]">
-                  Ассоциация
-                  <br />
+                  Ассоциация<br />
                   трихологов{" "}
                   <span style={{ color: PINK }}>России</span>
                 </h1>
-                <p className="mb-8 max-w-lg text-base leading-relaxed text-[#6B6F80] lg:text-lg">
+                <p
+                  data-ca-hero-text
+                  className="mt-6 max-w-lg text-base leading-relaxed text-[#6B6F80] lg:text-lg"
+                >
                   Объединяем врачей-дерматологов, трихологов и специалистов по
-                  здоровью волос. Сертификация, конференции и интеграция через
-                  EHRS.
+                  здоровью волос. Сертификация, конференции и интеграция через EHRS.
                 </p>
-                <Link href={isOnboarded ? ROUTES.CABINET : ROUTES.REGISTER}>
-                  <button
-                    className="group inline-flex items-center gap-3 rounded-[10px] px-8 py-4 text-sm font-bold text-white transition-transform duration-300 hover:-translate-y-0.5"
-                    style={{
-                      background: PINK,
-                      boxShadow: `0 2px 8px rgba(232,99,139,0.25)`,
-                    }}
-                  >
-                    {isOnboarded ? "Перейти в кабинет" : "Стать членом ассоциации"}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </Link>
-              </motion.div>
+                <div data-ca-hero-text className="mt-8 flex flex-wrap items-center gap-4">
+                  <Link href={isOnboarded ? ROUTES.CABINET : ROUTES.REGISTER}>
+                    <button
+                      className="group inline-flex items-center gap-3 rounded-full px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                      style={{ background: PINK, boxShadow: `0 4px 20px rgba(232,99,139,0.3)` }}
+                    >
+                      {isOnboarded ? "Перейти в кабинет" : "Стать членом"}
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    </button>
+                  </Link>
+                  <Link href={ROUTES.DOCTORS}>
+                    <button className="inline-flex items-center gap-2 rounded-full border border-[#E2E4EA] px-6 py-3.5 text-sm font-medium text-[#1A1D23] transition-all duration-300 hover:border-[#E8638B40] hover:bg-[#E8638B08]">
+                      Каталог врачей
+                    </button>
+                  </Link>
+                </div>
+              </div>
 
-              {/* Decorative gradient spheres */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="relative hidden h-[420px] lg:block"
-              >
-                <div
-                  className="absolute right-8 top-4 h-72 w-72 rounded-full opacity-50 blur-[80px]"
-                  style={{ background: PINK }}
-                />
-                <div
-                  className="absolute bottom-8 left-8 h-56 w-56 rounded-full opacity-40 blur-[70px]"
-                  style={{ background: TEAL }}
-                />
-                <div
-                  className="absolute right-28 bottom-20 h-36 w-36 rounded-full opacity-30 blur-[60px]"
-                  style={{ background: PINK }}
-                />
-              </motion.div>
+              {/* 3D Glass Orb */}
+              <div data-ca-orb className="hidden lg:block">
+                <div className="relative" style={{ width: 360, height: 360 }}>
+                  <div
+                    className="pointer-events-none absolute inset-0 rounded-full blur-[60px]"
+                    style={{ background: `radial-gradient(circle, ${PINK}40 0%, ${TEAL}25 50%, transparent 70%)` }}
+                  />
+                  <div className="animate-orb-float absolute inset-[20px]">
+                    <div
+                      className="relative h-full w-full rounded-full"
+                      style={{
+                        background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95) 0%, ${PINK}25 35%, ${TEAL}20 60%, ${PINK}14 100%)`,
+                        boxShadow: `0 8px 60px ${PINK}33, 0 2px 20px ${TEAL}25, inset 0 -8px 30px ${PINK}20, inset 0 8px 30px rgba(255,255,255,0.8)`,
+                        border: "1px solid rgba(255,255,255,0.6)",
+                      }}
+                    >
+                      <div
+                        className="absolute inset-[25px] rounded-full"
+                        style={{
+                          background: "radial-gradient(circle at 40% 35%, rgba(255,255,255,0.5) 0%, transparent 60%)",
+                          backdropFilter: "blur(8px)",
+                          boxShadow: `inset 0 4px 20px rgba(255,255,255,0.4), inset 0 -4px 15px ${PINK}14`,
+                        }}
+                      />
+                      <div
+                        className="absolute left-[18%] top-[12%] h-[30%] w-[35%] rounded-full"
+                        style={{
+                          background: "radial-gradient(ellipse, rgba(255,255,255,0.75) 0%, transparent 70%)",
+                          transform: "rotate(-15deg)",
+                        }}
+                      />
+                      <div
+                        className="animate-orb-pulse absolute bottom-[15%] left-[10%] h-[20%] w-[60%] rounded-full"
+                        style={{ background: `radial-gradient(ellipse, ${TEAL}33 0%, transparent 70%)` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="animate-orb-dot absolute left-0 top-1/4 h-3 w-3 rounded-full" style={{ background: PINK, opacity: 0.6 }} />
+                  <div className="animate-orb-dot absolute right-4 top-8 h-2 w-2 rounded-full" style={{ background: TEAL, opacity: 0.5, animationDelay: "1s" }} />
+                  <div className="animate-orb-dot absolute bottom-8 left-12 h-2.5 w-2.5 rounded-full" style={{ background: PINK, opacity: 0.4, animationDelay: "2s" }} />
+                  <div className="animate-orb-dot absolute bottom-1/4 right-0 h-2 w-2 rounded-full" style={{ background: TEAL, opacity: 0.5, animationDelay: "1.5s" }} />
+                </div>
+              </div>
             </div>
 
-            {/* Stats row */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-16 grid grid-cols-2 gap-6 border-t border-[#E2E4EA] pt-10 lg:grid-cols-4"
-            >
-              {STATS.map((s, i) => (
-                <div key={s.label} className="relative pl-6 lg:pl-0 lg:text-center">
-                  {i > 0 && (
-                    <div className="absolute left-0 top-0 hidden h-full w-px lg:block" style={{ background: "#E2E4EA" }} />
-                  )}
-                  <div className="font-heading text-3xl font-extrabold" style={{ color: PINK }}>
+            {/* Bento stat cards */}
+            <div className="mt-12 grid grid-cols-2 gap-4 lg:mt-16 lg:grid-cols-4">
+              {STATS.map((s) => (
+                <div
+                  key={s.label}
+                  data-ca-stat
+                  className="group rounded-2xl border border-white/60 bg-white/60 p-5 backdrop-blur-[12px] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg lg:p-6"
+                  style={{ boxShadow: "0 4px 15px rgba(0,0,0,0.04)" }}
+                >
+                  <div className="font-heading text-3xl font-extrabold lg:text-4xl" style={{ color: PINK }}>
                     {s.num}
                   </div>
-                  <div className="mt-1 text-xs text-[#9095A5]">{s.label}</div>
+                  <div className="mt-1.5 text-xs text-[#9095A5]">{s.label}</div>
                 </div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </section>
 

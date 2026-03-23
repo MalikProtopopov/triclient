@@ -14,7 +14,7 @@ import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
 import { useAuth } from "@/providers/AuthProvider";
 import { useGSAP } from "@/shared/lib/useGSAP";
-import { staggerReveal, parallaxY } from "@/shared/lib/animations";
+import { staggerReveal, parallaxY, gsap } from "@/shared/lib/animations";
 
 const BENEFITS = [
   "Публикация в каталоге верифицированных врачей",
@@ -160,6 +160,13 @@ export default function HomeClient() {
   const articles = articlesData?.data ?? [];
   const [featuredEvent, ...restEvents] = events;
 
+  const heroRef = useGSAP((_ctx, el) => {
+    staggerReveal("[data-hero-text]", el, { y: 40, stagger: 0.12, duration: 0.7, start: "top 95%" });
+    const orb = el.querySelector("[data-orb]");
+    if (orb) gsap.fromTo(orb, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.3 });
+    staggerReveal("[data-stat-card]", el, { y: 24, stagger: 0.08, duration: 0.5, start: "top 95%" });
+  });
+
   return (
     <div className="flex min-h-screen flex-col bg-bg">
       <Header />
@@ -167,110 +174,117 @@ export default function HomeClient() {
       <main className="flex-1">
 
         {/* ══════════ HERO ══════════ */}
-        <section className="relative overflow-hidden bg-[#4a4a4a]">
-          {/* Фоновый акцентный элемент */}
-          <div
-            className="pointer-events-none absolute -right-32 -top-32 h-[500px] w-[500px] rounded-full opacity-[0.07]"
-            style={{ background: "#edbecc" }}
-          />
-          <div
-            className="pointer-events-none absolute bottom-0 left-0 h-px w-full"
-            style={{ background: "linear-gradient(90deg, #edbecc 0%, transparent 60%)" }}
-          />
-
-          <div className="mx-auto max-w-7xl px-4 pt-16 pb-0 lg:px-8 lg:pt-24">
-            <div className="grid items-end gap-8 lg:grid-cols-[1fr_340px]">
-              {/* Левая часть — текст */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="pb-16 lg:pb-24"
-              >
-                <p className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-[#edbecc]/70">
-                  Профессиональное сообщество · с 2012 года
-                </p>
+        <section
+          ref={heroRef}
+          className="relative overflow-hidden"
+          style={{
+            background: `
+              radial-gradient(ellipse 80% 50% at 15% 60%, rgba(232,99,139,0.09) 0%, transparent 100%),
+              radial-gradient(ellipse 60% 80% at 78% 20%, rgba(91,181,162,0.08) 0%, transparent 100%),
+              radial-gradient(ellipse 50% 50% at 50% 100%, rgba(232,99,139,0.04) 0%, transparent 100%),
+              #ffffff
+            `,
+          }}
+        >
+          <div className="mx-auto max-w-7xl px-4 pt-20 pb-8 lg:px-8 lg:pt-28 lg:pb-12">
+            <div className="grid items-center gap-8 lg:grid-cols-[1fr_380px]">
+              {/* Text */}
+              <div>
+                <div data-hero-text>
+                  <span className="inline-block rounded-full border border-accent/20 bg-accent/8 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-accent">
+                    Профессиональное сообщество · с 2012
+                  </span>
+                </div>
                 <h1
-                  className="mb-6 font-heading text-5xl font-bold leading-[1.0] text-white lg:text-7xl xl:text-[88px]"
+                  data-hero-text
+                  className="mt-6 font-heading text-5xl font-extrabold leading-[1.05] text-text-primary lg:text-7xl xl:text-[82px]"
                 >
                   Ассоциация<br />
-                  <span className="relative inline-block">
-                    трихологов
-                    <span
-                      className="absolute -bottom-1 left-0 h-[3px] w-full"
-                      style={{ background: "#edbecc" }}
-                    />
-                  </span>
-                  <br />
-                  <span className="text-[#edbecc]">России</span>
+                  трихологов{" "}
+                  <span className="text-accent">России</span>
                 </h1>
-                <p className="mb-8 max-w-lg text-base leading-relaxed text-white/60 lg:text-lg">
-                  Объединяем врачей-дерматологов, трихологов и специалистов по волосам.
-                  Ежегодные конференции, сертификация и интеграция в мировую трихологию через EHRS.
+                <p
+                  data-hero-text
+                  className="mt-6 max-w-lg text-base leading-relaxed text-text-secondary lg:text-lg"
+                >
+                  Объединяем врачей-дерматологов, трихологов и специалистов по
+                  здоровью волос. Сертификация, конференции и интеграция через EHRS.
                 </p>
-                <Link href={isOnboarded ? ROUTES.CABINET : ROUTES.REGISTER}>
-                  <button className="group inline-flex items-center gap-3 rounded-full bg-[#edbecc] px-8 py-3.5 text-sm font-semibold text-[#4a4a4a] transition-all duration-300 hover:shadow-[0_0_30px_rgba(237,190,204,0.3)] hover:scale-[1.02]">
-                    {isOnboarded ? "Перейти в кабинет" : "Стать членом ассоциации"}
-                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </button>
-                </Link>
-
-                {/* Статистика */}
-                <div className="mt-12 flex flex-wrap gap-8 border-t border-white/10 pt-8">
-                  {STATS.map((s) => (
-                    <div key={s.label}>
-                      <div
-                        className="font-heading text-3xl font-bold text-[#edbecc] lg:text-4xl"
-                      >
-                        {s.num}
-                      </div>
-                      <div className="mt-0.5 text-xs text-white/40">{s.label}</div>
-                    </div>
-                  ))}
+                <div data-hero-text className="mt-8 flex flex-wrap items-center gap-4">
+                  <Link href={isOnboarded ? ROUTES.CABINET : ROUTES.REGISTER}>
+                    <button className="group inline-flex items-center gap-3 rounded-full bg-accent px-8 py-3.5 text-sm font-semibold text-accent-contrast shadow-lg shadow-accent/20 transition-all duration-300 hover:shadow-xl hover:shadow-accent/30 hover:-translate-y-0.5">
+                      {isOnboarded ? "Перейти в кабинет" : "Стать членом"}
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                    </button>
+                  </Link>
+                  <Link href={ROUTES.DOCTORS}>
+                    <button className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3.5 text-sm font-medium text-text-primary transition-all duration-300 hover:border-accent/40 hover:bg-accent/5">
+                      Каталог врачей
+                    </button>
+                  </Link>
                 </div>
-              </motion.div>
+              </div>
 
-              {/* Правая часть — фото президента */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.15 }}
-                className="hidden self-end lg:block"
-              >
-                <Link href="/pravlenie" className="group block">
-                  <div className="relative mx-auto w-[280px]">
-                    {/* Арочный контейнер с фото */}
-                    <div className="relative overflow-hidden rounded-t-[140px] h-[380px]">
-                      <Image
-                        src="/media/gadzhigoroeva-aida-guseyhanovna-prezident-associacii-professionalnoe-obshchestvo-trihologov.jpg"
-                        alt="Гаджигороева Аида Гусейхановна — президент"
-                        fill
-                        className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]"
-                        sizes="280px"
-                        priority
-                      />
-                      {/* Тёмный градиент снизу */}
-                      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#4a4a4a] to-transparent" />
-                    </div>
-
-                    {/* Подпись снизу */}
-                    <div className="relative -mt-14 px-4 pb-4">
-                      <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#edbecc]/60">
-                        Президент ассоциации
-                      </p>
-                      <p className="mt-0.5 text-sm font-semibold text-white leading-snug">
-                        Гаджигороева Аида<br />Гусейхановна
-                      </p>
-                    </div>
-
-                    {/* Декоративная рамка — появляется при ховере */}
+              {/* 3D Glass Orb */}
+              <div data-orb className="hidden lg:block">
+                <div className="relative" style={{ width: 360, height: 360 }}>
+                  <div
+                    className="pointer-events-none absolute inset-0 rounded-full blur-[60px]"
+                    style={{ background: "radial-gradient(circle, rgba(232,99,139,0.25) 0%, rgba(91,181,162,0.15) 50%, transparent 70%)" }}
+                  />
+                  <div className="animate-orb-float absolute inset-[20px]">
                     <div
-                      className="pointer-events-none absolute inset-0 rounded-t-[140px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                      style={{ boxShadow: "inset 0 0 0 2px rgba(237,190,204,0.4)" }}
-                    />
+                      className="relative h-full w-full rounded-full"
+                      style={{
+                        background: "radial-gradient(circle at 35% 30%, rgba(255,255,255,0.95) 0%, rgba(232,99,139,0.15) 35%, rgba(91,181,162,0.12) 60%, rgba(232,99,139,0.08) 100%)",
+                        boxShadow: "0 8px 60px rgba(232,99,139,0.2), 0 2px 20px rgba(91,181,162,0.15), inset 0 -8px 30px rgba(232,99,139,0.12), inset 0 8px 30px rgba(255,255,255,0.8)",
+                        border: "1px solid rgba(255,255,255,0.6)",
+                      }}
+                    >
+                      <div
+                        className="absolute inset-[25px] rounded-full"
+                        style={{
+                          background: "radial-gradient(circle at 40% 35%, rgba(255,255,255,0.5) 0%, transparent 60%)",
+                          backdropFilter: "blur(8px)",
+                          boxShadow: "inset 0 4px 20px rgba(255,255,255,0.4), inset 0 -4px 15px rgba(232,99,139,0.08)",
+                        }}
+                      />
+                      <div
+                        className="absolute left-[18%] top-[12%] h-[30%] w-[35%] rounded-full"
+                        style={{
+                          background: "radial-gradient(ellipse, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0) 70%)",
+                          transform: "rotate(-15deg)",
+                        }}
+                      />
+                      <div
+                        className="animate-orb-pulse absolute bottom-[15%] left-[10%] h-[20%] w-[60%] rounded-full"
+                        style={{ background: "radial-gradient(ellipse, rgba(91,181,162,0.2) 0%, transparent 70%)" }}
+                      />
+                    </div>
                   </div>
-                </Link>
-              </motion.div>
+                  <div className="animate-orb-dot absolute left-0 top-1/4 h-3 w-3 rounded-full" style={{ background: "#E8638B", opacity: 0.6 }} />
+                  <div className="animate-orb-dot absolute right-4 top-8 h-2 w-2 rounded-full" style={{ background: "#5BB5A2", opacity: 0.5, animationDelay: "1s" }} />
+                  <div className="animate-orb-dot absolute bottom-8 left-12 h-2.5 w-2.5 rounded-full" style={{ background: "#E8638B", opacity: 0.4, animationDelay: "2s" }} />
+                  <div className="animate-orb-dot absolute bottom-1/4 right-0 h-2 w-2 rounded-full" style={{ background: "#5BB5A2", opacity: 0.5, animationDelay: "1.5s" }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Bento stat cards */}
+            <div className="mt-12 grid grid-cols-2 gap-4 lg:mt-16 lg:grid-cols-4">
+              {STATS.map((s) => (
+                <div
+                  key={s.label}
+                  data-stat-card
+                  className="group rounded-2xl border border-white/60 bg-white/60 p-5 backdrop-blur-[12px] transition-all duration-300 hover:scale-[1.02] hover:shadow-lg lg:p-6"
+                  style={{ boxShadow: "0 4px 15px rgba(0,0,0,0.04)" }}
+                >
+                  <div className="font-heading text-3xl font-extrabold text-accent lg:text-4xl">
+                    {s.num}
+                  </div>
+                  <div className="mt-1.5 text-xs text-text-muted">{s.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -319,7 +333,7 @@ export default function HomeClient() {
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                className="relative flex items-center justify-center overflow-hidden bg-[#4a4a4a] px-8 py-16 lg:py-20"
+                className="relative flex items-center justify-center overflow-hidden bg-[#1A1D23] px-8 py-16 lg:py-20"
               >
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span
@@ -334,7 +348,7 @@ export default function HomeClient() {
                   >
                     Вступайте <br />в сообщество
                     <br />
-                    <span style={{ color: "#edbecc" }}>трихологов</span>
+                    <span className="text-accent">трихологов</span>
                   </div>
                   <p className="mt-4 text-sm text-white/50">
                     Заявки рассматриваются в течение 2–3 рабочих дней
@@ -380,10 +394,10 @@ export default function HomeClient() {
                     viewport={{ once: true }}
                   >
                     <Link href={ROUTES.EVENT(featuredEvent.slug)}>
-                      <div className="group relative overflow-hidden rounded-2xl bg-[#4a4a4a] p-8 transition-all duration-300 hover:shadow-xl lg:p-10">
+                      <div className="group relative overflow-hidden rounded-2xl bg-[#1A1D23] p-8 transition-all duration-300 hover:shadow-xl lg:p-10">
                         <div
                           className="pointer-events-none absolute right-0 top-0 h-full w-1/3 opacity-20"
-                          style={{ background: "linear-gradient(to left, #edbecc, transparent)" }}
+                          style={{ background: "linear-gradient(to left, var(--accent), transparent)" }}
                         />
                         <div className="relative grid gap-6 lg:grid-cols-[auto_1fr_auto] lg:items-center">
                           {/* Дата как большое число */}
@@ -397,8 +411,8 @@ export default function HomeClient() {
                           </div>
                           <div>
                             <span
-                              className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold text-[#4a4a4a]"
-                              style={{ background: "#edbecc" }}
+                              className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold text-accent-contrast"
+                              style={{ background: "var(--accent)" }}
                             >
                               Ближайшее
                             </span>
@@ -472,8 +486,7 @@ export default function HomeClient() {
                           </div>
                           {event.tariffs.length > 0 && (
                             <div
-                              className="mt-3 text-xs font-medium"
-                              style={{ color: "#edbecc" }}
+                              className="mt-3 text-xs font-medium text-accent"
                             >
                               от {Math.min(...event.tariffs.map((t) => t.member_price)).toLocaleString("ru")} ₽
                             </div>
@@ -539,7 +552,7 @@ export default function HomeClient() {
                         {/* Accent полоса снизу обложки */}
                         <div
                           className="absolute bottom-0 left-0 h-[3px] w-0 transition-all duration-500 group-hover:w-full"
-                          style={{ background: "#edbecc" }}
+                          style={{ background: "var(--accent)" }}
                         />
                       </div>
                       <div className="p-5">
