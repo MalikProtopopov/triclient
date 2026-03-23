@@ -17,9 +17,9 @@ class ApiClient {
       if (config.data instanceof FormData) {
         delete config.headers["Content-Type"];
       }
-      // Токен передаётся ко ВСЕМ запросам к API (в т.ч. POST .../events/{id}/register)
+      // Токен передаётся ко ВСЕМ запросам (Authorization или cookie access_token)
       if (typeof window !== "undefined") {
-        const token = sessionStorage.getItem("access_token");
+        const token = sessionStorage.getItem("access_token") ?? localStorage.getItem("access_token");
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }

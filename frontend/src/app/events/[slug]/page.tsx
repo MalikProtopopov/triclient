@@ -5,13 +5,14 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Play, Check, Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AxiosError } from "axios";
 
 import {
   useEvent,
   useEventRegisterMutation,
   useConfirmGuestMutation,
+  eventKeys,
 } from "@/entities/event";
 import type { EventTariff, EventRegistrationResponse } from "@/entities/event";
 import { Header } from "@/widgets/header";
@@ -27,10 +28,13 @@ function generateIdempotencyKey(): string {
 }
 
 function getRegistrationErrorMessage(error: unknown): string {
+  const status = (error as { response?: { status?: number } })?.response?.status;
   const msg =
     (error as { response?: { data?: { error?: { message?: string } } } })
       ?.response?.data?.error?.message ?? "";
+  if (status === 429) return "Слишком много запросов. Подождите немного и попробуйте снова.";
   if (/email is required for guest registration/i.test(msg)) return "Войдите в аккаунт или укажите email для регистрации гостя";
+  if (/already registered for this event with this tariff/i.test(msg)) return "Вы уже зарегистрированы на это мероприятие по данному тарифу";
   if (/no seats available/i.test(msg)) return "Места закончились";
   if (/invalid verification code/i.test(msg)) {
     const m = msg.match(/(\d+)\s*attempt/i);
@@ -42,6 +46,12 @@ function getRegistrationErrorMessage(error: unknown): string {
   if (/registration is closed/i.test(msg)) return "Регистрация закрыта";
   if (/not found/i.test(msg)) return "Мероприятие или тариф не найдены";
   return msg || "Ошибка регистрации. Попробуйте ещё раз.";
+}
+}
+
+function isAlreadyRegisteredError(error: unknown): boolean {
+  const status = (error as { response?: { status?: number } })?.response?.status;
+  return status === 409;
 }
 
 function formatDurationSeconds(seconds: number): string {
@@ -398,6 +408,7 @@ function GuestModal({
 export default function EventDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const queryClient = useQueryClient();
   const { isAuthenticated, login } = useAuth();
 
   const { data: event, isLoading, error } = useEvent(slug);
@@ -407,7 +418,6 @@ export default function EventDetailPage() {
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [selectedTariffId, setSelectedTariffId] = useState<string | null>(null);
   const [registrationResult, setRegistrationResult] = useState<EventRegistrationResponse | null>(null);
-  const [guestIdempotencyKey, setGuestIdempotencyKey] = useState<string | null>(null);
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [step2Error, setStep2Error] = useState<string | null>(null);
 
@@ -441,6 +451,9 @@ export default function EventDetailPage() {
         toast.success("Вы успешно зарегистрированы!");
       }
     } catch (err) {
+      if (isAlreadyRegisteredError(err)) {
+        queryClient.invalidateQueries({ queryKey: eventKeys.all });
+      }
       toast.error(getRegistrationErrorMessage(err));
     }
   };
@@ -453,12 +466,10 @@ export default function EventDetailPage() {
   }) => {
     if (!selectedTariffId || !event?.id) return;
     setStep1Error(null);
-    const idempotencyKey = generateIdempotencyKey();
-    setGuestIdempotencyKey(idempotencyKey);
     try {
       const result = await registerMutation.mutateAsync({
         tariff_id: selectedTariffId,
-        idempotency_key: idempotencyKey,
+        idempotency_key: generateIdempotencyKey(),
         guest_email: data.email,
         guest_full_name: data.guest_full_name,
         guest_workplace: data.guest_workplace,
@@ -474,6 +485,10 @@ export default function EventDetailPage() {
         setShowGuestModal(false);
       }
     } catch (err) {
+      if (isAlreadyRegisteredError(err)) {
+        queryClient.invalidateQueries({ queryKey: eventKeys.all });
+        setShowGuestModal(false);
+      }
       setStep1Error(getRegistrationErrorMessage(err));
     }
   };
@@ -481,13 +496,12 @@ export default function EventDetailPage() {
   const handleGuestStep2Submit = async (data: { email: string; code: string }) => {
     if (!selectedTariffId || !event?.id) return;
     setStep2Error(null);
-    const idempotencyKey = guestIdempotencyKey ?? generateIdempotencyKey();
     try {
       const result = await confirmMutation.mutateAsync({
         email: data.email,
         code: data.code,
         tariff_id: selectedTariffId,
-        idempotency_key: idempotencyKey,
+        idempotency_key: generateIdempotencyKey(),
       });
 
       if (result.access_token) {
@@ -708,7 +722,6 @@ export default function EventDetailPage() {
             setShowGuestModal(false);
             setSelectedTariffId(null);
             setRegistrationResult(null);
-            setGuestIdempotencyKey(null);
             setStep1Error(null);
             setStep2Error(null);
           }}
