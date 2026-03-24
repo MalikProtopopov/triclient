@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { flushSync } from "react-dom";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -65,11 +66,15 @@ function TariffCard({
   tariff,
   onRegister,
   isRegistering,
+  disableRegister,
   isRegistered,
 }: {
   tariff: EventTariff;
   onRegister: (tariffId: string) => void;
+  /** Лоадер только на кнопке выбранного тарифа */
   isRegistering: boolean;
+  /** Блокировать все кнопки «Зарегистрироваться», пока идёт запрос */
+  disableRegister: boolean;
   isRegistered: boolean;
 }) {
   const seatsLeft =
@@ -119,7 +124,7 @@ function TariffCard({
         <Button
           size="sm"
           className="mt-auto"
-          disabled={soldOut || isRegistering || tariff.is_active === false}
+          disabled={soldOut || disableRegister || tariff.is_active === false}
           onClick={() => onRegister(tariff.id)}
         >
           {isRegistering ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -419,6 +424,8 @@ export default function EventDetailPage() {
   const [registrationResult, setRegistrationResult] = useState<EventRegistrationResponse | null>(null);
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [step2Error, setStep2Error] = useState<string | null>(null);
+  /** Тариф, по которому сейчас идёт POST register (лоадер только на этой кнопке) */
+  const [registeringTariffId, setRegisteringTariffId] = useState<string | null>(null);
 
   const isRegistered = !!event?.user_registration?.registration_id;
 
@@ -434,6 +441,9 @@ export default function EventDetailPage() {
     }
 
     setStep1Error(null);
+    flushSync(() => {
+      setRegisteringTariffId(tariffId);
+    });
     try {
       const result = await registerMutation.mutateAsync({
         tariff_id: tariffId,
@@ -454,6 +464,8 @@ export default function EventDetailPage() {
         queryClient.invalidateQueries({ queryKey: eventKeys.all });
       }
       toast.error(getRegistrationErrorMessage(err));
+    } finally {
+      setRegisteringTariffId(null);
     }
   };
 
@@ -465,6 +477,9 @@ export default function EventDetailPage() {
   }) => {
     if (!selectedTariffId || !event?.id) return;
     setStep1Error(null);
+    flushSync(() => {
+      setRegisteringTariffId(selectedTariffId);
+    });
     try {
       const result = await registerMutation.mutateAsync({
         tariff_id: selectedTariffId,
@@ -489,6 +504,8 @@ export default function EventDetailPage() {
         setShowGuestModal(false);
       }
       setStep1Error(getRegistrationErrorMessage(err));
+    } finally {
+      setRegisteringTariffId(null);
     }
   };
 
@@ -609,7 +626,10 @@ export default function EventDetailPage() {
                     key={tariff.id}
                     tariff={tariff}
                     onRegister={handleRegister}
-                    isRegistering={registerMutation.isPending}
+                    isRegistering={
+                      registerMutation.isPending && registeringTariffId === tariff.id
+                    }
+                    disableRegister={registerMutation.isPending}
                     isRegistered={isRegistered}
                   />
                 ))}
