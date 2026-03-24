@@ -8,7 +8,7 @@ import { Menu, X } from "lucide-react";
 
 import { usePublicSettings } from "@/entities/settings";
 import { useAuth } from "@/providers/AuthProvider";
-import { cn } from "@/shared/lib";
+import { cn, trimStringOrNull } from "@/shared/lib";
 import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui";
 
@@ -26,10 +26,7 @@ export const Header = () => {
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout } = useAuth();
   const { data: settings } = usePublicSettings();
-  const telegramLink =
-    settings?.telegram_bot_link && settings.telegram_bot_link.trim() !== ""
-      ? settings.telegram_bot_link.trim()
-      : null;
+  const telegramLink = trimStringOrNull(settings?.telegram_bot_link);
   useEffect(() => {
     const handleScroll = (): void => {
       setIsScrolled(window.scrollY > 0);

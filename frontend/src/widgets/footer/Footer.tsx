@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useDocuments } from "@/entities/document";
 import { usePublicSettings } from "@/entities/settings";
 import { ROUTES } from "@/shared/config";
+import { trimStringOrNull } from "@/shared/lib";
 
 const FOOTER_DOCUMENTS_LIMIT = 4;
 
@@ -26,10 +27,7 @@ export const Footer = () => {
   const email = settings?.contact_email ?? FALLBACK.contact_email;
   const phone = settings?.contact_phone ?? FALLBACK.contact_phone;
   const siteName = settings?.site_name ?? FALLBACK.site_name;
-  const telegramLink =
-    settings?.telegram_bot_link && settings.telegram_bot_link.trim() !== ""
-      ? settings.telegram_bot_link.trim()
-      : null;
+  const telegramLink = trimStringOrNull(settings?.telegram_bot_link);
 
   return (
     <footer className="border-t border-border bg-[#4a4a4a]">
