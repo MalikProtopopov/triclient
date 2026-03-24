@@ -49,9 +49,9 @@ export const Header = () => {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 lg:px-8">
         <Link
           href={ROUTES.HOME}
-          className="flex min-w-0 max-w-[calc(100%-3.25rem)] items-center gap-1.5 sm:max-w-none sm:gap-3 lg:shrink-0"
+          className="flex min-w-0 max-w-[calc(100%-3.25rem)] items-center gap-2 sm:max-w-none sm:gap-2.5 lg:shrink-0"
         >
-          <span className="relative block h-9 w-[4.75rem] shrink-0 sm:w-28 md:w-32">
+          <span className="relative block h-9 w-9 shrink-0 sm:h-10 sm:w-10 md:h-11 md:w-11">
             <Image
               src="/logo.png"
               alt={settings?.site_name ?? "Профессиональное общество трихологов"}
@@ -59,7 +59,7 @@ export const Header = () => {
               className="object-contain object-left"
             />
           </span>
-          <span className="flex min-w-0 max-w-[6.25rem] flex-col justify-center leading-[1.1] sm:max-w-[7.5rem] md:max-w-none">
+          <span className="flex min-w-0 flex-col justify-center leading-[1.1] sm:max-w-[8rem] md:max-w-none">
             <span className="font-heading text-[9px] font-semibold tracking-wide text-text-primary sm:text-[10px] lg:text-[11px]">
               Ассоциация
             </span>

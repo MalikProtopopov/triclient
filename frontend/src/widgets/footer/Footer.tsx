@@ -7,6 +7,8 @@ import { usePublicSettings } from "@/entities/settings";
 import { ROUTES } from "@/shared/config";
 import { trimStringOrNull } from "@/shared/lib";
 
+import { PaymentMethodsStrip } from "./PaymentMethodsStrip";
+
 const FOOTER_DOCUMENTS_LIMIT = 4;
 
 const FALLBACK = {
@@ -30,6 +32,7 @@ export const Footer = () => {
   const telegramLink = trimStringOrNull(settings?.telegram_bot_link);
 
   return (
+    <>
     <footer className="border-t border-border bg-[#4a4a4a]">
       <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[2fr_1fr_1fr_1fr] lg:items-start">
@@ -160,5 +163,7 @@ export const Footer = () => {
         </div>
       </div>
     </footer>
+    <PaymentMethodsStrip />
+    </>
   );
 };
