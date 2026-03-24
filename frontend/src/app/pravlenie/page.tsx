@@ -7,8 +7,9 @@ import { useDoctors } from "@/entities/doctor";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { EmptyState } from "@/shared/ui";
-import { ROUTES } from "@/shared/config";
-import { resolvePendingPhotoUrl } from "@/shared/config";
+import { ROUTES, resolvePendingPhotoUrl } from "@/shared/config";
+import { useGSAP } from "@/shared/lib/useGSAP";
+import gsap from "gsap";
 
 const BOARD_ROLE_LABELS: Record<string, string> = {
   president: "Президент ассоциации",
@@ -19,6 +20,14 @@ export default function PravleniePage() {
   const { data: doctorsData, isLoading } = useDoctors({
     board_role: ["president", "pravlenie"],
     limit: 50,
+  });
+
+  const headerRef = useGSAP((_ctx, el) => {
+    gsap.fromTo(
+      el.querySelectorAll("[data-hero-text]"),
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.7, stagger: 0.1, ease: "power3.out" },
+    );
   });
 
   const doctors = doctorsData?.data ?? [];
@@ -33,24 +42,28 @@ export default function PravleniePage() {
       <Header />
 
       <main className="flex-1">
-        {/* Шапка */}
-        <div className="border-b border-border bg-bg-secondary">
-          <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-14">
-            <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted">
+        <div ref={headerRef} className="border-b border-border bg-bg-secondary">
+          <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-16">
+            <p
+              data-hero-text
+              className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted"
+            >
               Ассоциация трихологов
             </p>
-            <h1 className="font-heading text-4xl font-bold text-text-primary lg:text-5xl">
+            <h1
+              data-hero-text
+              className="font-heading text-4xl font-bold text-text-primary lg:text-5xl xl:text-6xl"
+            >
               Правление
             </h1>
-            <p className="mt-3 max-w-xl text-text-secondary">
+            <p data-hero-text className="mt-4 max-w-xl text-text-secondary">
               Руководство «Профессионального общества трихологов» — ведущие
               эксперты в области трихологии и дерматологии России
             </p>
           </div>
         </div>
 
-        {/* Карточки правления */}
-        <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8 lg:py-20">
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
           {isLoading ? (
             <div className="space-y-0 divide-y divide-border">
               {[1, 2, 3].map((i) => (
@@ -158,9 +171,11 @@ export default function PravleniePage() {
                         </div>
                       )}
 
-                      <p className="mt-4 text-sm font-medium text-text-secondary">
-                        {doctor.specialization}
-                      </p>
+                      {doctor.specialization && (
+                        <p className="mt-4 text-sm font-medium text-text-secondary">
+                          {doctor.specialization}
+                        </p>
+                      )}
 
                       {doctor.bio && (
                         <>

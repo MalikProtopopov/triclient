@@ -30,7 +30,9 @@ function DoctorsByCityContent() {
   const params = useParams();
   const citySlug = typeof params.citySlug === "string" ? params.citySlug : "";
 
-  const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const specFromUrl =
+    searchParams.get("specialization") ?? searchParams.get("search") ?? "";
+  const [search, setSearch] = useState(specFromUrl);
   const [page, setPage] = useState(1);
 
   const debouncedSearch = useDebouncedValue(search, 300);
@@ -39,7 +41,7 @@ function DoctorsByCityContent() {
   const { data: citiesData } = useCities({ withDoctors: true });
   const { data: doctorsData, isLoading: doctorsLoading } = useDoctors({
     city_slug: citySlug || undefined,
-    search:
+    specialization:
       debouncedSearch && debouncedSearch.length >= 2
         ? debouncedSearch
         : undefined,
@@ -54,7 +56,7 @@ function DoctorsByCityContent() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams();
-    if (debouncedSearch) urlParams.set("search", debouncedSearch);
+    if (debouncedSearch) urlParams.set("specialization", debouncedSearch);
     const qs = urlParams.toString();
     const target = `${ROUTES.DOCTORS_CITY(citySlug)}${qs ? `?${qs}` : ""}`;
     router.replace(target, { scroll: false });
@@ -77,7 +79,7 @@ function DoctorsByCityContent() {
       }
       router.push(
         debouncedSearch && debouncedSearch.length >= 2
-          ? `${ROUTES.DOCTORS_CITY(newSlug)}?search=${encodeURIComponent(debouncedSearch)}`
+          ? `${ROUTES.DOCTORS_CITY(newSlug)}?specialization=${encodeURIComponent(debouncedSearch)}`
           : ROUTES.DOCTORS_CITY(newSlug),
       );
       setPage(1);
@@ -156,7 +158,7 @@ function DoctorsByCityContent() {
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="flex-1">
               <Input
-                placeholder="Поиск по имени..."
+                placeholder="Поиск по специализации..."
                 value={search}
                 onChange={handleSearchChange}
               />

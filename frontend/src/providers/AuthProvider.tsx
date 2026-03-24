@@ -13,6 +13,7 @@ export interface SessionUser {
   email?: string;
   role?: "doctor" | "user";
   sidebarSections: string[];
+  specialization?: string | null;
 }
 
 interface AuthContextType {
@@ -86,6 +87,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           onboarding,
           email: me.email,
           role: me.role,
+          specialization: me.specialization ?? null,
           sidebarSections: me.sidebar_sections?.length
             ? me.sidebar_sections
             : DEFAULT_SIDEBAR_SECTIONS,
@@ -112,6 +114,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       onboarding,
       email: me.email,
       role: me.role,
+      specialization: me.specialization ?? null,
       sidebarSections: me.sidebar_sections?.length
         ? me.sidebar_sections
         : DEFAULT_SIDEBAR_SECTIONS,

@@ -173,9 +173,11 @@ export default function DoctorProfilePage() {
               <h1 data-hero-text className="font-heading text-3xl font-bold text-text-primary lg:text-4xl">
                 {fullName}
               </h1>
-              <p data-hero-text className="mt-3 text-lg text-text-secondary">
-                {doctor.specialization}
-              </p>
+              {doctor.specialization && (
+                <p data-hero-text className="mt-3 text-lg text-text-secondary">
+                  {doctor.specialization}
+                </p>
+              )}
 
               {(doctor.board_role || doctor.academic_degree) && (
                 <div className="mt-4 flex flex-wrap gap-2">

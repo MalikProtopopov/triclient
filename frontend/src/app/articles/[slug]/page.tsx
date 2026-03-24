@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 import { useArticle } from "@/entities/article";
 import { Header } from "@/widgets/header";
@@ -14,9 +15,9 @@ export default function ArticleDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const { data: article, isLoading, error } = useArticle(slug);
+  const { data: article, isLoading, isError, error } = useArticle(slug);
 
-  if (isLoading || !article) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col bg-bg">
         <Header />
@@ -33,12 +34,14 @@ export default function ArticleDetailPage() {
     );
   }
 
-  if (error) {
+  if (isError || !article) {
     return (
       <div className="flex min-h-screen flex-col bg-bg">
         <Header />
         <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 lg:px-8">
-          <p className="text-error">Статья не найдена</p>
+          <p className="text-error">
+            {error ? "Не удалось загрузить статью" : "Статья не найдена"}
+          </p>
         </main>
         <Footer />
       </div>
@@ -56,7 +59,20 @@ export default function ArticleDetailPage() {
           ← Все статьи
         </Link>
 
-        <div className="mb-6 h-64 w-full overflow-hidden rounded-xl bg-metal-light" />
+        {article.cover_image_url ? (
+          <div className="relative mb-6 h-64 w-full overflow-hidden rounded-xl bg-metal-light">
+            <Image
+              src={article.cover_image_url}
+              alt={article.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 896px) 100vw, 896px"
+              priority
+            />
+          </div>
+        ) : (
+          <div className="mb-6 h-64 w-full overflow-hidden rounded-xl bg-metal-light" />
+        )}
 
         <div className="mb-3 flex items-center gap-3">
           <p className="text-sm text-text-muted">

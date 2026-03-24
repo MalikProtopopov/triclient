@@ -4,6 +4,7 @@ export {
   useUpdatePersonalMutation,
   usePublicProfile,
   useUpdatePublicMutation,
+  useSubmitPublicProfileMutation,
   useUploadPhotoMutation,
   useUploadDiplomaMutation,
   useProfileEvents,
@@ -18,4 +19,5 @@ export type {
   PublicProfileDraft,
   UpdatePersonalRequest,
   UploadPhotoResponse,
+  PublicSubmitResponse,
 } from "./types";

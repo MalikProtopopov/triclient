@@ -163,7 +163,8 @@ export default function HomeClient() {
   const heroRef = useGSAP((_ctx, el) => {
     staggerReveal("[data-hero-text]", el, { y: 40, stagger: 0.12, duration: 0.7, start: "top 95%" });
     const orb = el.querySelector("[data-orb]");
-    if (orb) gsap.fromTo(orb, { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.5)", delay: 0.3 });
+    // Без scale/elastic: иначе + backdrop-filter на потомках дают мерцание при загрузке
+    if (orb) gsap.fromTo(orb, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.out", delay: 0.15 });
     staggerReveal("[data-stat-card]", el, { y: 24, stagger: 0.08, duration: 0.5, start: "top 95%" });
   });
 
@@ -244,9 +245,10 @@ export default function HomeClient() {
                       <div
                         className="absolute inset-[25px] rounded-full"
                         style={{
-                          background: "radial-gradient(circle at 40% 35%, rgba(255,255,255,0.5) 0%, transparent 60%)",
-                          backdropFilter: "blur(8px)",
-                          boxShadow: "inset 0 4px 20px rgba(255,255,255,0.4), inset 0 -4px 15px rgba(232,99,139,0.08)",
+                          background:
+                            "radial-gradient(circle at 40% 32%, rgba(255,255,255,0.58) 0%, rgba(255,255,255,0.18) 42%, transparent 68%)",
+                          boxShadow:
+                            "inset 0 4px 20px rgba(255,255,255,0.4), inset 0 -4px 15px rgba(232,99,139,0.08)",
                         }}
                       />
                       <div

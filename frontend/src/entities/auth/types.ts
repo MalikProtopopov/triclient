@@ -25,6 +25,8 @@ export interface AuthMeResponse {
   role: "doctor" | "user";
   is_staff: boolean;
   sidebar_sections: string[];
+  /** Для роли doctor — из профиля врача; иначе обычно null */
+  specialization?: string | null;
 }
 
 export interface RegisterRequest {

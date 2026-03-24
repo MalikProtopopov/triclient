@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+
+import { fetchPublicSettingsServer } from "@/entities/settings";
+
 import {
   Playfair_Display,
   Raleway,
@@ -104,28 +107,35 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Ассоциация трихологов",
-    template: "%s | Ассоциация трихологов",
-  },
-  description:
-    "Профессиональная ассоциация врачей-трихологов России. Каталог специалистов, мероприятия, сертификация.",
-  openGraph: {
-    type: "website",
-    locale: "ru_RU",
-    siteName: "Ассоциация трихологов",
-    title: "Ассоциация трихологов",
-    description:
-      "Профессиональная ассоциация врачей-трихологов России. Каталог специалистов, мероприятия, сертификация.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Ассоциация трихологов",
-    description:
-      "Профессиональная ассоциация врачей-трихологов России.",
-  },
-};
+const FALLBACK_SITE_NAME = "Ассоциация трихологов";
+const FALLBACK_DESCRIPTION =
+  "Профессиональная ассоциация врачей-трихологов России. Каталог специалистов, мероприятия, сертификация.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await fetchPublicSettingsServer();
+  const siteName = settings?.site_name?.trim() || FALLBACK_SITE_NAME;
+  const description = settings?.site_description?.trim() || FALLBACK_DESCRIPTION;
+
+  return {
+    title: {
+      default: siteName,
+      template: `%s | ${siteName}`,
+    },
+    description,
+    openGraph: {
+      type: "website",
+      locale: "ru_RU",
+      siteName: siteName,
+      title: siteName,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: siteName,
+      description,
+    },
+  };
+}
 
 export default function RootLayout({
   children,

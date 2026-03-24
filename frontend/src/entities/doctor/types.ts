@@ -11,15 +11,15 @@ export interface DoctorResponseSchema {
   first_name: string;
   last_name: string;
   middle_name: string;
-  specialization: string;
+  specialization: string | null;
   academic_degree: string;
   city: string;
   clinic_name: string;
   position: string;
   bio: string;
   photo_url: string | null;
-  public_phone: string;
-  public_email: string;
+  public_phone: string | null;
+  public_email: string | null;
   slug: string;
   is_active: boolean;
   seo: SeoMeta | null;

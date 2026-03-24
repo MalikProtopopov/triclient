@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
+import { usePublicSettings } from "@/entities/settings";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/shared/lib";
 import { ROUTES } from "@/shared/config";
@@ -24,6 +25,11 @@ export const Header = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout } = useAuth();
+  const { data: settings } = usePublicSettings();
+  const telegramLink =
+    settings?.telegram_bot_link && settings.telegram_bot_link.trim() !== ""
+      ? settings.telegram_bot_link.trim()
+      : null;
   useEffect(() => {
     const handleScroll = (): void => {
       setIsScrolled(window.scrollY > 0);
@@ -43,14 +49,27 @@ export const Header = () => {
         isScrolled ? "border-border shadow-sm" : "border-transparent",
       )}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
-        <Link href={ROUTES.HOME} className="relative block h-9 w-32">
-          <Image
-            src="/logo.png"
-            alt="Профессиональное общество трихологов"
-            fill
-            className="object-contain object-left"
-          />
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 lg:px-8">
+        <Link
+          href={ROUTES.HOME}
+          className="flex min-w-0 max-w-[calc(100%-3.25rem)] items-center gap-1.5 sm:max-w-none sm:gap-3 lg:shrink-0"
+        >
+          <span className="relative block h-9 w-[4.75rem] shrink-0 sm:w-28 md:w-32">
+            <Image
+              src="/logo.png"
+              alt={settings?.site_name ?? "Профессиональное общество трихологов"}
+              fill
+              className="object-contain object-left"
+            />
+          </span>
+          <span className="flex min-w-0 max-w-[6.25rem] flex-col justify-center leading-[1.1] sm:max-w-[7.5rem] md:max-w-none">
+            <span className="font-heading text-[9px] font-semibold tracking-wide text-text-primary sm:text-[10px] lg:text-[11px]">
+              Ассоциация
+            </span>
+            <span className="font-heading text-[9px] font-semibold tracking-wide text-text-muted sm:text-[10px] lg:text-[11px]">
+              трихологов России
+            </span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
@@ -71,6 +90,16 @@ export const Header = () => {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          {telegramLink && (
+            <a
+              href={telegramLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-text-secondary transition-colors hover:text-text-primary"
+            >
+              Telegram
+            </a>
+          )}
           {!isLoading && (
             <>
               {isAuthenticated ? (
@@ -130,6 +159,16 @@ export const Header = () => {
             ))}
           </nav>
           <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
+            {telegramLink && (
+              <a
+                href={telegramLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg px-4 py-3 text-sm text-text-secondary transition-colors hover:bg-bg hover:text-text-primary"
+              >
+                Telegram
+              </a>
+            )}
             {isAuthenticated ? (
               <>
                 <Link href={ROUTES.CABINET}>

@@ -122,7 +122,10 @@ const personalSchema = z.object({
   city: z.string().nullable(),
   clinic_name: z.string().nullable(),
   position: z.string().nullable(),
-  specialization: z.string().nullable(),
+  specialization: z
+    .string()
+    .max(255, "Не более 255 символов")
+    .nullable(),
   academic_degree: z.string().nullable(),
   colleague_contacts: z.string().nullable(),
 });
@@ -228,7 +231,11 @@ export default function PersonalInfoPage() {
             <Input label="Город" {...register("city")} />
             <Input label="Клиника" {...register("clinic_name")} />
             <Input label="Должность" {...register("position")} />
-            <Input label="Специализация" {...register("specialization")} />
+            <Input
+              label="Специализация"
+              maxLength={255}
+              {...register("specialization")}
+            />
             <Input
               label="Научная степень"
               {...register("academic_degree")}

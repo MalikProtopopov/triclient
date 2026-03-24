@@ -66,15 +66,12 @@ function TariffCard({
   tariff,
   onRegister,
   isRegistering,
-  disableRegister,
   isRegistered,
 }: {
   tariff: EventTariff;
   onRegister: (tariffId: string) => void;
-  /** Лоадер только на кнопке выбранного тарифа */
+  /** Лоадер и disabled только на кнопке выбранного тарифа */
   isRegistering: boolean;
-  /** Блокировать все кнопки «Зарегистрироваться», пока идёт запрос */
-  disableRegister: boolean;
   isRegistered: boolean;
 }) {
   const seatsLeft =
@@ -124,7 +121,7 @@ function TariffCard({
         <Button
           size="sm"
           className="mt-auto"
-          disabled={soldOut || disableRegister || tariff.is_active === false}
+          disabled={soldOut || tariff.is_active === false || isRegistering}
           onClick={() => onRegister(tariff.id)}
         >
           {isRegistering ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -440,6 +437,8 @@ export default function EventDetailPage() {
       return;
     }
 
+    if (registerMutation.isPending) return;
+
     setStep1Error(null);
     flushSync(() => {
       setRegisteringTariffId(tariffId);
@@ -617,7 +616,9 @@ export default function EventDetailPage() {
             <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
               Тарифы
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div
+              className={`grid gap-4 sm:grid-cols-2${registerMutation.isPending ? " cursor-wait" : ""}`}
+            >
               {event.tariffs
                 .filter((t) => t.is_active !== false)
                 .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
@@ -629,7 +630,6 @@ export default function EventDetailPage() {
                     isRegistering={
                       registerMutation.isPending && registeringTariffId === tariff.id
                     }
-                    disableRegister={registerMutation.isPending}
                     isRegistered={isRegistered}
                   />
                 ))}

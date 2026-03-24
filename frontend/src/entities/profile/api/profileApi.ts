@@ -7,6 +7,7 @@ import type {
   ProfileEvent,
   UpdatePersonalRequest,
   UploadPhotoResponse,
+  PublicSubmitResponse,
 } from "../types";
 
 export const profileApi = {
@@ -21,6 +22,9 @@ export const profileApi = {
 
   updatePublic: (data: Partial<PublicProfile>): Promise<PublicProfile> =>
     apiClient.patch(API_ENDPOINTS.PROFILE.PUBLIC, data),
+
+  submitPublic: (formData: FormData): Promise<PublicSubmitResponse> =>
+    apiClient.post(API_ENDPOINTS.PROFILE.PUBLIC_SUBMIT, formData),
 
   uploadPhoto: (formData: FormData): Promise<UploadPhotoResponse> =>
     apiClient.post(API_ENDPOINTS.PROFILE.PHOTO, formData),

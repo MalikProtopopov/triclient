@@ -272,6 +272,10 @@ export default function OnboardingProfilePage() {
   const handleStep2Next = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profileFilled) return;
+    if (specialization.length > 255) {
+      toast.error("Специализация не длиннее 255 символов");
+      return;
+    }
     try {
       await saveProfileMutation.mutateAsync({
         last_name: lastName,
@@ -438,6 +442,7 @@ export default function OnboardingProfilePage() {
                       value={specialization}
                       onChange={(e) => setSpecialization(e.target.value)}
                       placeholder="Трихология"
+                      maxLength={255}
                     />
                     <Input
                       label="Научная степень"

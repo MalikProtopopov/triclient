@@ -18,9 +18,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .filter(Boolean)
     .join(" ");
 
+  const descriptionParts = [doctor.specialization, doctor.city].filter(
+    (p): p is string => typeof p === "string" && p.trim().length > 0,
+  );
+  const description =
+    descriptionParts.length > 0 ? descriptionParts.join(" — ") : `Врач-трихолог — ${fullName}`;
+
   return buildMetadata(doctor.seo ?? null, {
     title: fullName,
-    description: `${doctor.specialization} — ${doctor.city}`,
+    description,
   });
 }
 

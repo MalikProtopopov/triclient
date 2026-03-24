@@ -26,7 +26,9 @@ function DoctorsContent() {
 
   const cityFromUrl = searchParams.get("city") ?? "";
   const citySlug = "";
-  const [search, setSearch] = useState(searchParams.get("search") ?? "");
+  const specFromUrl =
+    searchParams.get("specialization") ?? searchParams.get("search") ?? "";
+  const [search, setSearch] = useState(specFromUrl);
   const [page, setPage] = useState(1);
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -34,9 +36,10 @@ function DoctorsContent() {
 
   useEffect(() => {
     if (cityFromUrl) {
-      const target = debouncedSearch && debouncedSearch.length >= 2
-        ? `${ROUTES.DOCTORS_CITY(cityFromUrl)}?search=${encodeURIComponent(debouncedSearch)}`
-        : ROUTES.DOCTORS_CITY(cityFromUrl);
+      const target =
+        debouncedSearch && debouncedSearch.length >= 2
+          ? `${ROUTES.DOCTORS_CITY(cityFromUrl)}?specialization=${encodeURIComponent(debouncedSearch)}`
+          : ROUTES.DOCTORS_CITY(cityFromUrl);
       router.replace(target, { scroll: false });
       return;
     }
@@ -45,7 +48,7 @@ function DoctorsContent() {
   useEffect(() => {
     if (cityFromUrl) return;
     const params = new URLSearchParams();
-    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (debouncedSearch) params.set("specialization", debouncedSearch);
     const qs = params.toString();
     router.replace(qs ? `?${qs}` : "/doctors", { scroll: false });
   }, [cityFromUrl, debouncedSearch, router]);
@@ -53,7 +56,7 @@ function DoctorsContent() {
   const { data: citiesData } = useCities({ withDoctors: true });
   const { data: doctorsData, isLoading } = useDoctors({
     city_slug: citySlug || undefined,
-    search:
+    specialization:
       debouncedSearch && debouncedSearch.length >= 2
         ? debouncedSearch
         : undefined,
@@ -95,7 +98,7 @@ function DoctorsContent() {
       if (!newSlug) return;
       router.push(
         debouncedSearch && debouncedSearch.length >= 2
-          ? `${ROUTES.DOCTORS_CITY(newSlug)}?search=${encodeURIComponent(debouncedSearch)}`
+          ? `${ROUTES.DOCTORS_CITY(newSlug)}?specialization=${encodeURIComponent(debouncedSearch)}`
           : ROUTES.DOCTORS_CITY(newSlug),
       );
       setPage(1);
@@ -155,7 +158,7 @@ function DoctorsContent() {
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end">
             <div className="flex-1">
               <Input
-                placeholder="Поиск по имени..."
+                placeholder="Поиск по специализации..."
                 value={search}
                 onChange={handleSearchChange}
               />

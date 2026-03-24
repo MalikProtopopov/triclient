@@ -88,6 +88,14 @@ export interface UploadPhotoResponse {
   pending_moderation: boolean;
 }
 
+/** Ответ POST /profile/public/submit (multipart) */
+export interface PublicSubmitResponse {
+  message: string;
+  pending_moderation: boolean;
+  /** Превью URL только если в этом запросе был файл photo */
+  photo_url: string;
+}
+
 export interface ProfileEvent {
   registration_id: string;
   event_id: string;

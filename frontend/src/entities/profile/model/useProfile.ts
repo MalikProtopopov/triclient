@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { profileApi } from "../api/profileApi";
 import type {
-  PersonalProfile,
   PublicProfile,
   UpdatePersonalRequest,
   UploadPhotoResponse,
@@ -42,6 +41,16 @@ export const useUpdatePublicMutation = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<PublicProfile>) => profileApi.updatePublic(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: profileKeys.public() });
+    },
+  });
+};
+
+export const useSubmitPublicProfileMutation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (formData: FormData) => profileApi.submitPublic(formData),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: profileKeys.public() });
     },

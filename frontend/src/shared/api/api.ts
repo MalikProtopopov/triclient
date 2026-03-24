@@ -10,6 +10,8 @@ class ApiClient {
       baseURL,
       headers: { "Content-Type": "application/json" },
       withCredentials: true,
+      // Массивы в query: board_role=a&board_role=b (бэкенд не принимает board_role[]=...)
+      paramsSerializer: { indexes: null },
     });
 
     this.instance.interceptors.request.use((config) => {

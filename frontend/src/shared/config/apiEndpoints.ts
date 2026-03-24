@@ -48,6 +48,7 @@ export const API_ENDPOINTS = {
   PROFILE: {
     PERSONAL: "/api/v1/profile/personal",
     PUBLIC: "/api/v1/profile/public",
+    PUBLIC_SUBMIT: "/api/v1/profile/public/submit",
     PHOTO: "/api/v1/profile/photo",
     EVENTS: "/api/v1/profile/events",
     DIPLOMA_PHOTO: "/api/v1/profile/diploma-photo",

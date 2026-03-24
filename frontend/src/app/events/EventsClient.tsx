@@ -89,10 +89,13 @@ export default function EventsClient() {
             <h1 data-hero-text className="font-heading text-4xl font-bold text-text-primary lg:text-5xl xl:text-6xl">
               Мероприятия
             </h1>
+            <p data-hero-text className="mt-4 max-w-xl text-text-secondary">
+              Конференции, семинары и образовательные события для врачей-трихологов
+            </p>
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-14">
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
           <div className="mb-10 flex gap-1 self-start rounded-xl border border-border bg-bg-secondary p-1 w-fit">
             {(["upcoming", "past"] as const).map((tab) => (
               <button

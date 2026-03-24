@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 
+import { useDocuments } from "@/entities/document";
 import { usePublicSettings } from "@/entities/settings";
 import { ROUTES } from "@/shared/config";
+
+const FOOTER_DOCUMENTS_LIMIT = 4;
 
 const FALLBACK = {
   contact_email: "info@trichologia.ru",
@@ -13,9 +16,20 @@ const FALLBACK = {
 
 export const Footer = () => {
   const { data: settings } = usePublicSettings();
+  const { data: documentsData, isSuccess: documentsLoaded } = useDocuments();
+  const footerDocuments = documentsLoaded
+    ? (documentsData?.data ?? [])
+        .filter((d) => d.is_active)
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .slice(0, FOOTER_DOCUMENTS_LIMIT)
+    : [];
   const email = settings?.contact_email ?? FALLBACK.contact_email;
   const phone = settings?.contact_phone ?? FALLBACK.contact_phone;
   const siteName = settings?.site_name ?? FALLBACK.site_name;
+  const telegramLink =
+    settings?.telegram_bot_link && settings.telegram_bot_link.trim() !== ""
+      ? settings.telegram_bot_link.trim()
+      : null;
 
   return (
     <footer className="border-t border-border bg-[#4a4a4a]">
@@ -24,12 +38,17 @@ export const Footer = () => {
           {/* Лого + описание */}
           <div>
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent">
                 <span className="text-sm font-bold text-accent-contrast">АТ</span>
               </div>
-              <span className="font-heading text-base font-semibold text-white">
-                {siteName}
-              </span>
+              <div className="min-w-0 leading-[1.15]">
+                <span className="block font-heading text-[10px] font-semibold tracking-wide text-white sm:text-[11px]">
+                  Ассоциация
+                </span>
+                <span className="block font-heading text-[10px] font-semibold tracking-wide text-white/70 sm:text-[11px]">
+                  трихологов России
+                </span>
+              </div>
             </div>
             <p className="max-w-xs text-xs leading-relaxed text-white/40">
               Профессиональное объединение врачей-трихологов России.
@@ -103,6 +122,16 @@ export const Footer = () => {
               <a href={`tel:${phone.replace(/\D/g, "")}`} className="transition-colors hover:text-white">
                 {phone}
               </a>
+              {telegramLink && (
+                <a
+                  href={telegramLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-white"
+                >
+                  Telegram
+                </a>
+              )}
               <span className="text-xs leading-relaxed">
                 Москва, Спартаковская пл., д.&nbsp;14, стр.&nbsp;4, офис 4107
               </span>
@@ -114,17 +143,22 @@ export const Footer = () => {
           <p className="text-xs text-white/25">
             &copy; {new Date().getFullYear()} {siteName}. Все права защищены.
           </p>
-          <div className="flex flex-wrap items-center gap-4 text-xs text-white/25">
-            <Link href={ROUTES.UI_KIT} className="transition-colors hover:text-white/50">
-              UI Kit
-            </Link>
-            <Link href={ROUTES.DOCUMENTS} className="transition-colors hover:text-white/50">
-              Политика конфиденциальности
-            </Link>
-            <Link href={ROUTES.DOCUMENTS} className="transition-colors hover:text-white/50">
-              Оферта
-            </Link>
-          </div>
+          {footerDocuments.length > 0 && (
+            <nav
+              className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-white/25"
+              aria-label="Документы организации"
+            >
+              {footerDocuments.map((doc) => (
+                <Link
+                  key={doc.id}
+                  href={ROUTES.DOCUMENT(doc.slug)}
+                  className="transition-colors hover:text-white/50"
+                >
+                  {doc.title}
+                </Link>
+              ))}
+            </nav>
+          )}
         </div>
       </div>
     </footer>

@@ -7,18 +7,15 @@ import { z } from "zod";
 import { Upload, AlertCircle, XCircle, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
   usePublicProfile,
-  useUpdatePublicMutation,
-  useUploadPhotoMutation,
+  useSubmitPublicProfileMutation,
+  profileKeys,
 } from "@/entities/profile";
 import type { ApiError } from "@/entities/auth";
-import type {
-  PublicProfile,
-  PublicProfileDraft,
-  UploadPhotoResponse,
-} from "@/entities/profile";
+import type { PublicProfile } from "@/entities/profile";
 import { useCities } from "@/entities/doctor";
 import { Card, Button, Input, DropdownSelect, PageLoader } from "@/shared/ui";
 import { resolvePendingPhotoUrl } from "@/shared/config";
@@ -71,19 +68,56 @@ const publicSchema = z.object({
   public_phone: z.string().nullable(),
   city_id: z.string().nullable(),
   clinic_name: z.string().nullable(),
-  specialization: z.string().nullable(),
+  specialization: z
+    .string()
+    .max(255, "Не более 255 символов")
+    .nullable(),
   academic_degree: z.string().nullable(),
 });
 
 type PublicFormValues = z.infer<typeof publicSchema>;
 
+const PUBLIC_SUBMIT_FORM_KEYS = [
+  "bio",
+  "public_email",
+  "public_phone",
+  "city_id",
+  "clinic_name",
+  "specialization",
+  "academic_degree",
+] as const satisfies readonly (keyof PublicFormValues)[];
+
+function buildPublicSubmitFormData(
+  values: PublicFormValues,
+  dirtyFields: Partial<Readonly<Record<keyof PublicFormValues, boolean>>>,
+  file: File | null,
+): FormData | null {
+  const fd = new FormData();
+  for (const key of PUBLIC_SUBMIT_FORM_KEYS) {
+    if (!dirtyFields[key]) continue;
+    const raw = values[key];
+    if (raw == null) continue;
+    const s = typeof raw === "string" ? raw.trim() : String(raw);
+    if (s === "") continue;
+    fd.append(key, s);
+  }
+  if (file) {
+    fd.append("photo", file);
+  }
+  if ([...fd.entries()].length === 0) return null;
+  return fd;
+}
+
 export default function PublicProfilePage() {
+  const queryClient = useQueryClient();
   const { data: profile, isLoading } = usePublicProfile();
   const { data: cities = [] } = useCities();
-  const updateMutation = useUpdatePublicMutation();
-  const photoMutation = useUploadPhotoMutation();
+  const submitMutation = useSubmitPublicProfileMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditingAfterReject, setIsEditingAfterReject] = useState(false);
+  const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
+  /** Сброс нативного input[type=file] без чтения ref внутри onSubmit (eslint react-hooks/refs). */
+  const [fileInputKey, setFileInputKey] = useState(0);
 
   const draft = profile?.pending_draft;
   const isFormLocked =
@@ -95,7 +129,7 @@ export default function PublicProfilePage() {
     control,
     handleSubmit,
     reset,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, dirtyFields },
   } = useForm<PublicFormValues>({
     resolver: zodResolver(publicSchema),
     defaultValues: {
@@ -125,48 +159,56 @@ export default function PublicProfilePage() {
   }, [profile, reset, isDirty]);
 
   const onSubmit = (values: PublicFormValues) => {
-    updateMutation.mutate(values, {
-      onSuccess: (data) => {
-        toast.success("Изменения отправлены на модерацию");
+    const fd = buildPublicSubmitFormData(values, dirtyFields, pendingPhotoFile);
+    if (!fd) return;
+
+    submitMutation.mutate(fd, {
+      onSuccess: async (response) => {
+        toast.success(
+          response.message?.trim()
+            ? response.message
+            : "Изменения отправлены на модерацию",
+        );
+        await queryClient.refetchQueries({ queryKey: profileKeys.public() });
+        const fresh = queryClient.getQueryData<PublicProfile>(
+          profileKeys.public(),
+        );
+        if (fresh) {
+          const display = getDisplayData(fresh);
+          reset({
+            bio: display.bio,
+            public_email: display.public_email,
+            public_phone: display.public_phone,
+            city_id: display.city_id,
+            clinic_name: display.clinic_name,
+            specialization: display.specialization,
+            academic_degree: display.academic_degree,
+          });
+        }
+        setPendingPhotoFile(null);
+        setFileInputKey((k) => k + 1);
         setIsEditingAfterReject(false);
-        const display = getDisplayData(data as PublicProfile);
-        reset({
-          bio: display.bio,
-          public_email: display.public_email,
-          public_phone: display.public_phone,
-          city_id: display.city_id,
-          clinic_name: display.clinic_name,
-          specialization: display.specialization,
-          academic_degree: display.academic_degree,
-        });
       },
       onError: (error) => {
         const axiosErr = error as AxiosError<ApiError>;
+        const status = axiosErr.response?.status;
         const code = axiosErr.response?.data?.error?.code;
+        const message = axiosErr.response?.data?.error?.message;
         if (code === "DRAFT_ALREADY_PENDING") {
           toast.error("У вас уже есть изменения на модерации");
+        } else if (status === 422) {
+          toast.error(message || "Проверьте данные формы");
         } else {
-          toast.error("Не удалось сохранить изменения");
+          toast.error(message || "Не удалось отправить изменения");
         }
       },
     });
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const fd = new FormData();
-    fd.append("file", file);
-    photoMutation.mutate(fd, {
-      onSuccess: (data: UploadPhotoResponse) => {
-        toast.success(
-          data.message ??
-            "Фото отправлено на модерацию. Изменения появятся на сайте после одобрения администратором",
-        );
-      },
-      onError: () => toast.error("Не удалось загрузить фото"),
-    });
+    setPendingPhotoFile(file);
   };
 
   const cityOptions = cities.map((c) => ({ value: c.id, label: c.name }));
@@ -267,7 +309,9 @@ export default function PublicProfilePage() {
               const displayPhotoUrl =
                 draftPhotoUrl ?? profile?.photo_url ?? null;
               const showModerationBadge =
-                profile?.photo_pending_moderation ?? !!draftPhotoKey;
+                Boolean(profile?.photo_pending_moderation) ||
+                Boolean(draftPhotoKey) ||
+                pendingPhotoFile != null;
 
               return (
                 <>
@@ -284,30 +328,38 @@ export default function PublicProfilePage() {
                   )}
                   {showModerationBadge && (
                     <p className="text-center text-xs text-warning">
-                      {draftPhotoKey
-                        ? "Новое фото на модерации"
-                        : "Фото на модерации"}
+                      {pendingPhotoFile
+                        ? "Фото будет отправлено при сохранении"
+                        : draftPhotoKey
+                          ? "Новое фото на модерации"
+                          : "Фото на модерации"}
                     </p>
                   )}
                 </>
               );
             })()}
+            {pendingPhotoFile && (
+              <p className="text-center text-xs text-text-secondary">
+                Выбрано: {pendingPhotoFile.name}
+              </p>
+            )}
             <input
+              key={fileInputKey}
               ref={fileInputRef}
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={handlePhotoUpload}
+              onChange={handlePhotoSelect}
             />
             <Button
               type="button"
               variant="secondary"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
-              disabled={photoMutation.isPending || isFormLocked}
+              disabled={submitMutation.isPending || isFormLocked}
             >
               <Upload className="mr-1.5 h-4 w-4" />
-              {photoMutation.isPending ? "Загрузка..." : "Загрузить фото"}
+              Выбрать фото
             </Button>
           </div>
 
@@ -362,6 +414,7 @@ export default function PublicProfilePage() {
             />
             <Input
               label="Специализация"
+              maxLength={255}
               {...register("specialization")}
               disabled={isFormLocked}
             />
@@ -375,9 +428,13 @@ export default function PublicProfilePage() {
 
           <Button
             type="submit"
-            disabled={isFormLocked || !isDirty || updateMutation.isPending}
+            disabled={
+              isFormLocked ||
+              submitMutation.isPending ||
+              !(isDirty || pendingPhotoFile)
+            }
           >
-            {updateMutation.isPending
+            {submitMutation.isPending
               ? "Сохранение..."
               : "Сохранить изменения"}
           </Button>

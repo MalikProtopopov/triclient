@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown, Download, ArrowRight } from "lucide-react";
+import gsap from "gsap";
 
 import { useDocuments } from "@/entities/document";
 import { Header } from "@/widgets/header";
@@ -10,11 +11,20 @@ import { Footer } from "@/widgets/footer";
 import { Button, SkeletonCard } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { cn } from "@/shared/lib";
+import { useGSAP } from "@/shared/lib/useGSAP";
 
 export default function DocumentsClient() {
   const { data, isLoading } = useDocuments();
   const documents = data?.data ?? [];
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+
+  const headerRef = useGSAP((_ctx, el) => {
+    gsap.fromTo(
+      el.querySelectorAll("[data-hero-text]"),
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.7, stagger: 0.1, ease: "power3.out" },
+    );
+  });
 
   const toggleOpen = (id: string) => {
     setOpenIds((prev) => {
@@ -31,19 +41,37 @@ export default function DocumentsClient() {
   return (
     <div className="flex min-h-screen flex-col bg-bg">
       <Header />
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 lg:px-8">
-        <h1 className="mb-8 font-heading text-3xl font-semibold text-text-primary">
-          Документы организации
-        </h1>
-
-        {isLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
+      <main className="flex-1">
+        <div ref={headerRef} className="border-b border-border bg-bg-secondary">
+          <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-16">
+            <p
+              data-hero-text
+              className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted"
+            >
+              Ассоциация трихологов
+            </p>
+            <h1
+              data-hero-text
+              className="font-heading text-4xl font-bold text-text-primary lg:text-5xl xl:text-6xl"
+            >
+              Документы организации
+            </h1>
+            <p data-hero-text className="mt-4 max-w-xl text-text-secondary">
+              Уставные и правовые материалы, политики и официальные документы общества
+            </p>
           </div>
-        ) : (
-          <div className="space-y-2">
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
+          <div className="mx-auto max-w-4xl">
+            {isLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <SkeletonCard key={i} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
             {documents.map((doc) => {
               const isOpen = openIds.has(doc.id);
               return (
@@ -96,8 +124,10 @@ export default function DocumentsClient() {
                 </div>
               );
             })}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </main>
       <Footer />
     </div>

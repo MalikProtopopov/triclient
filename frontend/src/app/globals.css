@@ -177,8 +177,8 @@ h6 {
   50% { transform: translateY(-20px) rotate(5deg); }
 }
 @keyframes orb-pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.8; }
+  0%, 100% { opacity: 0.62; }
+  50% { opacity: 0.78; }
 }
 @keyframes orb-dot {
   0%, 100% { transform: translateY(0) scale(1); }
