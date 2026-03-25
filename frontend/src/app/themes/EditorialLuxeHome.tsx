@@ -7,7 +7,7 @@ import { Calendar, MapPin, Check, ArrowRight } from "lucide-react";
 
 import { useEvents } from "@/entities/event";
 import { useArticles } from "@/entities/article";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth, shouldSkipClientOnboarding } from "@/providers/AuthProvider";
 import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
 
@@ -54,8 +54,8 @@ export const EditorialLuxeHome = () => {
   const { isAuthenticated, user } = useAuth();
   const isOnboarded =
     isAuthenticated &&
-    (user?.onboarding?.next_step === "completed" ||
-      user?.onboarding?.next_step === "done");
+    !!user?.onboarding &&
+    shouldSkipClientOnboarding(user.onboarding);
 
   const { data: eventsData, isLoading: eventsLoading } = useEvents({
     period: "upcoming",

@@ -16,13 +16,15 @@ export interface LoginRequest {
 export interface LoginResponse {
   access_token: string;
   token_type: string;
-  role?: "doctor" | "user";
+  /** До выбора роли в БД бэкенд может отдавать `pending` */
+  role?: "doctor" | "user" | "pending";
 }
 
 export interface AuthMeResponse {
   id: string;
   email: string;
-  role: "doctor" | "user";
+  /** Эффективная роль из БД; `pending` пока роль не выбрана через онбординг */
+  role: "doctor" | "user" | "pending";
   is_staff: boolean;
   sidebar_sections: string[];
   /** Для роли doctor — из профиля врача; иначе обычно null */
@@ -66,7 +68,23 @@ export type OnboardingNextStep =
   | "wait_moderation"
   | "pay_entry_fee"
   | "completed"
-  | "done";
+  | "done"
+  /** Staff (admin / manager / accountant) — клиентский онбординг не применяется */
+  | "not_applicable";
+
+export type ModerationStatusValue =
+  | "pending_review"
+  | "approved"
+  | "rejected"
+  | "active"
+  | "deactivated"
+  | null;
+
+export interface DoctorOnboardingSummary {
+  moderation_status: ModerationStatusValue;
+  submitted_at: string | null;
+  rejection_comment: string | null;
+}
 
 export interface OnboardingStatus {
   email_verified: boolean;
@@ -75,14 +93,28 @@ export interface OnboardingStatus {
   profile_filled: boolean;
   documents_uploaded: boolean;
   has_medical_diploma: boolean;
-  moderation_status: "pending_review" | "approved" | "rejected" | "active" | "deactivated" | null;
+  moderation_status: ModerationStatusValue;
   submitted_at: string | null;
   rejection_comment: string | null;
   next_step: OnboardingNextStep;
+  /** false для staff — не показывать клиентский онбординг (если нет в ответе — считаем true) */
+  onboarding_applicable?: boolean;
+  /** true — апгрейд user → doctor через повторный choose-role */
+  can_upgrade_to_doctor?: boolean;
+  /** Краткая подпись шага на русском */
+  status_label?: string | null;
+  /** Сводка по заявке врача; у staff — null */
+  doctor_onboarding_summary?: DoctorOnboardingSummary | null;
 }
 
 export interface ChooseRoleRequest {
   role: "doctor" | "user";
+}
+
+/** Ответ POST /onboarding/choose-role; при реальном изменении роли — новый JWT */
+export interface ChooseRoleResponse {
+  message?: string;
+  access_token?: string;
 }
 
 export interface DoctorProfileRequest {

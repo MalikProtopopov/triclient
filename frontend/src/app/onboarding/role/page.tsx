@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Stethoscope, User, Loader2 } from "lucide-react";
@@ -11,24 +11,38 @@ import { Footer } from "@/widgets/footer";
 import { Button, Card } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { useOnboardingStatus, useChooseRoleMutation } from "@/entities/auth";
-import { getOnboardingStepRoute } from "@/providers/AuthProvider";
+import { getOnboardingStepRoute, useAuth } from "@/providers/AuthProvider";
 
 export default function OnboardingRolePage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [selectedNonDoctor, setSelectedNonDoctor] = useState(false);
   const chooseRoleMutation = useChooseRoleMutation();
 
   const { data: status, isLoading } = useOnboardingStatus();
   const isSubmitting = chooseRoleMutation.isPending;
 
-  if (status && status.next_step !== "choose_role") {
+  const isDoctorUpgradeFlow =
+    !!status &&
+    Boolean(status.can_upgrade_to_doctor) &&
+    status.next_step === "completed";
+
+  const shouldRedirectAway =
+    !!status &&
+    status.next_step !== "choose_role" &&
+    !isDoctorUpgradeFlow;
+
+  useEffect(() => {
+    if (!shouldRedirectAway || !status) return;
     router.replace(getOnboardingStepRoute(status.next_step));
-    return null;
-  }
+  }, [shouldRedirectAway, status, router]);
 
   const handleDoctorSelect = async () => {
     try {
-      await chooseRoleMutation.mutateAsync({ role: "doctor" });
+      const res = await chooseRoleMutation.mutateAsync({ role: "doctor" });
+      if (res.access_token) {
+        await login(res.access_token);
+      }
       toast.success("Роль сохранена");
       router.push(ROUTES.ONBOARDING_PROFILE);
     } catch {
@@ -55,6 +69,10 @@ export default function OnboardingRolePage() {
         <Footer />
       </div>
     );
+  }
+
+  if (shouldRedirectAway) {
+    return null;
   }
 
   if (selectedNonDoctor) {
@@ -87,7 +105,9 @@ export default function OnboardingRolePage() {
       <Header />
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         <h1 className="mb-8 text-center text-2xl font-semibold text-text-primary">
-          Добро пожаловать! Выберите свою роль
+          {isDoctorUpgradeFlow
+            ? "Продолжить регистрацию врача"
+            : "Добро пожаловать! Выберите свою роль"}
         </h1>
         <div className="grid w-full max-w-2xl gap-6 sm:grid-cols-2">
           <Card hover className="flex flex-col">

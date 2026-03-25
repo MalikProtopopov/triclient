@@ -28,6 +28,7 @@ export type {
   OnboardingNextStep,
   AuthMeResponse,
   ChooseRoleRequest,
+  ChooseRoleResponse,
   DoctorProfileRequest,
   ChangeEmailRequest,
   ChangePasswordRequest,

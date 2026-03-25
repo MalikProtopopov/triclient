@@ -8,7 +8,7 @@ import { CabinetSidebar } from "@/widgets/cabinet-sidebar";
 import { RequireAuth } from "@/providers/RequireAuth";
 import { cn } from "@/shared/lib";
 import { useOnboardingStatus } from "@/entities/auth";
-import { getOnboardingStepRoute } from "@/providers/AuthProvider";
+import { getOnboardingStepRoute, shouldSkipClientOnboarding } from "@/providers/AuthProvider";
 
 function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -23,7 +23,7 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (status && status.next_step !== "completed" && status.next_step !== "done") {
+  if (status && !shouldSkipClientOnboarding(status)) {
     const targetRoute = getOnboardingStepRoute(status.next_step);
     if (targetRoute !== pathname) {
       router.replace(targetRoute);

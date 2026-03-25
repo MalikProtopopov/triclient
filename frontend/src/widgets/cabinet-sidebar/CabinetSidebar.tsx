@@ -12,6 +12,7 @@ import {
   Award,
   MessageCircle,
   Settings,
+  Stethoscope,
   Vote,
   Users,
   ArrowLeft,
@@ -22,6 +23,7 @@ import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 
 import { useAuth } from "@/providers/AuthProvider";
+import { useOnboardingStatus } from "@/entities/auth";
 import { usePersonalProfile, usePublicProfile } from "@/entities/profile";
 import { ROUTES } from "@/shared/config";
 import { resolvePendingPhotoUrl } from "@/shared/config";
@@ -51,6 +53,7 @@ export const CabinetSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { data: onboardingStatus } = useOnboardingStatus({ enabled: !!user });
   const sidebarSections = user?.sidebarSections;
   const hasPersonalSection = sidebarSections?.includes("personal") ?? false;
 
@@ -125,6 +128,18 @@ export const CabinetSidebar = () => {
               {item.label}
             </Link>
           ))}
+          {onboardingStatus?.can_upgrade_to_doctor && (
+            <Link
+              href={ROUTES.ONBOARDING_ROLE}
+              className={cn(
+                "mt-2 flex items-center gap-3 rounded-lg border border-accent/30 bg-accent/5 px-3 py-2.5 text-sm font-medium text-accent transition-colors duration-200 hover:bg-accent/10",
+                pathname === ROUTES.ONBOARDING_ROLE && "bg-accent/10",
+              )}
+            >
+              <Stethoscope className="h-4 w-4 flex-shrink-0" />
+              Стать врачом
+            </Link>
+          )}
         </div>
       </nav>
 

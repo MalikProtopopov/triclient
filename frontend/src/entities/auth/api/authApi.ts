@@ -13,6 +13,7 @@ import type {
   OnboardingStatus,
   AuthMeResponse,
   ChooseRoleRequest,
+  ChooseRoleResponse,
   DoctorProfileRequest,
   ChangeEmailRequest,
   ChangePasswordRequest,
@@ -46,7 +47,7 @@ export const authApi = {
   getOnboardingStatus: (): Promise<OnboardingStatus> =>
     apiClient.get(API_ENDPOINTS.ONBOARDING.STATUS),
 
-  chooseRole: (data: ChooseRoleRequest): Promise<{ message: string }> =>
+  chooseRole: (data: ChooseRoleRequest): Promise<ChooseRoleResponse> =>
     apiClient.post(API_ENDPOINTS.ONBOARDING.CHOOSE_ROLE, data),
 
   saveDoctorProfile: (data: DoctorProfileRequest): Promise<{ message: string }> =>

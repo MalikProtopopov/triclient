@@ -18,7 +18,7 @@ import type { ApiError } from "@/entities/auth";
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { login, isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -32,11 +32,11 @@ export default function LoginPage() {
   }, [searchParams, router]);
 
   useEffect(() => {
-    if (!isAuthLoading && isAuthenticated) {
+    if (!isAuthLoading && isAuthenticated && user) {
       const redirectParam = searchParams.get("redirect");
-      router.replace(redirectParam || ROUTES.CABINET);
+      router.replace(getPostLoginRedirect(user.onboarding, redirectParam));
     }
-  }, [isAuthLoading, isAuthenticated, searchParams, router]);
+  }, [isAuthLoading, isAuthenticated, user, searchParams, router]);
 
   if (isAuthLoading || isAuthenticated) {
     return (

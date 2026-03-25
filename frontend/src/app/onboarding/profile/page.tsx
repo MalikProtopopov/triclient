@@ -354,6 +354,10 @@ export default function OnboardingProfilePage() {
         <div className="mx-auto max-w-2xl">
           <OnboardingProgress currentStep={currentStep} />
 
+          {status?.status_label && (
+            <p className="mb-4 text-sm text-text-muted">{status.status_label}</p>
+          )}
+
           {status?.moderation_status === "rejected" && status.rejection_comment && (
             <div className="mb-6 rounded-xl border border-red-500/50 bg-red-500/10 px-5 py-4 text-sm text-red-700 dark:text-red-400">
               <strong>Заявка отклонена.</strong> Причина: {status.rejection_comment}

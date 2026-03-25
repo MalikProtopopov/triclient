@@ -11,7 +11,7 @@ const DEFAULT_SIDEBAR_SECTIONS = ["cabinet", "events", "settings"];
 export interface SessionUser {
   onboarding: OnboardingStatus;
   email?: string;
-  role?: "doctor" | "user";
+  role?: "doctor" | "user" | "pending";
   sidebarSections: string[];
   specialization?: string | null;
 }
@@ -45,13 +45,23 @@ const NEXT_STEP_ROUTES: Partial<Record<OnboardingNextStep, string>> = {
   pay_entry_fee: ROUTES.CABINET_PAYMENTS,
   completed: ROUTES.CABINET,
   done: ROUTES.CABINET,
+  not_applicable: ROUTES.CABINET,
 };
+
+/** Клиентский онбординг не нужен или уже завершён (в т.ч. staff). */
+export function shouldSkipClientOnboarding(status: OnboardingStatus): boolean {
+  if (status.onboarding_applicable === false) return true;
+  if (status.next_step === "not_applicable") return true;
+  if (status.next_step === "completed" || status.next_step === "done") return true;
+  return false;
+}
 
 export function getPostLoginRedirect(
   onboarding: OnboardingStatus,
   redirectParam?: string | null,
 ): string {
   if (redirectParam) return redirectParam;
+  if (shouldSkipClientOnboarding(onboarding)) return ROUTES.CABINET;
   return NEXT_STEP_ROUTES[onboarding.next_step] ?? ROUTES.CABINET;
 }
 

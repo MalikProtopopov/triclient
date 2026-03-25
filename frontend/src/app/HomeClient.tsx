@@ -12,7 +12,7 @@ import { Footer } from "@/widgets/footer";
 import { Button } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth, shouldSkipClientOnboarding } from "@/providers/AuthProvider";
 import { useGSAP } from "@/shared/lib/useGSAP";
 import { staggerReveal, parallaxY, gsap } from "@/shared/lib/animations";
 
@@ -149,7 +149,10 @@ function HomeMissionSection() {
 
 export default function HomeClient() {
   const { isAuthenticated, user } = useAuth();
-  const isOnboarded = isAuthenticated && (user?.onboarding?.next_step === "completed" || user?.onboarding?.next_step === "done");
+  const isOnboarded =
+    isAuthenticated &&
+    !!user?.onboarding &&
+    shouldSkipClientOnboarding(user.onboarding);
   const { data: eventsData, isLoading: eventsLoading } = useEvents({
     period: "upcoming",
     limit: 4,
