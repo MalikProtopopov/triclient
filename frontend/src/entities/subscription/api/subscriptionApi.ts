@@ -5,6 +5,7 @@ import type {
   SubscriptionStatusResponse,
   SubscriptionPayRequest,
   SubscriptionPayResponse,
+  SubscriptionPayArrearsRequest,
 } from "../types";
 
 export const subscriptionApi = {
@@ -13,4 +14,9 @@ export const subscriptionApi = {
 
   pay: (request: SubscriptionPayRequest): Promise<SubscriptionPayResponse> =>
     apiClient.post(API_ENDPOINTS.SUBSCRIPTIONS.PAY, request),
+
+  payArrears: (
+    request: SubscriptionPayArrearsRequest,
+  ): Promise<SubscriptionPayResponse> =>
+    apiClient.post(API_ENDPOINTS.SUBSCRIPTIONS.PAY_ARREARS, request),
 };

@@ -136,6 +136,7 @@ function SuccessContent() {
 
   if (state === "success" && paymentData) {
     const isEvent = paymentData.product_type === "event";
+    const isArrears = paymentData.product_type === "membership_arrears";
     return (
       <main className={mainClass}>
         <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
@@ -144,21 +145,35 @@ function SuccessContent() {
         <h1 className="mb-2 font-heading text-2xl font-bold text-text-primary">
           {isEvent
             ? "Билет оплачен!"
-            : "Подписка активирована!"}
+            : isArrears
+              ? "Задолженность оплачена"
+              : "Подписка активирована!"}
         </h1>
         <p className="mb-6 text-sm text-text-secondary">
           {isEvent
             ? paymentData.event_title
               ? `Мероприятие: ${paymentData.event_title}`
               : "Оплата прошла успешно."
-            : "Оплата прошла успешно. Чек отправлен на ваш email."}
+            : isArrears
+              ? "Оплата прошла успешно. Статус задолженности обновится в личном кабинете."
+              : "Оплата прошла успешно. Чек отправлен на ваш email."}
         </p>
         <Link
-          href={isEvent ? ROUTES.CABINET_EVENTS : ROUTES.CABINET}
+          href={
+            isEvent
+              ? ROUTES.CABINET_EVENTS
+              : isArrears
+                ? ROUTES.CABINET_PAYMENTS
+                : ROUTES.CABINET
+          }
           className="w-full"
         >
           <Button fullWidth>
-            {isEvent ? "Мои мероприятия" : "Перейти в личный кабинет"}
+            {isEvent
+              ? "Мои мероприятия"
+              : isArrears
+                ? "К оплатам и подписке"
+                : "Перейти в личный кабинет"}
           </Button>
         </Link>
       </main>

@@ -19,4 +19,11 @@ export const paymentApi = {
 
   getStatus: (paymentId: string): Promise<PaymentStatusResponse> =>
     apiClient.get(API_ENDPOINTS.SUBSCRIPTIONS.PAYMENT_STATUS(paymentId)),
+
+  /** Проверка статуса через Moneta (требует авторизации врача) */
+  checkStatus: (paymentId: string): Promise<PaymentStatusResponse> =>
+    apiClient.post(
+      API_ENDPOINTS.SUBSCRIPTIONS.PAYMENT_CHECK_STATUS(paymentId),
+      {},
+    ),
 };

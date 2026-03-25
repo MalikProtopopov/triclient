@@ -7,6 +7,8 @@ import {
   Clock,
   Info,
   CheckCircle,
+  ShieldAlert,
+  Ban,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
@@ -15,8 +17,12 @@ import { useAuth } from "@/providers/AuthProvider";
 import {
   useSubscriptionStatus,
   useSubscriptionPayMutation,
+  useSubscriptionPayArrearsMutation,
 } from "@/entities/subscription";
-import type { SubscriptionPlanSchema } from "@/entities/subscription";
+import type {
+  SubscriptionPlanSchema,
+  SubscriptionStatusResponse,
+} from "@/entities/subscription";
 import { usePayments, paymentApi } from "@/entities/payment";
 import type { Payment } from "@/entities/payment";
 import type { ApiError } from "@/entities/auth";
@@ -27,10 +33,25 @@ import {
   getSavedIdempotencyKey,
 } from "@/shared/lib/paymentStorage";
 
+/**
+ * Если true — кнопка оплаты членского недоступна, пока есть открытые долги
+ * (бэкенд может не требовать очереди — переключите при необходимости).
+ */
+const BLOCK_MEMBERSHIP_PAY_UNTIL_ARREARS_CLEARED = false;
+
+function showsEntryFeeInUi(sub: SubscriptionStatusResponse): boolean {
+  if (sub.entry_fee_exempt) return false;
+  return (sub.entry_fee_required ?? false) && !!sub.entry_fee_plan;
+}
+
 function getSubscriptionMessage(status: {
   entry_fee_required: boolean;
+  entry_fee_exempt?: boolean;
   has_paid_entry_fee: boolean;
 }): string {
+  if (status.entry_fee_exempt) {
+    return "Продлите подписку для доступа ко всем функциям.";
+  }
   if (status.entry_fee_required) {
     if (!status.has_paid_entry_fee) {
       return "Первая оплата. Необходимо оплатить вступительный взнос и членский взнос.";
@@ -38,6 +59,18 @@ function getSubscriptionMessage(status: {
     return "Подписка истекла более 60 дней назад. Для возобновления потребуется вступительный взнос и членский взнос.";
   }
   return "Продлите подписку для доступа ко всем функциям.";
+}
+
+function formatPaymentPurpose(payment: Payment): string {
+  const d = payment.description?.trim();
+  if (d) return d;
+  if (payment.product_type === "membership_arrears") {
+    if (payment.year != null) {
+      return `Задолженность за ${payment.year}`;
+    }
+    return "Задолженность по членскому взносу";
+  }
+  return "—";
 }
 
 export default function PaymentsPage() {
@@ -49,14 +82,21 @@ export default function PaymentsPage() {
   });
   const { data: paymentsData } = usePayments();
   const payMutation = useSubscriptionPayMutation();
+  const payArrearsMutation = useSubscriptionPayArrearsMutation();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  const [payingArrearId, setPayingArrearId] = useState<string | null>(null);
 
   const payments = paymentsData?.data ?? [];
   const currentSub = subscription?.current_subscription;
   const nextAction = subscription?.next_action;
-  const entryFeeRequired = subscription?.entry_fee_required ?? false;
   const entryFeePlan = subscription?.entry_fee_plan;
   const availablePlans = subscription?.available_plans ?? [];
+  const openArrears = subscription?.open_arrears ?? [];
+  const arrearsTotal = subscription?.arrears_total;
+  const membershipBlockedByArrears =
+    BLOCK_MEMBERSHIP_PAY_UNTIL_ARREARS_CLEARED && openArrears.length > 0;
+  const showEntryFee =
+    subscription && showsEntryFeeInUi(subscription);
 
   const selectedPlan = selectedPlanId
     ? availablePlans.find((p) => p.id === selectedPlanId)
@@ -93,6 +133,31 @@ export default function PaymentsPage() {
             toast.error("Не удалось инициировать оплату");
           }
         },
+      },
+    );
+  };
+
+  const handlePayArrear = (arrearId: string) => {
+    const idempotencyKey = crypto.randomUUID();
+    setPayingArrearId(arrearId);
+    payArrearsMutation.mutate(
+      { arrear_id: arrearId, idempotency_key: idempotencyKey },
+      {
+        onSuccess: (data) => {
+          savePendingPayment({
+            idempotencyKey,
+            paymentId: data.payment_id,
+            expiresAt:
+              data.expires_at ??
+              new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            planId: arrearId,
+          });
+          window.location.href = data.payment_url;
+        },
+        onError: () => {
+          toast.error("Не удалось инициировать оплату задолженности");
+        },
+        onSettled: () => setPayingArrearId(null),
       },
     );
   };
@@ -159,13 +224,128 @@ export default function PaymentsPage() {
         Оплаты и подписка
       </h1>
 
-      {/* ── Section 1: Subscription Status ── */}
+      {/* ── Section 1: Alerts & subscription status ── */}
       {!subLoading && subscription && (
-        <SubscriptionStatusCard
-          subscription={subscription}
-          currentSub={currentSub ?? null}
-          onGoToPay={handleGoToPay}
-        />
+        <>
+          {(subscription.is_membership_excluded ||
+            subscription.membership_excluded_at) && (
+            <Card className="border-border bg-bg-secondary">
+              <div className="flex items-start gap-3">
+                <Ban className="mt-0.5 h-5 w-5 shrink-0 text-text-muted" />
+                <div>
+                  <p className="font-medium text-text-primary">
+                    Исключение из членства
+                  </p>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    {subscription.membership_excluded_at
+                      ? `Дата исключения: ${formatShortDate(subscription.membership_excluded_at)}. `
+                      : ""}
+                    Возобновление участия — через оплату по разделам ниже (см.
+                    статус подписки и задолженности). При вопросах обратитесь в
+                    ассоциацию.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {subscription.arrears_block_active && (
+            <Card className="border-warning/40 bg-warning/10">
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+                <div>
+                  <p className="font-medium text-text-primary">
+                    Есть непогашенная задолженность
+                  </p>
+                  <p className="mt-1 text-sm text-text-secondary">
+                    При включённой блокировке на сайте отображение в каталоге
+                    врачей и привилегии могут быть ограничены до погашения долга.
+                    Оплатите задолженности ниже.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          <SubscriptionStatusCard
+            subscription={subscription}
+            currentSub={currentSub ?? null}
+            onGoToPay={handleGoToPay}
+          />
+
+          {openArrears.length > 0 && (
+            <section className="space-y-4">
+              <h2 className="font-heading text-xl font-semibold text-text-primary">
+                Задолженности по членскому взносу
+              </h2>
+              <Card className="overflow-hidden p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[600px]">
+                    <thead>
+                      <tr className="border-b border-border bg-bg-secondary/50">
+                        <th className="px-6 py-4 text-left text-sm font-medium text-text-secondary">
+                          Год
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-text-secondary">
+                          Описание
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-medium text-text-secondary">
+                          Сумма
+                        </th>
+                        <th className="px-6 py-4 text-right text-sm font-medium text-text-secondary">
+                          Действие
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {openArrears.map((row) => (
+                        <tr
+                          key={row.id}
+                          className="border-b border-border last:border-b-0"
+                        >
+                          <td className="px-6 py-4 text-sm text-text-primary">
+                            {row.year}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-text-primary">
+                            <div>{row.description}</div>
+                            {row.escalation_level != null && (
+                              <div className="mt-1 text-xs text-text-muted">
+                                Уровень: {row.escalation_level}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-sm font-medium text-text-primary">
+                            {formatPrice(row.amount)}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <Button
+                              size="sm"
+                              onClick={() => handlePayArrear(row.id)}
+                              disabled={
+                                payArrearsMutation.isPending &&
+                                payingArrearId === row.id
+                              }
+                            >
+                              {payArrearsMutation.isPending &&
+                              payingArrearId === row.id
+                                ? "Ожидание..."
+                                : "Оплатить"}
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {arrearsTotal != null && (
+                  <div className="border-t border-border px-6 py-3 text-sm font-medium text-text-primary">
+                    Итого к оплате (открытые долги): {formatPrice(arrearsTotal)}
+                  </div>
+                )}
+              </Card>
+            </section>
+          )}
+        </>
       )}
 
       {/* ── Section 2: Plan Selection & Payment ── */}
@@ -175,7 +355,17 @@ export default function PaymentsPage() {
             {nextAction === "renew" ? "Продлить подписку" : "Выберите тариф"}
           </h2>
 
-          {entryFeeRequired && entryFeePlan && (
+          {membershipBlockedByArrears && (
+            <Card className="border-border bg-bg-secondary">
+              <p className="text-sm text-text-secondary">
+                Сначала погасите задолженности по членскому взносу — затем
+                станет доступна оплата текущего членского (настройка интерфейса;
+                бэкенд может разрешать иначе).
+              </p>
+            </Card>
+          )}
+
+          {showEntryFee && entryFeePlan && (
             <Card className="border-warning/30 bg-warning/5">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
@@ -213,7 +403,7 @@ export default function PaymentsPage() {
           {selectedPlan && (
             <Card className="border-accent/20 bg-accent/5">
               <div className="space-y-2">
-                {entryFeeRequired && entryFeePlan && (
+                {showEntryFee && entryFeePlan && (
                   <>
                     <div className="flex justify-between text-sm text-text-secondary">
                       <span>Вступительный взнос</span>
@@ -232,7 +422,7 @@ export default function PaymentsPage() {
                   </span>
                   <span className="text-lg font-bold text-accent">
                     {formatPrice(
-                      (entryFeeRequired ? (entryFeePlan?.price ?? 0) : 0) +
+                      (showEntryFee ? (entryFeePlan?.price ?? 0) : 0) +
                         selectedPlan.price,
                     )}
                   </span>
@@ -240,12 +430,14 @@ export default function PaymentsPage() {
                 <Button
                   className="mt-3 w-full"
                   onClick={() => handlePay(selectedPlan.id)}
-                  disabled={payMutation.isPending}
+                  disabled={
+                    payMutation.isPending || membershipBlockedByArrears
+                  }
                 >
                   {payMutation.isPending
                     ? "Перенаправление на оплату..."
                     : `Оплатить ${formatPrice(
-                        (entryFeeRequired ? (entryFeePlan?.price ?? 0) : 0) +
+                        (showEntryFee ? (entryFeePlan?.price ?? 0) : 0) +
                           selectedPlan.price,
                       )}`}
                 </Button>
@@ -292,7 +484,7 @@ export default function PaymentsPage() {
                       {formatShortDate(payment.paid_at ?? payment.created_at)}
                     </td>
                     <td className="px-6 py-4 text-sm text-text-primary">
-                      {payment.description}
+                      {formatPaymentPurpose(payment)}
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-text-primary">
                       {formatPrice(payment.amount)}
@@ -486,6 +678,7 @@ function SubscriptionStatusCard({
 
   const message = getSubscriptionMessage({
     entry_fee_required: subscription.entry_fee_required,
+    entry_fee_exempt: subscription.entry_fee_exempt,
     has_paid_entry_fee: subscription.has_paid_entry_fee,
   });
 

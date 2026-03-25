@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   Clock,
   CreditCard,
+  ShieldAlert,
 } from "lucide-react";
 
 import { useAuth } from "@/providers/AuthProvider";
@@ -35,6 +36,30 @@ export default function CabinetPage() {
       <h1 className="font-heading text-3xl font-semibold text-text-primary">
         Личный кабинет
       </h1>
+
+      {isDoctor && subscription?.arrears_block_active && (
+        <Card className="border-warning/40 bg-warning/10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+              <div>
+                <p className="font-medium text-text-primary">
+                  Есть непогашенная задолженность
+                </p>
+                <p className="text-sm text-text-secondary">
+                  Погасите задолженность по членскому взносу, чтобы не терять
+                  отображение в каталоге и привилегии участника.
+                </p>
+              </div>
+            </div>
+            <Link href={ROUTES.CABINET_PAYMENTS}>
+              <Button size="sm" variant="outline">
+                Перейти к оплате
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      )}
 
       {isDoctor && subscription && (
         <SubscriptionWidget subscription={subscription} />

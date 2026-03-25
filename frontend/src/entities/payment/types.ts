@@ -1,9 +1,17 @@
 import type { PaginatedResponse } from "@/shared/types";
 
+export type PaymentProductType =
+  | "entry_fee"
+  | "subscription"
+  | "event"
+  | "membership_arrears";
+
 export interface Payment {
   id: string;
   amount: number;
-  product_type: "entry_fee" | "subscription" | "event";
+  product_type: PaymentProductType;
+  /** Год долга — если бэкенд отдаёт (для membership_arrears) */
+  year?: number | null;
   status:
     | "pending"
     | "succeeded"
@@ -35,7 +43,7 @@ export interface ReceiptResponse {
 export interface PaymentStatusResponse {
   payment_id: string;
   status: "pending" | "succeeded" | "failed" | "expired";
-  product_type: "entry_fee" | "subscription" | "event";
+  product_type: PaymentProductType;
   amount: number;
   created_at: string;
   paid_at: string | null;
