@@ -14,14 +14,13 @@ import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
 import { useAuth, shouldSkipClientOnboarding } from "@/providers/AuthProvider";
 import { useGSAP } from "@/shared/lib/useGSAP";
-import { staggerReveal, parallaxY, gsap } from "@/shared/lib/animations";
+import { staggerReveal, gsap } from "@/shared/lib/animations";
 
 const BENEFITS = [
   "Публикация в каталоге верифицированных врачей",
   "Доступ к закрытому профессиональному чату",
   "Льготные цены на конференции и семинары",
   "Именной сертификат члена ассоциации",
-  "Участие в выборах президента ассоциации",
 ];
 
 const STATS = [
@@ -40,8 +39,6 @@ const HOME_MISSION = [
     metric: "500+",
     metricLabel: "врачей в каталоге",
     tag: "Сертификация",
-    accentColor: "#edbecc",
-    accentBg: "rgba(237,190,204,0.15)",
   },
   {
     num: "02",
@@ -51,8 +48,6 @@ const HOME_MISSION = [
     metric: "14",
     metricLabel: "лет объединяем врачей",
     tag: "Сообщество",
-    accentColor: "#5BB5A2",
-    accentBg: "rgba(91,181,162,0.12)",
   },
   {
     num: "03",
@@ -62,85 +57,89 @@ const HOME_MISSION = [
     metric: "30+",
     metricLabel: "городов присутствия",
     tag: "Обучение",
-    accentColor: "#edbecc",
-    accentBg: "rgba(237,190,204,0.15)",
   },
 ];
 
 function HomeMissionSection() {
   const ref = useGSAP((_ctx, el) => {
-    staggerReveal("[data-hm-card]", el, { y: 50, stagger: 0.15, duration: 0.8 });
-    parallaxY("[data-hm-num]", el, 20);
+    staggerReveal("[data-hm-card]", el, { y: 36, stagger: 0.12, duration: 0.65 });
   });
 
   return (
-    <section ref={ref} className="py-20 lg:py-28">
+    <section
+      ref={ref}
+      className="border-t border-border bg-bg-secondary/60 py-20 lg:py-28"
+    >
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
-        <div className="mb-14 flex items-end justify-between">
-          <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted">
-              01 · Миссия
-            </p>
-            <h2 className="font-heading text-4xl font-bold text-text-primary lg:text-5xl">
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-16 xl:grid-cols-[minmax(0,20rem)_1fr]">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <div className="flex items-center gap-3">
+              <span
+                className="h-px w-10 bg-accent/60"
+                aria-hidden
+              />
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-text-muted">
+                01 · Миссия
+              </p>
+            </div>
+            <h2 className="mt-5 max-w-[14ch] font-heading text-[1.65rem] font-bold leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-3xl lg:text-[2rem]">
               Зачем нужна ассоциация
             </h2>
+            <Link
+              href={ROUTES.DOCUMENTS}
+              className="mt-6 inline-flex text-sm font-medium text-accent underline decoration-accent/30 underline-offset-4 transition-colors hover:decoration-accent"
+            >
+              Документы организации
+            </Link>
           </div>
-          <Link
-            href={ROUTES.DOCUMENTS}
-            className="hidden text-sm text-text-muted transition-colors hover:text-text-primary lg:block"
-          >
-            Документы организации →
-          </Link>
-        </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {HOME_MISSION.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.num}
-                data-hm-card
-                className="group relative min-h-[280px] overflow-hidden rounded-2xl border border-border bg-bg-secondary p-8 transition-all duration-500 hover:-translate-y-1 hover:border-accent/40 hover:shadow-lg lg:p-10"
-              >
+          <div className="min-w-0">
+            {HOME_MISSION.map((item) => {
+              const Icon = item.icon;
+              return (
                 <div
-                  className="absolute left-0 top-0 h-1 w-full"
-                  style={{ background: `linear-gradient(90deg, ${item.accentColor}, transparent)` }}
-                />
-                <div
-                  data-hm-num
-                  className="pointer-events-none absolute -right-2 -top-4 font-heading text-[100px] font-bold leading-none select-none"
-                  style={{ color: `${item.accentColor}12` }}
+                  key={item.num}
+                  data-hm-card
+                  className="grid gap-6 border-t border-border py-10 first:border-t-0 first:pt-0 last:pb-0 sm:grid-cols-[auto_1fr] sm:gap-8 lg:grid-cols-[3.5rem_1fr_minmax(0,9.5rem)] lg:items-start lg:gap-10"
                 >
-                  {item.num}
-                </div>
-                <div className="relative">
-                  <div
-                    className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110"
-                    style={{ background: item.accentBg }}
-                  >
-                    <Icon className="h-7 w-7" style={{ color: item.accentColor }} />
-                  </div>
-                  <h3 className="mb-2 font-heading text-xl font-semibold text-text-primary lg:text-2xl">
-                    {item.title}
-                  </h3>
-                  <p className="mb-6 max-w-xl text-sm leading-relaxed text-text-secondary lg:text-base">
-                    {item.desc}
-                  </p>
-                  <div className="mt-auto flex items-end justify-between border-t border-border pt-5">
-                    <div>
-                      <div className="font-heading text-3xl font-bold" style={{ color: item.accentColor }}>
-                        {item.metric}
-                      </div>
-                      <div className="mt-0.5 text-xs text-text-muted">{item.metricLabel}</div>
-                    </div>
-                    <span className="inline-block rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-medium text-text-primary">
-                      {item.tag}
+                  <div className="flex flex-row items-center gap-3 sm:flex-col sm:items-start sm:gap-2">
+                    <span
+                      className="font-mono text-[13px] font-medium tabular-nums text-accent"
+                      aria-hidden
+                    >
+                      {item.num}
+                    </span>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center border border-border bg-bg text-text-secondary">
+                      <Icon className="h-4 w-4" strokeWidth={1.75} />
                     </span>
                   </div>
+
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                      <h3 className="font-heading text-lg font-semibold text-text-primary lg:text-xl">
+                        {item.title}
+                      </h3>
+                      <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted">
+                        {item.tag}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm leading-relaxed text-text-secondary lg:text-[15px]">
+                      {item.desc}
+                    </p>
+                  </div>
+
+                  <div className="sm:col-span-2 lg:col-span-1 lg:border-l lg:border-border lg:pl-8">
+                    <p className="font-heading text-2xl font-bold tabular-nums tracking-tight text-text-primary lg:text-[1.65rem]">
+                      {item.metric}
+                    </p>
+                    <p className="mt-1 max-w-[12rem] text-xs leading-snug text-text-muted">
+                      {item.metricLabel}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
@@ -203,9 +202,8 @@ export default function HomeClient() {
                   data-hero-text
                   className="mt-6 font-heading text-5xl font-extrabold leading-[1.05] text-text-primary lg:text-7xl xl:text-[82px]"
                 >
-                  Ассоциация<br />
-                  трихологов{" "}
-                  <span className="text-accent">России</span>
+                  Профессиональное общество<br />
+                  <span className="text-accent">Трихологов</span>
                 </h1>
                 <p
                   data-hero-text
@@ -333,29 +331,37 @@ export default function HomeClient() {
                 </div>
               </motion.div>
 
-              {/* Правая — большая типографика */}
+              {/* Правая — мягкий акцент без «тяжёлого» чёрного */}
               <motion.div
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                className="relative flex items-center justify-center overflow-hidden bg-[#1A1D23] px-8 py-16 lg:py-20"
+                className="relative flex min-h-[min(52vh,420px)] items-center justify-center overflow-hidden px-8 py-16 lg:min-h-0 lg:py-20"
+                style={{
+                  background: `
+                    radial-gradient(ellipse 90% 70% at 80% 15%, rgba(232,99,139,0.12) 0%, transparent 55%),
+                    radial-gradient(ellipse 70% 60% at 10% 85%, rgba(91,181,162,0.1) 0%, transparent 50%),
+                    linear-gradient(165deg, #fdf9fa 0%, #f5eef1 42%, #eef5f2 100%)
+                  `,
+                }}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span
-                    className="font-heading text-[180px] font-bold leading-none text-white/[0.04] select-none lg:text-[220px]"
+                    className="font-heading text-[160px] font-bold leading-none text-accent/[0.06] select-none lg:text-[200px]"
+                    aria-hidden
                   >
                     АТ
                   </span>
                 </div>
-                <div className="relative text-center">
-                  <div
-                    className="font-heading text-5xl font-bold leading-tight text-white lg:text-6xl"
-                  >
-                    Вступайте <br />в сообщество
+                <div className="relative max-w-[18rem] text-center sm:max-w-none">
+                  <div className="font-heading text-[2rem] font-bold leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-4xl lg:text-[2.75rem]">
+                    Вступайте
+                    <br />
+                    в сообщество
                     <br />
                     <span className="text-accent">трихологов</span>
                   </div>
-                  <p className="mt-4 text-sm text-white/50">
+                  <p className="mx-auto mt-5 max-w-xs text-sm leading-relaxed text-text-secondary">
                     Заявки рассматриваются в течение 2–3 рабочих дней
                   </p>
                 </div>

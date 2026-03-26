@@ -42,7 +42,6 @@ const BENEFITS = [
   "Доступ к закрытому профессиональному чату",
   "Льготные цены на конференции и семинары",
   "Именной сертификат члена ассоциации",
-  "Участие в выборах президента ассоциации",
 ];
 
 const STATS = [
@@ -208,8 +207,9 @@ export const ClinicalAuraHome = () => {
             >
               АТ
             </span>
-            <span className="font-heading text-lg font-bold hidden sm:inline">
-              Ассоциация трихологов
+            <span className="font-heading hidden flex-col text-base font-bold leading-tight sm:flex">
+              <span>Профессиональное общество</span>
+              <span className="text-sm font-semibold text-[#6B6F80]">Трихологов</span>
             </span>
           </Link>
 
@@ -313,9 +313,8 @@ export const ClinicalAuraHome = () => {
                   data-ca-hero-text
                   className="font-heading mt-6 text-5xl font-extrabold leading-[1.05] text-[#1A1D23] lg:text-7xl xl:text-[82px]"
                 >
-                  Ассоциация<br />
-                  трихологов{" "}
-                  <span style={{ color: PINK }}>России</span>
+                  Профессиональное общество<br />
+                  <span style={{ color: PINK }}>Трихологов</span>
                 </h1>
                 <p
                   data-ca-hero-text
@@ -738,8 +737,9 @@ export const ClinicalAuraHome = () => {
                 >
                   АТ
                 </span>
-                <span className="font-heading text-lg font-bold text-white">
-                  Ассоциация трихологов
+                <span className="font-heading flex flex-col text-base font-bold leading-tight text-white">
+                  <span>Профессиональное общество</span>
+                  <span className="text-sm font-semibold text-white/60">Трихологов</span>
                 </span>
               </div>
               <p className="text-sm leading-relaxed text-white/50">
@@ -802,7 +802,7 @@ export const ClinicalAuraHome = () => {
           </div>
 
           <div className="mt-12 border-t border-white/10 pt-8 text-center text-xs text-white/30">
-            © {new Date().getFullYear()} Ассоциация трихологов России. Все права защищены.
+            © {new Date().getFullYear()} Профессиональное общество Трихологов. Все права защищены.
           </div>
         </div>
       </footer>

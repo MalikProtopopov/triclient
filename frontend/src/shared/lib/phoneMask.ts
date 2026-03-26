@@ -20,3 +20,17 @@ export function formatPhoneForApi(value: string): string {
   const nums = digits.startsWith("7") ? digits.slice(1) : digits.startsWith("8") ? digits.slice(1) : digits;
   return `+7${nums.slice(0, RUSSIAN_PHONE_DIGITS_LENGTH)}`;
 }
+
+/** Маска для отображения российского номера (+7 (999) 123-45-67); иначе исходная строка */
+export function formatPhoneDisplay(value: string | null | undefined): string {
+  if (!value?.trim()) return "";
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 0) return value.trim();
+  if (digits.length === 11 && (digits.startsWith("7") || digits.startsWith("8"))) {
+    return formatPhoneInput(digits.slice(1));
+  }
+  if (digits.length === 10) {
+    return formatPhoneInput(digits);
+  }
+  return value.trim();
+}

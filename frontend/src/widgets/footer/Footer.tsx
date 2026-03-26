@@ -14,7 +14,7 @@ const FOOTER_DOCUMENTS_LIMIT = 4;
 const FALLBACK = {
   contact_email: "info@trichologia.ru",
   contact_phone: "+7 (495) 545-43-75",
-  site_name: "Профессиональное общество трихологов",
+  site_name: "Профессиональное общество Трихологов",
 };
 
 export const Footer = () => {
@@ -44,10 +44,10 @@ export const Footer = () => {
               </div>
               <div className="min-w-0 leading-[1.15]">
                 <span className="block font-heading text-[10px] font-semibold tracking-wide text-white sm:text-[11px]">
-                  Ассоциация
+                  Профессиональное общество
                 </span>
                 <span className="block font-heading text-[10px] font-semibold tracking-wide text-white/70 sm:text-[11px]">
-                  трихологов России
+                  Трихологов
                 </span>
               </div>
             </div>

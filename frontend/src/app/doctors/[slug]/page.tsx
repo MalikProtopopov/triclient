@@ -11,6 +11,7 @@ import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { Card, SkeletonCard, DocumentContentBlockRenderer } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
+import { formatPhoneDisplay, formatPhoneForApi } from "@/shared/lib/phoneMask";
 import { useGSAP } from "@/shared/lib/useGSAP";
 import { staggerReveal } from "@/shared/lib/animations";
 import gsap from "gsap";
@@ -210,11 +211,11 @@ export default function DoctorProfilePage() {
                 <div data-hero-text className="mt-6 flex flex-wrap gap-3">
                   {doctor.public_phone && (
                     <a
-                      href={`tel:${doctor.public_phone.replace(/\D/g, "")}`}
+                      href={`tel:${formatPhoneForApi(doctor.public_phone)}`}
                       className="inline-flex items-center gap-2 rounded-xl border border-border bg-bg-secondary px-4 py-2.5 text-sm text-text-primary transition-all duration-300 hover:border-accent/40 hover:shadow-sm"
                     >
                       <Phone className="h-4 w-4 text-accent" />
-                      {doctor.public_phone}
+                      {formatPhoneDisplay(doctor.public_phone)}
                     </a>
                   )}
                   {doctor.public_email && (

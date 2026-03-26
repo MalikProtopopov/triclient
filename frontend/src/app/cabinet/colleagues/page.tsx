@@ -8,6 +8,7 @@ import { AxiosError } from "axios";
 import { useColleagues } from "@/entities/colleague";
 import { Card, Button, EmptyState } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
+import { formatPhoneDisplay, formatPhoneForApi } from "@/shared/lib/phoneMask";
 
 const PAGE_SIZE = 20;
 
@@ -114,12 +115,12 @@ export default function ColleaguesPage() {
                   <div className="flex flex-col gap-1 border-t border-border pt-3 text-xs text-text-muted">
                     {colleague.public_phone && (
                       <a
-                        href={`tel:${colleague.public_phone.replace(/\D/g, "")}`}
+                        href={`tel:${formatPhoneForApi(colleague.public_phone)}`}
                         className="flex items-center gap-2 hover:text-accent"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Phone className="h-3 w-3 shrink-0" />
-                        {colleague.public_phone}
+                        {formatPhoneDisplay(colleague.public_phone)}
                       </a>
                     )}
                     {colleague.public_email && (

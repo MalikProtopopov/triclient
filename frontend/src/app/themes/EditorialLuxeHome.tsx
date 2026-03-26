@@ -33,7 +33,6 @@ const BENEFITS = [
   "Доступ к закрытому профессиональному чату",
   "Льготные цены на конференции и семинары",
   "Именной сертификат члена ассоциации",
-  "Участие в выборах президента ассоциации",
 ];
 
 const STATS = [
@@ -78,8 +77,12 @@ export const EditorialLuxeHome = () => {
           <span className="font-heading text-2xl font-normal italic" style={{ color: GOLD }}>
             АТ
           </span>
-          <span className="hidden text-sm font-medium sm:inline" style={{ color: TEXT_ON_DARK }}>
-            Ассоциация трихологов
+          <span
+            className="hidden flex-col text-xs font-medium leading-tight sm:flex"
+            style={{ color: TEXT_ON_DARK }}
+          >
+            <span>Профессиональное общество</span>
+            <span style={{ color: TEXT_SEC_DARK }}>Трихологов</span>
           </span>
         </Link>
 
@@ -135,11 +138,10 @@ export const EditorialLuxeHome = () => {
               className="font-heading mx-auto max-w-4xl text-5xl leading-[1.1] lg:text-7xl xl:text-[84px]"
               style={{ color: TEXT_ON_DARK }}
             >
-              Ассоциация
+              Профессиональное общество
               <br />
-              трихологов{" "}
               <span className="italic" style={{ color: GOLD }}>
-                России
+                Трихологов
               </span>
             </h1>
             <p
@@ -652,7 +654,7 @@ export const EditorialLuxeHome = () => {
             className="mt-12 border-t pt-8 text-center text-xs"
             style={{ borderColor: BORDER_DARK, color: TEXT_SEC_DARK }}
           >
-            © {new Date().getFullYear()} Ассоциация трихологов России. Все права
+            © {new Date().getFullYear()} Профессиональное общество Трихологов. Все права
             защищены.
           </div>
         </div>

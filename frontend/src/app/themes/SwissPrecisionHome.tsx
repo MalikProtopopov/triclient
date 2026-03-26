@@ -18,7 +18,6 @@ const BENEFITS = [
   "Доступ к закрытому профессиональному чату",
   "Льготные цены на конференции и семинары",
   "Именной сертификат члена ассоциации",
-  "Участие в выборах президента ассоциации",
 ];
 
 const STATS = [
@@ -78,8 +77,9 @@ export const SwissPrecisionHome = () => {
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D4637A] text-sm font-bold text-white">
             АТ
           </span>
-          <span className="hidden text-sm font-semibold text-[#2C3340] sm:block">
-            Ассоциация трихологов
+          <span className="hidden flex-col text-[11px] font-semibold leading-[1.15] text-[#2C3340] sm:flex">
+            <span>Профессиональное общество</span>
+            <span className="font-medium text-[#5A6578]">Трихологов</span>
           </span>
         </Link>
 
@@ -115,11 +115,9 @@ export const SwissPrecisionHome = () => {
                 Профессиональное объединение · с 2012
               </p>
               <h1 className="font-heading text-[44px] font-bold leading-[1.05] tracking-[-0.025em] text-[#2C3340] lg:text-[64px]">
-                Ассоциация
+                Профессиональное общество
                 <br />
-                трихологов
-                <br />
-                России
+                <span className="text-[#D4637A]">Трихологов</span>
               </h1>
               <p className="mt-6 max-w-md text-[15px] leading-relaxed text-[#4A5568]">
                 Объединяем врачей-дерматологов, трихологов и специалистов по
@@ -459,8 +457,9 @@ export const SwissPrecisionHome = () => {
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D4637A] text-sm font-bold text-white">
                   АТ
                 </span>
-                <span className="text-sm font-semibold text-[#2C3340]">
-                  Ассоциация трихологов
+                <span className="flex flex-col text-sm font-semibold leading-tight text-[#2C3340]">
+                  <span>Профессиональное общество</span>
+                  <span className="text-xs font-medium text-[#5A6578]">Трихологов</span>
                 </span>
               </div>
               <p className="mt-3 max-w-xs text-xs leading-relaxed text-[#4A5568]">
@@ -485,7 +484,7 @@ export const SwissPrecisionHome = () => {
 
           <div className="mt-10 border-t border-[#DCDFE4] pt-6">
             <p className="text-[11px] text-[#4A5568]" style={mono}>
-              © {new Date().getFullYear()} Ассоциация трихологов России
+              © {new Date().getFullYear()} Профессиональное общество Трихологов
             </p>
           </div>
         </div>

@@ -54,17 +54,17 @@ export const Header = () => {
           <span className="relative block h-9 w-9 shrink-0 sm:h-10 sm:w-10 md:h-11 md:w-11">
             <Image
               src="/logo.png"
-              alt={settings?.site_name ?? "Профессиональное общество трихологов"}
+              alt={settings?.site_name ?? "Профессиональное общество Трихологов"}
               fill
               className="object-contain object-left"
             />
           </span>
           <span className="flex min-w-0 flex-col justify-center leading-[1.1] sm:max-w-[8rem] md:max-w-none">
             <span className="font-heading text-[9px] font-semibold tracking-wide text-text-primary sm:text-[10px] lg:text-[11px]">
-              Ассоциация
+              Профессиональное общество
             </span>
             <span className="font-heading text-[9px] font-semibold tracking-wide text-text-muted sm:text-[10px] lg:text-[11px]">
-              трихологов России
+              Трихологов
             </span>
           </span>
         </Link>

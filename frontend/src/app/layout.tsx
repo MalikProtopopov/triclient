@@ -107,7 +107,7 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const FALLBACK_SITE_NAME = "Ассоциация трихологов";
+const FALLBACK_SITE_NAME = "Профессиональное общество Трихологов";
 const FALLBACK_DESCRIPTION =
   "Профессиональная ассоциация врачей-трихологов России. Каталог специалистов, мероприятия, сертификация.";
 
