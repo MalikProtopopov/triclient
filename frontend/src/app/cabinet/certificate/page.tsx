@@ -13,9 +13,16 @@ import {
 import { useSubscriptionStatus } from "@/entities/subscription";
 import { Card, Button, Badge, EmptyState, PageLoader } from "@/shared/ui";
 import { formatShortDate } from "@/shared/lib/format";
+import { getApiErrorMessage } from "@/shared/lib/apiError";
 
 export default function CabinetCertificatePage() {
-  const { data: certificates, isLoading } = useCertificates();
+  const {
+    data: certificates,
+    isLoading,
+    isError,
+    error: listError,
+    refetch,
+  } = useCertificates();
   const { data: subscription, isLoading: subLoading } = useSubscriptionStatus();
 
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -31,11 +38,16 @@ export default function CabinetCertificatePage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      const status = (err as AxiosError)?.response?.status;
-      if (status === 403) {
-        toast.error("Сертификат больше недействителен");
+      const fromApi = getApiErrorMessage(err);
+      if (fromApi) {
+        toast.error(fromApi);
       } else {
-        toast.error("Не удалось скачать сертификат");
+        const status = (err as AxiosError)?.response?.status;
+        if (status === 403) {
+          toast.error("Сертификат больше недействителен");
+        } else {
+          toast.error("Не удалось скачать сертификат");
+        }
       }
     } finally {
       setDownloadingId(null);
@@ -52,6 +64,30 @@ export default function CabinetCertificatePage() {
   };
 
   if (isLoading || subLoading) return <PageLoader />;
+
+  if (isError) {
+    const message =
+      getApiErrorMessage(listError) ??
+      "Не удалось загрузить список сертификатов.";
+    return (
+      <div className="space-y-6">
+        <h1 className="font-heading text-2xl font-semibold text-text-primary">
+          Сертификаты
+        </h1>
+        <Card className="border-error/30 bg-error/5 p-6">
+          <p className="text-sm leading-relaxed text-error">{message}</p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => void refetch()}
+          >
+            Попробовать снова
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   if (!certificates || certificates.length === 0) {
     const isActive =
