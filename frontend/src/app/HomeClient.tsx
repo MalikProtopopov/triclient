@@ -263,6 +263,15 @@ export default function HomeClient() {
                         className="animate-orb-pulse absolute bottom-[15%] left-[10%] h-[20%] w-[60%] rounded-full"
                         style={{ background: "radial-gradient(ellipse, rgba(91,181,162,0.2) 0%, transparent 70%)" }}
                       />
+                      <div className="pointer-events-none absolute inset-[10%] z-[4]">
+                        <Image
+                          src="/hero-russia-map.png"
+                          alt=""
+                          fill
+                          className="object-contain object-center opacity-[0.32] mix-blend-multiply"
+                          sizes="280px"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div className="animate-orb-dot absolute left-0 top-1/4 h-3 w-3 rounded-full" style={{ background: "#E8638B", opacity: 0.6 }} />
@@ -345,12 +354,9 @@ export default function HomeClient() {
                   `,
                 }}
               >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span
-                    className="font-heading text-[160px] font-bold leading-none text-accent/[0.06] select-none lg:text-[200px]"
-                    aria-hidden
-                  >
-                    АТ
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.07]">
+                  <span className="relative block h-[min(52vw,220px)] w-[min(52vw,220px)] sm:h-[200px] sm:w-[200px] lg:h-[240px] lg:w-[240px]">
+                    <Image src="/logo.png" alt="" fill className="object-contain" />
                   </span>
                 </div>
                 <div className="relative max-w-[18rem] text-center sm:max-w-none">

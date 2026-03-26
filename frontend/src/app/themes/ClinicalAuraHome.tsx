@@ -201,11 +201,8 @@ export const ClinicalAuraHome = () => {
       >
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 lg:px-8">
           <Link href={ROUTES.HOME} className="flex items-center gap-3">
-            <span
-              className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white"
-              style={{ background: PINK }}
-            >
-              АТ
+            <span className="relative block h-10 w-10 shrink-0">
+              <Image src="/logo.png" alt="" fill className="object-contain object-left" />
             </span>
             <span className="font-heading hidden flex-col text-base font-bold leading-tight sm:flex">
               <span>Профессиональное общество</span>
@@ -731,11 +728,13 @@ export const ClinicalAuraHome = () => {
           <div className="grid gap-10 lg:grid-cols-4">
             <div>
               <div className="mb-4 flex items-center gap-3">
-                <span
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white"
-                  style={{ background: PINK }}
-                >
-                  АТ
+                <span className="relative block h-10 w-10 shrink-0">
+                  <Image
+                    src="/logo.png"
+                    alt=""
+                    fill
+                    className="object-contain object-left brightness-0 invert"
+                  />
                 </span>
                 <span className="font-heading flex flex-col text-base font-bold leading-tight text-white">
                   <span>Профессиональное общество</span>

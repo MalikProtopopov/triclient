@@ -74,8 +74,8 @@ export const EditorialLuxeHome = () => {
         style={{ background: `${DARK}ee`, backdropFilter: "blur(12px)" }}
       >
         <Link href={ROUTES.HOME} className="flex items-center gap-3">
-          <span className="font-heading text-2xl font-normal italic" style={{ color: GOLD }}>
-            АТ
+          <span className="relative block h-9 w-9 shrink-0">
+            <Image src="/logo.png" alt="" fill className="object-contain object-left" />
           </span>
           <span
             className="hidden flex-col text-xs font-medium leading-tight sm:flex"
@@ -601,12 +601,24 @@ export const EditorialLuxeHome = () => {
           <div className="mb-10 h-px" style={{ background: GOLD }} />
           <div className="grid gap-10 lg:grid-cols-3">
             <div>
-              <span
-                className="font-heading text-2xl italic"
-                style={{ color: GOLD }}
-              >
-                АТ
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="relative block h-9 w-9 shrink-0">
+                  <Image
+                    src="/logo.png"
+                    alt=""
+                    fill
+                    className="object-contain object-left brightness-0 invert"
+                  />
+                </span>
+                <span className="flex flex-col leading-tight">
+                  <span className="text-xs font-medium" style={{ color: TEXT_ON_DARK }}>
+                    Профессиональное общество
+                  </span>
+                  <span className="text-xs font-medium" style={{ color: TEXT_SEC_DARK }}>
+                    Трихологов
+                  </span>
+                </span>
+              </div>
               <p
                 className="mt-4 max-w-xs text-sm leading-relaxed"
                 style={{ color: TEXT_SEC_DARK }}

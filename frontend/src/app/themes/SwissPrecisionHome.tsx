@@ -74,8 +74,8 @@ export const SwissPrecisionHome = () => {
       {/* ── HEADER ── */}
       <header className="flex h-16 items-center justify-between border-b border-[#DCDFE4] bg-white px-6 lg:px-10">
         <Link href={ROUTES.HOME} className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D4637A] text-sm font-bold text-white">
-            АТ
+          <span className="relative block h-9 w-9 shrink-0">
+            <Image src="/logo.png" alt="" fill className="object-contain object-left" />
           </span>
           <span className="hidden flex-col text-[11px] font-semibold leading-[1.15] text-[#2C3340] sm:flex">
             <span>Профессиональное общество</span>
@@ -454,8 +454,8 @@ export const SwissPrecisionHome = () => {
           <div className="grid gap-10 lg:grid-cols-[1fr_auto_auto]">
             <div>
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D4637A] text-sm font-bold text-white">
-                  АТ
+                <span className="relative block h-9 w-9 shrink-0">
+                  <Image src="/logo.png" alt="" fill className="object-contain object-left" />
                 </span>
                 <span className="flex flex-col text-sm font-semibold leading-tight text-[#2C3340]">
                   <span>Профессиональное общество</span>

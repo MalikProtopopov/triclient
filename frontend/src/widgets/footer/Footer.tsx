@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 import { useDocuments } from "@/entities/document";
 import { usePublicSettings } from "@/entities/settings";
@@ -39,9 +40,14 @@ export const Footer = () => {
           {/* Лого + описание */}
           <div>
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent">
-                <span className="text-sm font-bold text-accent-contrast">АТ</span>
-              </div>
+              <span className="relative block h-9 w-9 shrink-0">
+                <Image
+                  src="/logo.png"
+                  alt={siteName}
+                  fill
+                  className="object-contain drop-shadow-sm"
+                />
+              </span>
               <div className="min-w-0 leading-[1.15]">
                 <span className="block font-heading text-[10px] font-semibold tracking-wide text-white sm:text-[11px]">
                   Профессиональное общество
