@@ -14,6 +14,9 @@ import { getOnboardingStepRoute } from "@/providers/AuthProvider";
 
 type VerifyState = "loading" | "success" | "error";
 
+/** Strict Mode монтирует эффект дважды — не дублируем verify и toast */
+const verifyEmailStartedForToken = new Set<string>();
+
 function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -25,23 +28,29 @@ function VerifyEmailContent() {
       setState("error");
       return;
     }
+    if (verifyEmailStartedForToken.has(token)) {
+      return;
+    }
+    verifyEmailStartedForToken.add(token);
 
     authApi
       .verifyEmail({ token })
       .then(() => {
-        toast.success("Email подтверждён!");
         const hasSession =
           typeof window !== "undefined" && !!sessionStorage.getItem("access_token");
         if (hasSession) {
+          toast.success("Email подтверждён!");
           return authApi.getOnboardingStatus().then((status) => {
             setState("success");
             router.replace(getOnboardingStepRoute(status.next_step));
           });
         }
+        // Без сессии: экран «успех» + редирект на логин — второй toast на /login не показываем
         setState("success");
         router.replace(`${ROUTES.LOGIN}?verified=1`);
       })
       .catch(() => {
+        verifyEmailStartedForToken.delete(token);
         setState("error");
       });
   }, [searchParams, router]);

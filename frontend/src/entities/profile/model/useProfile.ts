@@ -5,6 +5,7 @@ import type {
   PublicProfile,
   UpdatePersonalRequest,
   UploadPhotoResponse,
+  EventRegistrationsQueryParams,
 } from "../types";
 
 export const profileKeys = {
@@ -12,6 +13,8 @@ export const profileKeys = {
   personal: () => [...profileKeys.all, "personal"] as const,
   public: () => [...profileKeys.all, "public"] as const,
   events: () => [...profileKeys.all, "events"] as const,
+  eventRegistrations: (params?: EventRegistrationsQueryParams) =>
+    [...profileKeys.all, "eventRegistrations", params] as const,
 };
 
 export const usePersonalProfile = (options?: { enabled?: boolean }) =>
@@ -89,4 +92,15 @@ export const useProfileEvents = () =>
   useQuery({
     queryKey: profileKeys.events(),
     queryFn: () => profileApi.getEvents(),
+  });
+
+export const useEventRegistrations = (options?: {
+  enabled?: boolean;
+  params?: EventRegistrationsQueryParams;
+}) =>
+  useQuery({
+    queryKey: profileKeys.eventRegistrations(options?.params),
+    queryFn: () => profileApi.getEventRegistrations(options?.params),
+    enabled: options?.enabled ?? true,
+    refetchOnWindowFocus: true,
   });

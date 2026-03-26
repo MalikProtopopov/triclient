@@ -107,3 +107,65 @@ export interface ProfileEvent {
   is_member_price: boolean;
   tariff_name: string | null;
 }
+
+export type EventRegistrationStatus = "pending" | "confirmed" | "cancelled";
+
+export interface EventRegistrationNested {
+  id: string;
+  status: EventRegistrationStatus;
+  created_at: string;
+  guest_full_name: string | null;
+  guest_email: string | null;
+  guest_workplace: string | null;
+  guest_specialization: string | null;
+  fiscal_email: string | null;
+}
+
+export interface EventRegistrationEventNested {
+  id: string;
+  slug: string;
+  title: string;
+  event_date: string;
+  event_end_date: string | null;
+  location: string;
+  status: string;
+  cover_image_url: string | null;
+}
+
+export interface EventRegistrationTariffNested {
+  id: string;
+  name: string;
+  price: number;
+  member_price: number;
+  applied_price: number;
+  is_member_price: boolean;
+}
+
+export interface EventRegistrationPaymentNested {
+  id?: string;
+  status: string;
+  amount?: number;
+  payment_url?: string | null;
+  expires_at?: string | null;
+}
+
+export interface EventRegistrationItem {
+  registration: EventRegistrationNested;
+  event: EventRegistrationEventNested;
+  tariff: EventRegistrationTariffNested;
+  payment: EventRegistrationPaymentNested | null;
+}
+
+export interface EventRegistrationsListResponse {
+  data: EventRegistrationItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface EventRegistrationsQueryParams {
+  limit?: number;
+  offset?: number;
+  status?: EventRegistrationStatus;
+  event_id?: string;
+}

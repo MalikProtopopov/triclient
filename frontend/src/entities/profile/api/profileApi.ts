@@ -8,6 +8,8 @@ import type {
   UpdatePersonalRequest,
   UploadPhotoResponse,
   PublicSubmitResponse,
+  EventRegistrationsListResponse,
+  EventRegistrationsQueryParams,
 } from "../types";
 
 export const profileApi = {
@@ -43,4 +45,9 @@ export const profileApi = {
     const body = response.data as { data?: ProfileEvent[] };
     return Array.isArray(body) ? body : (body.data ?? []);
   },
+
+  getEventRegistrations: (
+    params?: EventRegistrationsQueryParams,
+  ): Promise<EventRegistrationsListResponse> =>
+    apiClient.get(API_ENDPOINTS.PROFILE.EVENT_REGISTRATIONS, { params }),
 };

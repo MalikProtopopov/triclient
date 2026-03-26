@@ -8,6 +8,7 @@ export {
   useUploadPhotoMutation,
   useUploadDiplomaMutation,
   useProfileEvents,
+  useEventRegistrations,
   profileKeys,
 } from "./model/useProfile";
 export type {
@@ -15,6 +16,9 @@ export type {
   ProfileDocument,
   ProfileDocumentType,
   ProfileEvent,
+  EventRegistrationItem,
+  EventRegistrationsListResponse,
+  EventRegistrationsQueryParams,
   PublicProfile,
   PublicProfileDraft,
   UpdatePersonalRequest,

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Clock, XCircle, CheckCircle, Loader2 } from "lucide-react";
+import { XCircle, CheckCircle, Loader2 } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -116,8 +116,8 @@ export default function OnboardingPendingPage() {
           Дата подачи: {formatSubmittedDate(status?.submitted_at ?? null)}
         </p>
 
-        <Link href={ROUTES.CABINET}>
-          <Button>Перейти в личный кабинет</Button>
+        <Link href={ROUTES.HOME}>
+          <Button variant="secondary">На главную</Button>
         </Link>
       </main>
       <Footer />

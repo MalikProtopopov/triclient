@@ -15,6 +15,13 @@ import { useAuth, getPostLoginRedirect } from "@/providers/AuthProvider";
 import { authApi } from "@/entities/auth";
 import type { ApiError } from "@/entities/auth";
 
+function safeRedirectParam(
+  raw: string | null,
+): string | null {
+  if (!raw || raw === ROUTES.LOGIN || raw === "/login") return null;
+  return raw;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -23,17 +30,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
+  // Только убираем ?verified=1 из URL — уведомление уже было на /auth/verify-email
   useEffect(() => {
     if (searchParams.get("verified") === "1") {
-      toast.success("Email подтверждён. Войдите в аккаунт.");
       router.replace(ROUTES.LOGIN, { scroll: false });
     }
   }, [searchParams, router]);
 
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated && user) {
-      const redirectParam = searchParams.get("redirect");
+      const redirectParam = safeRedirectParam(searchParams.get("redirect"));
       router.replace(getPostLoginRedirect(user.onboarding, redirectParam));
     }
   }, [isAuthLoading, isAuthenticated, user, searchParams, router]);
@@ -52,21 +60,27 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     setIsLoading(true);
     try {
       const data = await authApi.login({ email, password });
       const onboarding = await login(data.access_token);
-      const redirect = searchParams.get("redirect");
+      const redirect = safeRedirectParam(searchParams.get("redirect"));
       toast.success("Добро пожаловать!");
       const target = getPostLoginRedirect(onboarding, redirect);
       window.location.href = target;
     } catch (err) {
       const axiosErr = err as AxiosError<ApiError>;
       const code = axiosErr.response?.data?.error?.code;
+      const apiMessage = axiosErr.response?.data?.error?.message;
       if (code === "ACCOUNT_DEACTIVATED") {
-        toast.error("Аккаунт деактивирован");
+        setFormError("Аккаунт деактивирован. Обратитесь в поддержку.");
       } else {
-        toast.error("Неверный email или пароль");
+        setFormError(
+          typeof apiMessage === "string" && apiMessage.trim()
+            ? apiMessage
+            : "Неверный email или пароль. Проверьте данные и попробуйте снова.",
+        );
       }
     } finally {
       setIsLoading(false);
@@ -85,7 +99,10 @@ export default function LoginPage() {
               label="Email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (formError) setFormError(null);
+              }}
               placeholder="example@mail.ru"
               required
               autoComplete="email"
@@ -95,7 +112,10 @@ export default function LoginPage() {
                 label="Пароль"
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (formError) setFormError(null);
+                }}
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
@@ -109,6 +129,16 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+
+            {formError && (
+              <p
+                className="text-sm text-error"
+                role="alert"
+                aria-live="polite"
+              >
+                {formError}
+              </p>
+            )}
 
             <div className="flex justify-end">
               <Link

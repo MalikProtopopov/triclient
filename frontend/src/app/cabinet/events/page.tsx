@@ -4,11 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 
-import { useProfileEvents } from "@/entities/profile";
+import { useEventRegistrations } from "@/entities/profile";
+import type { EventRegistrationItem } from "@/entities/profile";
 import { useEvents } from "@/entities/event";
 import { Card, Button, Badge, EmptyState } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
-import { formatDate } from "@/shared/lib/format";
+import { formatDate, formatPrice } from "@/shared/lib/format";
 
 const STATUS_LABELS: Record<string, string> = {
   confirmed: "Подтверждено",
@@ -22,10 +23,31 @@ const STATUS_VARIANTS: Record<string, "success" | "warning" | "error"> = {
   cancelled: "error",
 };
 
+function canPayRegistrationRow(
+  payment: EventRegistrationItem["payment"],
+): boolean {
+  if (!payment || payment.status !== "pending" || !payment.payment_url) {
+    return false;
+  }
+  if (payment.expires_at) {
+    return new Date(payment.expires_at) > new Date();
+  }
+  return true;
+}
+
+function registrationAmount(row: EventRegistrationItem): number {
+  if (row.payment?.amount != null) return row.payment.amount;
+  return row.tariff.applied_price;
+}
+
 export default function CabinetEventsPage() {
-  const { data: registrations = [] } = useProfileEvents();
+  const { data: regResponse, isLoading: regLoading } = useEventRegistrations({
+    params: { limit: 50, offset: 0 },
+  });
   const { data: eventsData } = useEvents({ period: "upcoming", limit: 3 });
   const events = eventsData?.data ?? [];
+
+  const registrationRows = regResponse?.data ?? [];
 
   return (
     <div className="space-y-10">
@@ -85,14 +107,16 @@ export default function CabinetEventsPage() {
         <h2 className="mb-4 text-lg font-medium text-text-primary">
           Мои регистрации
         </h2>
-        {registrations.length === 0 ? (
+        {regLoading ? (
+          <p className="text-sm text-text-muted">Загрузка…</p>
+        ) : registrationRows.length === 0 ? (
           <EmptyState
             title="Нет регистраций"
             description="Вы ещё не записались ни на одно мероприятие"
           />
         ) : (
           <div className="overflow-x-auto rounded-xl border border-border bg-bg-secondary">
-            <table className="w-full min-w-[500px]">
+            <table className="w-full min-w-[720px]">
               <thead>
                 <tr className="border-b border-border">
                   <th className="px-4 py-3 text-left text-sm font-medium text-text-secondary">
@@ -105,39 +129,84 @@ export default function CabinetEventsPage() {
                     Тариф
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-text-secondary">
+                    Сумма
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-text-secondary">
                     Статус
+                  </th>
+                  <th className="px-4 py-3 text-right text-sm font-medium text-text-secondary">
+                    Действия
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {registrations.map((reg) => (
-                  <tr
-                    key={reg.registration_id}
-                    className="border-b border-border last:border-0"
-                  >
-                    <td className="px-4 py-3 text-sm text-text-primary">
-                      <Link
-                        href={ROUTES.EVENT(reg.event_slug)}
-                        className="hover:text-accent hover:underline"
-                      >
-                        {reg.title}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-text-secondary">
-                      {formatDate(reg.event_date)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-text-secondary">
-                      {reg.tariff_name ?? "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        variant={STATUS_VARIANTS[reg.status] ?? "warning"}
-                      >
-                        {STATUS_LABELS[reg.status] ?? reg.status}
-                      </Badge>
-                    </td>
-                  </tr>
-                ))}
+                {registrationRows.map((row) => {
+                  const reg = row.registration;
+                  const ev = row.event;
+                  const tariff = row.tariff;
+                  const payment = row.payment;
+                  const status = reg.status;
+                  const amount = registrationAmount(row);
+                  const showMemberBadge = tariff.is_member_price;
+                  const pay = canPayRegistrationRow(payment);
+
+                  return (
+                    <tr
+                      key={reg.id}
+                      className="border-b border-border last:border-0"
+                    >
+                      <td className="px-4 py-3 text-sm text-text-primary">
+                        <Link
+                          href={ROUTES.EVENT(ev.slug)}
+                          className="hover:text-accent hover:underline"
+                        >
+                          {ev.title}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-text-secondary">
+                        {formatDate(ev.event_date)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-text-secondary">
+                        {tariff.name}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-text-primary">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-medium">
+                            {formatPrice(amount)}
+                          </span>
+                          {showMemberBadge && (
+                            <Badge variant="success" className="text-xs">
+                              Членская цена
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge
+                          variant={STATUS_VARIANTS[status] ?? "warning"}
+                        >
+                          {STATUS_LABELS[status] ?? status}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        {pay && payment?.payment_url ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const url = payment.payment_url;
+                              if (url) window.location.href = url;
+                            }}
+                          >
+                            Оплатить
+                          </Button>
+                        ) : (
+                          <span className="text-sm text-text-muted">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

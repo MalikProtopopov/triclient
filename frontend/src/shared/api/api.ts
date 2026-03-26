@@ -2,6 +2,14 @@ import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse 
 
 import { API_BASE_URL, API_ENDPOINTS } from "@/shared/config";
 
+/** Не применять refresh/редирект на отказ входа (401/403 и т.д.) */
+function isAuthLoginRequest(config: { url?: string } | undefined): boolean {
+  const u = config?.url ?? "";
+  return (
+    u.includes(API_ENDPOINTS.AUTH.LOGIN) || u.includes("/auth/login")
+  );
+}
+
 class ApiClient {
   private instance: AxiosInstance;
 
@@ -39,6 +47,10 @@ class ApiClient {
         }
 
         if (status === 401) {
+          // Неверный логин/пароль — не пытаемся refresh и не редиректим на /login?redirect=/login
+          if (isAuthLoginRequest(error.config)) {
+            return Promise.reject(error);
+          }
           try {
             const refreshResponse = await axios.post(
               `${baseURL}${API_ENDPOINTS.AUTH.REFRESH}`,
@@ -54,7 +66,12 @@ class ApiClient {
           }
         }
 
-        if (status === 403 && !sessionStorage.getItem("access_token")) {
+        // Без токена 403 на /auth/login часто означает неверные данные — не делаем полный редирект
+        if (
+          status === 403 &&
+          !sessionStorage.getItem("access_token") &&
+          !isAuthLoginRequest(error.config)
+        ) {
           this.clearSessionAndRedirect();
         }
 
@@ -67,7 +84,11 @@ class ApiClient {
     sessionStorage.removeItem("access_token");
     sessionStorage.removeItem("user");
     document.cookie = "has_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+    const path = window.location.pathname;
+    const isLoginPage = path === "/login" || path.endsWith("/login");
+    window.location.href = isLoginPage
+      ? "/login"
+      : `/login?redirect=${encodeURIComponent(path)}`;
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
