@@ -5,15 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { AxiosError } from "axios";
-
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { Button, Input } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { useAuth, getPostLoginRedirect } from "@/providers/AuthProvider";
 import { authApi } from "@/entities/auth";
-import type { ApiError } from "@/entities/auth";
+import { getLoginPageErrorMessage } from "@/shared/lib/apiError";
 
 function safeRedirectParam(
   raw: string | null,
@@ -70,18 +68,7 @@ export default function LoginPage() {
       const target = getPostLoginRedirect(onboarding, redirect);
       window.location.href = target;
     } catch (err) {
-      const axiosErr = err as AxiosError<ApiError>;
-      const code = axiosErr.response?.data?.error?.code;
-      const apiMessage = axiosErr.response?.data?.error?.message;
-      if (code === "ACCOUNT_DEACTIVATED") {
-        setFormError("Аккаунт деактивирован. Обратитесь в поддержку.");
-      } else {
-        setFormError(
-          typeof apiMessage === "string" && apiMessage.trim()
-            ? apiMessage
-            : "Неверный email или пароль. Проверьте данные и попробуйте снова.",
-        );
-      }
+      setFormError(getLoginPageErrorMessage(err));
     } finally {
       setIsLoading(false);
     }

@@ -63,7 +63,7 @@ export default function DocumentsClient() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
-          <div className="mx-auto max-w-4xl">
+          <div className="w-full">
             {isLoading ? (
               <div className="space-y-3">
                 {Array.from({ length: 4 }).map((_, i) => (

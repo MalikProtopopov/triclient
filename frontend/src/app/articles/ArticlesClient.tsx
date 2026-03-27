@@ -81,7 +81,7 @@ function ArticlesContent() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
-          <div className="mx-auto max-w-4xl">
+          <div className="w-full">
             {themes.length > 0 && (
               <div className="mb-8 w-full sm:w-56">
                 <DropdownSelect
@@ -169,7 +169,7 @@ function ArticlesContent() {
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="mt-8 flex items-center justify-center gap-2">
+                  <div className="mt-8 flex items-center justify-start gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -216,7 +216,7 @@ export default function ArticlesClient() {
               </div>
             </div>
             <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
-              <div className="mx-auto max-w-4xl space-y-6">
+              <div className="w-full space-y-6">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <SkeletonCard key={i} />
                 ))}
