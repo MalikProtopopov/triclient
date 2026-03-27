@@ -16,10 +16,31 @@ function getApiImagePattern() {
   }
 }
 
+/** Публичный origin S3/CloudFront для галерей и медиа (полный URL без path), опционально */
+function getS3PublicImagePattern() {
+  const origin = process.env.NEXT_PUBLIC_S3_PUBLIC_ORIGIN?.trim();
+  if (!origin) return null;
+  try {
+    const u = new URL(origin);
+    return {
+      protocol: u.protocol.replace(":", "") as "http" | "https",
+      hostname: u.hostname,
+      pathname: "/**",
+      ...(u.port && u.port !== "80" && u.port !== "443" ? { port: u.port } : {}),
+    };
+  } catch {
+    return null;
+  }
+}
+
+const imageRemotePatterns = [getApiImagePattern()];
+const s3Pattern = getS3PublicImagePattern();
+if (s3Pattern) imageRemotePatterns.push(s3Pattern);
+
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
-    remotePatterns: [getApiImagePattern()],
+    remotePatterns: imageRemotePatterns,
   },
   async redirects() {
     return [

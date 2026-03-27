@@ -124,14 +124,55 @@ function LinkBlock({ block }: { block: ContentBlockPublicNested }) {
   );
 }
 
+/** Парсинг `block_metadata.images`: объекты `{ url, alt }` или legacy-массив URL-строк */
+function parseGalleryImages(block: ContentBlockPublicNested): { url: string; alt: string }[] {
+  const raw = block.block_metadata?.images as unknown;
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+  const out: { url: string; alt: string }[] = [];
+  for (const item of raw) {
+    if (typeof item === "string") {
+      const u = item.trim();
+      if (u) out.push({ url: u, alt: "" });
+      continue;
+    }
+    if (item && typeof item === "object" && "url" in item) {
+      const u = (item as { url: unknown }).url;
+      if (typeof u !== "string" || !u.trim()) continue;
+      const altRaw = (item as { alt?: unknown }).alt;
+      const alt = typeof altRaw === "string" ? altRaw : "";
+      out.push({ url: u.trim(), alt });
+    }
+  }
+  return out;
+}
+
 function GalleryBlock({ block }: { block: ContentBlockPublicNested }) {
+  const items = parseGalleryImages(block);
+  if (items.length > 0) {
+    return (
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {items.map((item, i) => (
+          <div key={`${item.url}-${i}`} className="relative aspect-square overflow-hidden rounded-lg">
+            <Image
+              src={item.url}
+              alt={item.alt.trim() || `Фото ${i + 1}`}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 50vw, 33vw"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   const mediaUrl = block.media_url;
   const thumbUrl = block.thumbnail_url;
   const src = thumbUrl || mediaUrl;
   if (!src) return null;
   return (
     <figure>
-      <div className="relative overflow-hidden rounded-xl aspect-video">
+      <div className="relative aspect-video overflow-hidden rounded-xl">
         <Image
           src={src}
           alt={block.title ?? ""}
