@@ -6,6 +6,12 @@ export const PAYMENT_METHOD_ITEMS = [
   { id: "sbp", file: "sbp.svg", label: "СБП" },
   { id: "iomoney", file: "iomoney.svg", label: "ЮMoney" },
   { id: "payservices", file: "payservices.svg", label: "Платёжные сервисы" },
+  { id: "moneta", file: "moneta.png", label: "Монета.ру" },
+  {
+    id: "payanyway",
+    file: "logo-payanyway-simple.jpg",
+    label: "PayAnyWay",
+  },
 ] as const;
 
 export type PaymentMethodId = (typeof PAYMENT_METHOD_ITEMS)[number]["id"];
