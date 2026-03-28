@@ -232,11 +232,11 @@ export default function PaymentsPage() {
             <Card className="border-border bg-bg-secondary">
               <div className="flex items-start gap-3">
                 <Ban className="mt-0.5 h-5 w-5 shrink-0 text-text-muted" />
-                <div>
+                <div className="min-w-0">
                   <p className="font-medium text-text-primary">
                     Исключение из членства
                   </p>
-                  <p className="mt-1 text-sm text-text-secondary">
+                  <p className="mt-1 break-words text-sm text-text-secondary">
                     {subscription.membership_excluded_at
                       ? `Дата исключения: ${formatShortDate(subscription.membership_excluded_at)}. `
                       : ""}
@@ -253,11 +253,11 @@ export default function PaymentsPage() {
             <Card className="border-warning/40 bg-warning/10">
               <div className="flex items-start gap-3">
                 <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
-                <div>
+                <div className="min-w-0">
                   <p className="font-medium text-text-primary">
                     Есть непогашенная задолженность
                   </p>
-                  <p className="mt-1 text-sm text-text-secondary">
+                  <p className="mt-1 break-words text-sm text-text-secondary">
                     При включённой блокировке на сайте отображение в каталоге
                     врачей и привилегии могут быть ограничены до погашения долга.
                     Оплатите задолженности ниже.
@@ -416,7 +416,7 @@ export default function PaymentsPage() {
                     <div className="border-t border-border pt-2" />
                   </>
                 )}
-                <div className="flex items-center justify-between">
+                <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
                   <span className="text-lg font-semibold text-text-primary">
                     Итого
                   </span>
@@ -593,19 +593,24 @@ function SubscriptionStatusCard({
   if (subscription.next_action === "complete_payment") {
     return (
       <Card className="border-amber-300/30 bg-amber-50/50">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3 sm:items-center">
             <Clock className="h-5 w-5 shrink-0 text-amber-600" />
-            <div>
+            <div className="min-w-0">
               <p className="font-medium text-text-primary">
                 У вас есть незавершённый платёж
               </p>
-              <p className="text-sm text-text-secondary">
+              <p className="break-words text-sm text-text-secondary">
                 Перейдите к оплате или дождитесь завершения обработки.
               </p>
             </div>
           </div>
-          <Button size="sm" onClick={onGoToPay}>
+          <Button
+            size="sm"
+            fullWidth
+            className="sm:w-auto sm:shrink-0"
+            onClick={onGoToPay}
+          >
             Перейти к оплате
           </Button>
         </div>
@@ -634,26 +639,26 @@ function SubscriptionStatusCard({
     return (
       <Card className="border-success/30 bg-success/5">
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <CheckCircle className="h-5 w-5 shrink-0 text-success" />
-            <h2 className="font-heading text-xl font-semibold text-success">
+            <h2 className="min-w-0 break-words font-heading text-xl font-semibold text-success">
               Подписка активна
             </h2>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
+          <div className="grid min-w-0 gap-4 sm:grid-cols-3">
+            <div className="min-w-0">
               <p className="text-xs text-text-muted">Тариф</p>
-              <p className="font-medium text-text-primary">
+              <p className="break-words font-medium text-text-primary">
                 {currentSub.plan.name}
               </p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-text-muted">Период</p>
-              <p className="font-medium text-text-primary">
+              <p className="break-words font-medium text-text-primary">
                 {startDate} — {endDate}
               </p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-text-muted">Осталось</p>
               <p className="font-medium text-text-primary">
                 {daysRemaining} дн.
@@ -686,11 +691,11 @@ function SubscriptionStatusCard({
     <Card className="border-border">
       <div className="flex items-start gap-3">
         <Info className="mt-0.5 h-5 w-5 shrink-0 text-text-muted" />
-        <div>
+        <div className="min-w-0">
           <p className="font-medium text-text-primary">
             Подписка не активна
           </p>
-          <p className="mt-1 text-sm text-text-secondary">{message}</p>
+          <p className="mt-1 break-words text-sm text-text-secondary">{message}</p>
         </div>
       </div>
     </Card>
@@ -715,9 +720,9 @@ function PlanCard({
       }`}
       onClick={onSelect}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-heading text-lg font-semibold text-text-primary">
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="break-words font-heading text-lg font-semibold text-text-primary">
             {plan.name}
           </h3>
           <p className="text-sm text-text-muted">{plan.duration_months} мес.</p>

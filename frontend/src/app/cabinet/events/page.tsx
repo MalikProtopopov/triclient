@@ -56,13 +56,13 @@ export default function CabinetEventsPage() {
       </h1>
 
       <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-text-primary">
+        <div className="mb-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="min-w-0 break-words text-lg font-medium text-text-primary">
             Предстоящие мероприятия
           </h2>
           <Link
             href={ROUTES.EVENTS}
-            className="text-sm font-medium text-accent hover:underline"
+            className="shrink-0 text-sm font-medium text-accent hover:underline"
           >
             Все мероприятия
           </Link>
@@ -88,9 +88,9 @@ export default function CabinetEventsPage() {
                 <h3 className="mb-2 font-medium text-text-primary">
                   {event.title}
                 </h3>
-                <div className="mb-3 flex items-center gap-2 text-sm text-text-secondary">
-                  <MapPin className="h-4 w-4 shrink-0" />
-                  <span>{event.location}</span>
+                <div className="mb-3 flex min-w-0 items-start gap-2 text-sm text-text-secondary">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span className="min-w-0 break-words">{event.location}</span>
                 </div>
                 <Link href={ROUTES.EVENT(event.slug)}>
                   <Button variant="outline" size="sm">

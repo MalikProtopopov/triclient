@@ -72,7 +72,7 @@ function HomeMissionSection() {
     >
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="grid gap-14 lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-16 xl:grid-cols-[minmax(0,20rem)_1fr]">
-          <div className="lg:sticky lg:top-28 lg:self-start">
+          <div className="min-w-0 lg:sticky lg:top-28 lg:self-start">
             <div className="flex items-center gap-3">
               <span
                 className="h-px w-10 bg-accent/60"
@@ -190,24 +190,24 @@ export default function HomeClient() {
           }}
         >
           <div className="mx-auto max-w-7xl px-4 pt-20 pb-8 lg:px-8 lg:pt-28 lg:pb-12">
-            <div className="grid items-center gap-8 lg:grid-cols-[1fr_380px]">
+            <div className="grid min-w-0 items-center gap-8 lg:grid-cols-[1fr_380px]">
               {/* Text */}
-              <div>
+              <div className="min-w-0">
                 <div data-hero-text>
-                  <span className="inline-block rounded-full border border-accent/20 bg-accent/8 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-accent">
+                  <span className="inline-block max-w-full rounded-full border border-accent/20 bg-accent/8 px-3 py-1.5 text-center text-[10px] font-semibold uppercase leading-snug tracking-[0.12em] text-accent sm:px-4 sm:text-xs sm:tracking-[0.15em]">
                     Профессиональное сообщество · с 2012
                   </span>
                 </div>
                 <h1
                   data-hero-text
-                  className="mt-6 font-heading text-5xl font-extrabold leading-[1.05] text-text-primary lg:text-7xl xl:text-[82px]"
+                  className="mt-6 break-words font-heading text-4xl font-extrabold leading-[1.05] text-text-primary sm:text-5xl lg:text-7xl xl:text-[82px]"
                 >
                   Профессиональное общество<br />
                   <span className="text-accent">Трихологов</span>
                 </h1>
                 <p
                   data-hero-text
-                  className="mt-6 max-w-lg text-base leading-relaxed text-text-secondary lg:text-lg"
+                  className="mt-6 max-w-lg break-words text-base leading-relaxed text-text-secondary lg:text-lg"
                 >
                   Объединяем врачей-дерматологов, трихологов и специалистов по
                   здоровью волос. Сертификация, конференции и интеграция через EHRS.
@@ -379,12 +379,12 @@ export default function HomeClient() {
         {/* ══════════ МЕРОПРИЯТИЯ (featured + list) ══════════ */}
         <section className="py-20 lg:py-28">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <div className="mb-12 flex items-end justify-between">
-              <div>
+            <div className="mb-12 flex min-w-0 items-end justify-between gap-4">
+              <div className="min-w-0">
                 <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted">
                   03 · Мероприятия
                 </p>
-                <h2 className="font-heading text-4xl font-bold text-text-primary lg:text-5xl">
+                <h2 className="break-words font-heading text-3xl font-bold text-text-primary sm:text-4xl lg:text-5xl">
                   Ближайшие события
                 </h2>
               </div>
@@ -411,12 +411,12 @@ export default function HomeClient() {
                     viewport={{ once: true }}
                   >
                     <Link href={ROUTES.EVENT(featuredEvent.slug)}>
-                      <div className="group relative overflow-hidden rounded-2xl bg-[#1A1D23] p-8 transition-all duration-300 hover:shadow-xl lg:p-10">
+                      <div className="group relative overflow-hidden rounded-2xl bg-[#1A1D23] p-5 transition-all duration-300 hover:shadow-xl sm:p-8 lg:p-10">
                         <div
                           className="pointer-events-none absolute right-0 top-0 h-full w-1/3 opacity-20"
                           style={{ background: "linear-gradient(to left, var(--accent), transparent)" }}
                         />
-                        <div className="relative grid gap-6 lg:grid-cols-[auto_1fr_auto] lg:items-center">
+                        <div className="relative grid min-w-0 gap-6 max-lg:grid-cols-1 lg:grid-cols-[auto_1fr_auto] lg:items-center">
                           {/* Дата как большое число */}
                           <div className="hidden lg:block">
                             <div className="font-heading text-7xl font-bold leading-none text-white/20">
@@ -426,30 +426,30 @@ export default function HomeClient() {
                               {new Date(featuredEvent.event_date).toLocaleDateString("ru", { month: "long" })}
                             </div>
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <span
                               className="mb-3 inline-block rounded-full px-3 py-1 text-xs font-semibold text-accent-contrast"
                               style={{ background: "var(--accent)" }}
                             >
                               Ближайшее
                             </span>
-                            <h3 className="font-heading text-xl font-bold text-white lg:text-2xl">
+                            <h3 className="break-words font-heading text-lg font-bold text-white sm:text-xl lg:text-2xl">
                               {featuredEvent.title}
                             </h3>
-                            <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-white/50">
-                              <span className="flex items-center gap-1.5">
-                                <Calendar className="h-3.5 w-3.5" />
+                            <div className="mt-2 flex flex-col gap-2 text-sm text-white/50 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                              <span className="flex min-w-0 items-center gap-1.5">
+                                <Calendar className="h-3.5 w-3.5 shrink-0" />
                                 {formatDate(featuredEvent.event_date)}
                               </span>
-                              <span className="flex items-center gap-1.5">
-                                <MapPin className="h-3.5 w-3.5" />
-                                {featuredEvent.location}
+                              <span className="flex min-w-0 items-start gap-1.5">
+                                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                <span className="min-w-0 break-words">{featuredEvent.location}</span>
                               </span>
                             </div>
                           </div>
-                          <div className="flex-shrink-0">
+                          <div className="shrink-0 max-lg:border-t max-lg:border-white/10 max-lg:pt-4 lg:border-t-0 lg:pt-0">
                             {featuredEvent.tariffs.length > 0 && (
-                              <div className="text-right">
+                              <div className="text-left lg:text-right">
                                 <div className="text-xs text-white/40">от</div>
                                 <div className="font-heading text-2xl font-bold text-white">
                                   {Math.min(...featuredEvent.tariffs.map((t) => t.member_price)).toLocaleString("ru")} ₽
@@ -528,12 +528,12 @@ export default function HomeClient() {
         {/* ══════════ СТАТЬИ ══════════ */}
         <section className="border-t border-border bg-bg-secondary py-20 lg:py-28">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <div className="mb-12 flex items-end justify-between">
-              <div>
+            <div className="mb-12 flex min-w-0 items-end justify-between gap-4">
+              <div className="min-w-0">
                 <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted">
                   04 · Публикации
                 </p>
-                <h2 className="font-heading text-4xl font-bold text-text-primary lg:text-5xl">
+                <h2 className="break-words font-heading text-3xl font-bold text-text-primary sm:text-4xl lg:text-5xl">
                   Статьи и новости
                 </h2>
               </div>

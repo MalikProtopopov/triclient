@@ -75,7 +75,7 @@ export default function CabinetLayout({
 
           <main
             className={cn(
-              "min-h-screen flex-1 p-6 pt-16 lg:ml-60 lg:pt-8 lg:px-8",
+              "min-h-screen min-w-0 max-w-full flex-1 p-6 pt-16 lg:ml-60 lg:pt-8 lg:px-8",
             )}
           >
             {children}

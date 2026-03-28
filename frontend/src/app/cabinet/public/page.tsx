@@ -226,13 +226,13 @@ export default function PublicProfilePage() {
 
       {draft?.status === "pending" && (
         <Card className="border-warning/30 bg-warning/5">
-          <div className="flex items-center gap-3">
+          <div className="flex items-start gap-3 sm:items-center">
             <AlertCircle className="h-5 w-5 shrink-0 text-warning" />
-            <div>
+            <div className="min-w-0">
               <p className="font-medium text-text-primary">
                 Изменения на модерации
               </p>
-              <p className="text-sm text-text-secondary">
+              <p className="break-words text-sm text-text-secondary">
                 Ваши изменения отправлены{" "}
                 {new Date(draft.submitted_at).toLocaleDateString("ru-RU")} и
                 ожидают проверки
@@ -245,9 +245,9 @@ export default function PublicProfilePage() {
       {draft?.status === "rejected" && !isEditingAfterReject && (
         <Card className="border-error/30 bg-error/5">
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
+            <div className="flex items-start gap-3 sm:items-center">
               <XCircle className="h-5 w-5 shrink-0 text-error" />
-              <div>
+              <div className="min-w-0">
                 <p className="font-medium text-text-primary">
                   Изменения отклонены
                 </p>
@@ -260,7 +260,7 @@ export default function PublicProfilePage() {
               </div>
             </div>
             {draft.rejection_reason && (
-              <p className="text-sm text-text-primary pl-8">
+              <p className="break-words pl-8 text-sm text-text-primary sm:pl-0">
                 Причина: {draft.rejection_reason}
               </p>
             )}
@@ -279,13 +279,13 @@ export default function PublicProfilePage() {
 
       {draft?.status === "approved" && (
         <Card className="border-success/30 bg-success/5">
-          <div className="flex items-center gap-3">
+          <div className="flex items-start gap-3 sm:items-center">
             <CheckCircle className="h-5 w-5 shrink-0 text-success" />
-            <div>
+            <div className="min-w-0">
               <p className="font-medium text-text-primary">
                 Изменения одобрены
               </p>
-              <p className="text-sm text-text-secondary">
+              <p className="break-words text-sm text-text-secondary">
                 Профиль обновлён{" "}
                 {draft.reviewed_at
                   ? new Date(draft.reviewed_at).toLocaleDateString("ru-RU")

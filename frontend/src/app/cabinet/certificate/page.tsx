@@ -125,9 +125,9 @@ export default function CabinetCertificatePage() {
             <div className="flex shrink-0 items-center justify-center rounded-xl bg-accent/10 p-4">
               <Award className="h-8 w-8 text-accent" />
             </div>
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center gap-2">
-                <p className="font-medium text-text-primary">
+            <div className="min-w-0 flex-1 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="min-w-0 break-words font-medium text-text-primary">
                   {cert.certificate_type === "member"
                     ? `Сертификат члена ассоциации${cert.year ? ` ${cert.year}` : ""}`
                     : "Сертификат мероприятия"}
@@ -145,7 +145,7 @@ export default function CabinetCertificatePage() {
                 </Badge>
               </div>
               {cert.event && (
-                <p className="text-sm text-text-secondary">
+                <p className="break-words text-sm text-text-secondary">
                   {cert.event.title}
                 </p>
               )}
@@ -155,7 +155,7 @@ export default function CabinetCertificatePage() {
                 <span>Выдан {formatShortDate(cert.generated_at)}</span>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex min-w-0 flex-wrap gap-2">
               <Button
                 variant="outline"
                 size="sm"

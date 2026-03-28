@@ -78,7 +78,7 @@ export default function ColleaguesPage() {
           return (
             <Link key={colleague.id} href={ROUTES.DOCTOR(doctorSlug)}>
               <Card hover className="flex flex-col gap-3 p-4">
-                <div className="flex items-center gap-4">
+                <div className="flex min-w-0 items-center gap-4">
                   {colleague.photo_url ? (
                     <img
                       src={colleague.photo_url}
@@ -126,11 +126,11 @@ export default function ColleaguesPage() {
                     {colleague.public_email && (
                       <a
                         href={`mailto:${colleague.public_email}`}
-                        className="flex items-center gap-2 hover:text-accent"
+                        className="flex min-w-0 items-center gap-2 break-all hover:text-accent"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Mail className="h-3 w-3 shrink-0" />
-                        {colleague.public_email}
+                        <span className="min-w-0">{colleague.public_email}</span>
                       </a>
                     )}
                     {colleague.colleague_contacts && (
@@ -150,7 +150,7 @@ export default function ColleaguesPage() {
       </div>
 
       {(hasPrev || hasNext) && (
-        <div className="flex items-center justify-between">
+        <div className="flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Button
             variant="outline"
             size="sm"
@@ -159,7 +159,7 @@ export default function ColleaguesPage() {
           >
             Назад
           </Button>
-          <span className="text-sm text-text-muted">
+          <span className="text-center text-sm text-text-muted">
             {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} из {total}
           </span>
           <Button

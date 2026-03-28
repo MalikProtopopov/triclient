@@ -158,9 +158,9 @@ export default function CabinetPage() {
                 <h3 className="mb-2 font-heading text-lg font-semibold text-text-primary">
                   {event.title}
                 </h3>
-                <div className="mb-4 flex items-center gap-2 text-sm text-text-secondary">
+                <div className="mb-4 flex min-w-0 items-center gap-2 text-sm text-text-secondary">
                   <MapPin className="h-4 w-4 shrink-0" />
-                  <span>{event.location}</span>
+                  <span className="min-w-0 break-words">{event.location}</span>
                 </div>
                 <Link href={ROUTES.EVENT(event.slug)}>
                   <Button variant="outline" size="sm">
@@ -197,9 +197,9 @@ function SubscriptionWidget({ subscription }: { subscription: SubStatus }) {
           className="absolute left-0 top-0 h-full w-1 bg-amber-400"
           aria-hidden
         />
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Clock className="h-5 w-5 shrink-0 text-amber-600" />
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <p className="font-medium text-text-primary">
               У вас есть незавершённый платёж
             </p>
@@ -207,8 +207,10 @@ function SubscriptionWidget({ subscription }: { subscription: SubStatus }) {
               Перейдите к оплате или дождитесь завершения обработки
             </p>
           </div>
-          <Link href={ROUTES.CABINET_PAYMENTS}>
-            <Button size="sm">Перейти к оплате</Button>
+          <Link href={ROUTES.CABINET_PAYMENTS} className="w-full sm:w-auto sm:shrink-0">
+            <Button size="sm" fullWidth className="sm:w-auto">
+              Перейти к оплате
+            </Button>
           </Link>
         </div>
       </Card>
@@ -225,9 +227,9 @@ function SubscriptionWidget({ subscription }: { subscription: SubStatus }) {
           className="absolute left-0 top-0 h-full w-1 bg-success"
           aria-hidden
         />
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <CheckCircle className="h-5 w-5 shrink-0 text-success" />
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <p className="font-medium text-success">
               Подписка активна до {endDate}
             </p>
@@ -236,8 +238,10 @@ function SubscriptionWidget({ subscription }: { subscription: SubStatus }) {
             </p>
           </div>
           {subscription.can_renew && (
-            <Link href={ROUTES.CABINET_PAYMENTS}>
-              <Button size="sm">Продлить</Button>
+            <Link href={ROUTES.CABINET_PAYMENTS} className="w-full sm:w-auto sm:shrink-0">
+              <Button size="sm" fullWidth className="sm:w-auto">
+                Продлить
+              </Button>
             </Link>
           )}
         </div>
@@ -256,14 +260,16 @@ function SubscriptionWidget({ subscription }: { subscription: SubStatus }) {
         className={`absolute left-0 top-0 h-full w-1 bg-${accentColor}`}
         aria-hidden
       />
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Icon className={`h-5 w-5 shrink-0 text-${accentColor}`} />
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <p className="font-medium text-text-primary">{label}</p>
           <p className="text-sm text-text-secondary">{description}</p>
         </div>
-        <Link href={ROUTES.CABINET_PAYMENTS}>
-          <Button size="sm">{buttonText}</Button>
+        <Link href={ROUTES.CABINET_PAYMENTS} className="w-full sm:w-auto sm:shrink-0">
+          <Button size="sm" fullWidth className="sm:w-auto">
+            {buttonText}
+          </Button>
         </Link>
       </div>
     </Card>
