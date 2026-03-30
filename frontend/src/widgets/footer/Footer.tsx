@@ -59,7 +59,7 @@ export const Footer = () => {
             </div>
             <p className="max-w-xs text-xs leading-relaxed text-white/40">
               Профессиональное объединение врачей-трихологов России.
-              ОГРН 1127799002924 · ИНН 7718747218
+              ИНН 9701268115
             </p>
             <div className="mt-6">
               <span
