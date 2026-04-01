@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { XCircle, RotateCcw, Mail } from "lucide-react";
+import { XCircle, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { Header } from "@/widgets/header";
@@ -63,10 +63,6 @@ function FailContent() {
         >
           <RotateCcw className="h-4 w-4" />
           {payMutation.isPending ? "Перенаправление..." : "Попробовать снова"}
-        </Button>
-        <Button variant="outline" fullWidth>
-          <Mail className="h-4 w-4" />
-          Связаться с поддержкой
         </Button>
       </div>
     </main>
