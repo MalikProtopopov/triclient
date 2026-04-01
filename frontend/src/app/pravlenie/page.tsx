@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ShimmerImage } from "@/shared/ui";
 import Link from "next/link";
 
 import { useDoctors } from "@/entities/doctor";
@@ -110,7 +111,7 @@ export default function PravleniePage() {
                     <div className="relative">
                       <div className="relative overflow-hidden rounded-2xl">
                         {photoSrc ? (
-                          <Image
+                          <ShimmerImage
                             src={photoSrc}
                             alt={fullName}
                             width={320}

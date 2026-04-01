@@ -9,7 +9,7 @@ import { useEvents } from "@/entities/event";
 import { useArticles } from "@/entities/article";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Button } from "@/shared/ui";
+import { Button, ShimmerImage } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatDate } from "@/shared/lib/format";
 import { useAuth, shouldSkipClientOnboarding } from "@/providers/AuthProvider";
@@ -479,7 +479,7 @@ export default function HomeClient() {
                           {/* Обложка */}
                           <div className="relative aspect-video w-full overflow-hidden">
                             {event.cover_image_url ? (
-                              <Image
+                              <ShimmerImage
                                 src={event.cover_image_url}
                                 alt={event.title}
                                 fill
@@ -556,7 +556,7 @@ export default function HomeClient() {
                       {/* Обложка */}
                       <div className="relative h-44 w-full overflow-hidden">
                         {article.cover_image_url ? (
-                          <Image
+                          <ShimmerImage
                             src={article.cover_image_url}
                             alt={article.title}
                             fill

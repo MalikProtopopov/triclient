@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { ShimmerImage } from "@/shared/ui";
 import { MapPin, ArrowUpRight } from "lucide-react";
 
 import { ROUTES } from "@/shared/config";
@@ -50,7 +50,7 @@ export const DoctorCard = ({ doctor, className, featured }: DoctorCardProps) => 
           )}
         >
           {doctor.photo_url ? (
-            <Image
+            <ShimmerImage
               src={doctor.photo_url}
               alt={fullName}
               fill

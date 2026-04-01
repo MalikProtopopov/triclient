@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ShimmerImage } from "@/shared/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import gsap from "gsap";
@@ -126,7 +127,7 @@ function ArticlesContent() {
                       <article className="group flex flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-bg-secondary transition-all duration-300 hover:border-accent/40 hover:shadow-md sm:flex-row">
                         <div className="relative h-52 w-full flex-shrink-0 sm:h-auto sm:w-[280px]">
                           {article.cover_image_url ? (
-                            <Image
+                            <ShimmerImage
                               src={article.cover_image_url}
                               alt={article.title}
                               fill

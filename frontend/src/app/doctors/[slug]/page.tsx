@@ -9,7 +9,7 @@ import { AxiosError } from "axios";
 import { useDoctor } from "@/entities/doctor";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Card, SkeletonCard, DocumentContentBlockRenderer } from "@/shared/ui";
+import { Card, SkeletonCard, DocumentContentBlockRenderer, ShimmerImage } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatPhoneDisplay, formatPhoneForApi } from "@/shared/lib/phoneMask";
 import { useGSAP } from "@/shared/lib/useGSAP";
@@ -143,7 +143,7 @@ export default function DoctorProfilePage() {
             <div data-hero-photo className="relative overflow-hidden rounded-2xl">
               {doctor.photo_url ? (
                 <div className="relative aspect-[3/4] w-full">
-                  <Image
+                  <ShimmerImage
                     src={doctor.photo_url}
                     alt={fullName}
                     fill

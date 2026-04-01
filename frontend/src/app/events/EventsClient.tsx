@@ -10,7 +10,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEvents } from "@/entities/event";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
-import { Badge, SkeletonCard, EmptyState } from "@/shared/ui";
+import { Badge, SkeletonCard, EmptyState, ShimmerImage } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { cn } from "@/shared/lib";
 import { formatDate } from "@/shared/lib/format";
@@ -130,7 +130,7 @@ export default function EventsClient() {
                   <Link href={ROUTES.EVENT(featuredEvent.slug)} data-event-card>
                     <div className="group relative min-h-[320px] overflow-hidden rounded-2xl transition-all duration-500 hover:shadow-2xl lg:min-h-[400px]">
                       {featuredEvent.cover_image_url ? (
-                        <Image
+                        <ShimmerImage
                           src={featuredEvent.cover_image_url}
                           alt={featuredEvent.title}
                           fill
@@ -192,7 +192,7 @@ export default function EventsClient() {
                           <div className="group h-full overflow-hidden rounded-2xl border border-border bg-bg-secondary transition-all duration-500 hover:-translate-y-1 hover:border-accent/40 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
                             <div className="relative aspect-video w-full overflow-hidden">
                               {event.cover_image_url ? (
-                                <Image
+                                <ShimmerImage
                                   src={event.cover_image_url}
                                   alt={event.title}
                                   fill

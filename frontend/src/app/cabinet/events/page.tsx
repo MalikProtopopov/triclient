@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ShimmerImage } from "@/shared/ui";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 
@@ -72,7 +73,7 @@ export default function CabinetEventsPage() {
             <Card key={event.id} className="overflow-hidden p-0">
               <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-metal-light to-accent/20">
                 {event.cover_image_url ? (
-                  <Image
+                  <ShimmerImage
                     src={event.cover_image_url}
                     alt={event.title}
                     fill

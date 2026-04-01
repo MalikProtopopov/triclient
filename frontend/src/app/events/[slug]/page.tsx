@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { ShimmerImage } from "@/shared/ui";
 import { MapPin, Play, Check, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -581,7 +582,7 @@ export default function EventDetailPage() {
 
         {event.cover_image_url ? (
           <div className="relative mb-8 aspect-video w-full max-h-80 overflow-hidden rounded-xl bg-metal-light">
-            <Image
+            <ShimmerImage
               src={event.cover_image_url!}
               alt={event.title}
               fill

@@ -171,6 +171,11 @@ h6 {
   font-family: var(--font-family-heading);
 }
 
+/* Shimmer skeleton for image loading */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
 /* 3D Glass Orb animations */
 @keyframes orb-float {
   0%, 100% { transform: translateY(0) rotate(0deg); }

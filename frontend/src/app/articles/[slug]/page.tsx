@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { ShimmerImage } from "@/shared/ui";
 
 import { useArticle } from "@/entities/article";
 import { Header } from "@/widgets/header";
@@ -61,7 +62,7 @@ export default function ArticleDetailPage() {
 
         {article.cover_image_url ? (
           <div className="relative mb-6 h-64 w-full overflow-hidden rounded-xl bg-metal-light">
-            <Image
+            <ShimmerImage
               src={article.cover_image_url}
               alt={article.title}
               fill

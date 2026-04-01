@@ -21,6 +21,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 import Image from "next/image";
+import { ShimmerImage } from "@/shared/ui";
 
 import { useAuth } from "@/providers/AuthProvider";
 import { useOnboardingStatus } from "@/entities/auth";
@@ -87,7 +88,7 @@ export const CabinetSidebar = () => {
         <div className="flex items-center gap-3">
           {photoUrl ? (
             <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
-              <Image
+              <ShimmerImage
                 src={photoUrl}
                 alt=""
                 fill
