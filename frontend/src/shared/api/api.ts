@@ -51,7 +51,13 @@ class ApiClient {
           if (isAuthLoginRequest(error.config)) {
             return Promise.reject(error);
           }
+          // Уже пробовали refresh для этого запроса — не повторяем, чтобы не зациклиться
+          if (error.config._retried) {
+            this.clearSessionAndRedirect();
+            return Promise.reject(error);
+          }
           try {
+            error.config._retried = true;
             const refreshResponse = await axios.post(
               `${baseURL}${API_ENDPOINTS.AUTH.REFRESH}`,
               {},

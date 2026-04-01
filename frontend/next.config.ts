@@ -12,7 +12,7 @@ function getApiImagePattern() {
       ...(u.port && u.port !== "80" && u.port !== "443" ? { port: u.port } : {}),
     };
   } catch {
-    return { protocol: "https" as const, hostname: "trihoback.mediann.dev", pathname: "/**" };
+    return { protocol: "https" as const, hostname: "api.trichologia.ru", pathname: "/**" };
   }
 }
 

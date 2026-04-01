@@ -17,6 +17,7 @@ import {
 } from "@/entities/profile";
 import { Card, Button, Input, PageLoader } from "@/shared/ui";
 import { formatShortDate } from "@/shared/lib/format";
+import { formatPassportInput, formatPassportForApi, formatPassportDisplay } from "@/shared/lib/passportMask";
 
 const DOCUMENT_TYPE_LABELS: Record<ProfileDocumentType, string> = {
   medical_diploma: "Диплом об образовании",
@@ -142,6 +143,7 @@ export default function PersonalInfoPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, dirtyFields, isDirty },
   } = useForm<PersonalFormValues>({
     resolver: zodResolver(personalSchema),
@@ -168,7 +170,7 @@ export default function PersonalInfoPage() {
         last_name: profile.last_name,
         middle_name: profile.middle_name,
         phone: profile.phone,
-        passport_data: profile.passport_data,
+        passport_data: formatPassportDisplay(profile.passport_data),
         registration_address: profile.registration_address,
         city: profile.city?.name ?? null,
         clinic_name: profile.clinic_name,
@@ -183,7 +185,9 @@ export default function PersonalInfoPage() {
   const onSubmit = (values: PersonalFormValues) => {
     const changed: Record<string, unknown> = {};
     for (const key of Object.keys(dirtyFields) as (keyof PersonalFormValues)[]) {
-      changed[key] = values[key];
+      changed[key] = key === "passport_data" && values[key]
+        ? formatPassportForApi(values[key])
+        : values[key];
     }
     if (Object.keys(changed).length === 0) return;
 
@@ -251,6 +255,9 @@ export default function PersonalInfoPage() {
             <Input
               label="Паспортные данные"
               {...register("passport_data")}
+              onChange={(e) => setValue("passport_data", formatPassportInput(e.target.value), { shouldDirty: true })}
+              placeholder="4510 123456"
+              inputMode="numeric"
               className="sm:col-span-2"
             />
             <Input

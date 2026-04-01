@@ -11,6 +11,7 @@ import { Footer } from "@/widgets/footer";
 import { Button, Input, DropdownSelect, Card } from "@/shared/ui";
 import { ROUTES } from "@/shared/config";
 import { formatPhoneInput, formatPhoneForApi } from "@/shared/lib/phoneMask";
+import { formatPassportInput, formatPassportForApi, formatPassportDisplay } from "@/shared/lib/passportMask";
 import { useCities } from "@/entities/doctor";
 import { usePersonalProfile } from "@/entities/profile";
 import {
@@ -223,7 +224,7 @@ export default function OnboardingProfilePage() {
     setLastName(personalProfile.last_name || "");
     setMiddleName(personalProfile.middle_name || "");
     setPhone(personalProfile.phone ? formatPhoneInput(personalProfile.phone) : "");
-    setPassport(personalProfile.passport_data || "");
+    setPassport(formatPassportDisplay(personalProfile.passport_data));
     setCityId(personalProfile.city?.id ?? "");
     setClinic(personalProfile.clinic_name || "");
     setPosition(personalProfile.position || "");
@@ -282,7 +283,7 @@ export default function OnboardingProfilePage() {
         first_name: firstName,
         middle_name: middleName || undefined,
         phone: formatPhoneForApi(phone),
-        passport_data: passport || undefined,
+        passport_data: passport ? formatPassportForApi(passport) : undefined,
         city_id: cityId,
         clinic_name: clinic || undefined,
         position: position || undefined,
@@ -410,8 +411,9 @@ export default function OnboardingProfilePage() {
                     <Input
                       label="Паспортные данные"
                       value={passport}
-                      onChange={(e) => setPassport(e.target.value)}
-                      placeholder="Серия и номер"
+                      onChange={(e) => setPassport(formatPassportInput(e.target.value))}
+                      placeholder="4510 123456"
+                      inputMode="numeric"
                     />
                     <DropdownSelect
                       label="Город"
