@@ -608,7 +608,7 @@ export default function EventDetailPage() {
 
         {event.description && (
           <div
-            className="prose prose-sm max-w-none text-text-primary prose-headings:font-heading prose-headings:text-text-primary prose-p:text-text-secondary prose-table:w-full prose-td:align-top prose-td:border prose-td:border-border prose-td:px-3 prose-td:py-2 prose-th:border prose-th:border-border prose-th:px-3 prose-th:py-2 prose-table:border-collapse mb-10"
+            className="prose prose-sm max-w-none text-text-primary prose-headings:font-heading prose-headings:text-text-primary prose-p:text-text-secondary prose-table:w-full prose-td:align-top prose-td:border prose-td:border-border prose-td:px-3 prose-td:py-2 prose-th:border prose-th:border-border prose-th:px-3 prose-th:py-2 prose-table:border-collapse mb-10 [&_table_td:first-child]:min-w-[140px] [&_table_td:first-child]:whitespace-nowrap"
             dangerouslySetInnerHTML={{ __html: sanitizeLegacyHtml(event.description) }}
           />
         )}

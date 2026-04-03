@@ -4,4 +4,4 @@ export { buildMetadata } from "./seo";
 export { serverFetch } from "./serverFetch";
 export { useGSAP, useScrollTriggerRefresh, useMagneticHover } from "./useGSAP";
 export { staggerReveal, clipReveal, parallaxY, fadeInUp, scaleIn } from "./animations";
-export { sanitizeLegacyHtml } from "./sanitizeHtml";
+export { sanitizeLegacyHtml, stripHtmlTags } from "./sanitizeHtml";

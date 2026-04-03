@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { ENV } from "@/shared/config/env";
 import type { SeoMeta } from "@/shared/types";
 
+import { stripHtmlTags } from "./sanitizeHtml";
+
 interface MetadataDefaults {
   title: string;
   description: string;
@@ -19,7 +21,8 @@ export function buildMetadata(
   defaults: MetadataDefaults,
 ): Metadata {
   const title = seo?.title || defaults.title;
-  const description = seo?.description || defaults.description;
+  const rawDescription = seo?.description || defaults.description;
+  const description = stripHtmlTags(rawDescription).slice(0, 160);
 
   const ogType: OgType = VALID_OG_TYPES.has(seo?.og_type ?? "")
     ? (seo!.og_type as OgType)
