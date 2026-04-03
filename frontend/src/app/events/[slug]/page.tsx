@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ShimmerImage } from "@/shared/ui";
-import { MapPin, Play, Check, Loader2 } from "lucide-react";
+import { MapPin, Play, Check, Loader2, ImageIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -23,6 +23,7 @@ import { Card, Button, Badge, Modal, Input, DocumentContentBlockRenderer } from 
 import { ROUTES } from "@/shared/config";
 import { formatDateTime, formatPrice } from "@/shared/lib/format";
 import { deriveEventStatus } from "@/shared/lib/mediaUrl";
+import { sanitizeLegacyHtml } from "@/shared/lib/sanitizeHtml";
 import { useAuth } from "@/providers/AuthProvider";
 
 function generateIdempotencyKey(): string {
@@ -607,8 +608,8 @@ export default function EventDetailPage() {
 
         {event.description && (
           <div
-            className="prose prose-sm max-w-none text-text-primary prose-headings:font-heading prose-headings:text-text-primary prose-p:text-text-secondary mb-10"
-            dangerouslySetInnerHTML={{ __html: event.description }}
+            className="prose prose-sm max-w-none text-text-primary prose-headings:font-heading prose-headings:text-text-primary prose-p:text-text-secondary prose-table:w-full prose-td:align-top prose-td:border prose-td:border-border prose-td:px-3 prose-td:py-2 prose-th:border prose-th:border-border prose-th:px-3 prose-th:py-2 prose-table:border-collapse mb-10"
+            dangerouslySetInnerHTML={{ __html: sanitizeLegacyHtml(event.description) }}
           />
         )}
 
@@ -645,29 +646,68 @@ export default function EventDetailPage() {
             {event.galleries.length > 0 && (
               <section className="mb-10">
                 <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
-                  Галереи
+                  Фотогалерея
                 </h2>
-                <div className="space-y-3">
-                  {event.galleries.map((gallery) => (
-                    <div
-                      key={gallery.id}
-                      className="flex items-center justify-between rounded-xl border border-border bg-bg-secondary px-4 py-3"
-                    >
-                      <span className="font-medium text-text-primary">
-                        {gallery.title}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant={gallery.access_level === "members_only" ? "accent" : "default"}
-                        >
-                          {gallery.access_level === "members_only" ? "Только для членов" : "Публичная"}
-                        </Badge>
-                        <span className="text-sm text-text-muted">
-                          {gallery.photos_count} фото
-                        </span>
+                <div className="space-y-6">
+                  {event.galleries.map((gallery) => {
+                    const previews = (gallery.preview_photos ?? []).filter(
+                      (p) => p.thumbnail_url,
+                    );
+                    return (
+                      <div
+                        key={gallery.id}
+                        className="overflow-hidden rounded-2xl border border-border bg-bg-secondary"
+                      >
+                        {previews.length > 0 ? (
+                          <div className="grid grid-cols-2 gap-0.5 sm:grid-cols-4">
+                            {previews.slice(0, 4).map((photo, i) => (
+                              <div
+                                key={i}
+                                className="relative aspect-square bg-border-light"
+                              >
+                                <ShimmerImage
+                                  src={photo.thumbnail_url!}
+                                  alt={`${gallery.title} — фото ${i + 1}`}
+                                  fill
+                                  className="object-cover"
+                                  sizes="(max-width: 640px) 50vw, 25vw"
+                                />
+                                {i === 3 && gallery.photos_count > 4 && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                    <span className="text-lg font-semibold text-white">
+                                      +{gallery.photos_count - 4}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2 py-10 text-text-muted">
+                            <ImageIcon className="h-8 w-8" />
+                            <span className="text-sm">
+                              {gallery.photos_count} фото
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between px-5 py-3">
+                          <div className="min-w-0">
+                            <p className="truncate font-medium text-text-primary">
+                              {gallery.title}
+                            </p>
+                            <p className="text-xs text-text-muted">
+                              {gallery.photos_count} фото
+                            </p>
+                          </div>
+                          <Badge
+                            variant={gallery.access_level === "members_only" ? "accent" : "default"}
+                          >
+                            {gallery.access_level === "members_only" ? "Только для членов" : "Публичная"}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             )}

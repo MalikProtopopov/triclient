@@ -38,11 +38,16 @@ export interface EventTariff {
   sort_order?: number;
 }
 
+export interface EventGalleryPreviewPhoto {
+  thumbnail_url: string | null;
+}
+
 export interface EventGallery {
   id: string;
   title: string;
   access_level: "public" | "members_only";
   photos_count: number;
+  preview_photos?: EventGalleryPreviewPhoto[];
 }
 
 export interface EventRecording {
