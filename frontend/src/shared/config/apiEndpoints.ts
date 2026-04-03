@@ -43,6 +43,10 @@ export const API_ENDPOINTS = {
     LIST: "/api/v1/organization-documents",
     BY_SLUG: (slug: string) => `/api/v1/organization-documents/${slug}`,
   },
+  FAQ: {
+    LIST: "/api/v1/faq",
+    BY_ID: (id: string) => `/api/v1/faq/${id}`,
+  },
   CITIES: "/api/v1/cities",
   CITY_BY_SLUG: (slug: string) => `/api/v1/cities/${slug}`,
   PROFILE: {

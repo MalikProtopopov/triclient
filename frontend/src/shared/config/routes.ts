@@ -8,6 +8,7 @@ export const ROUTES = {
   EVENT: (slug: string) => `/events/${slug}`,
   ARTICLES: "/articles",
   ARTICLE: (slug: string) => `/articles/${slug}`,
+  FAQ: "/faq",
   DOCUMENTS: "/documents",
   DOCUMENT: (slug: string) => `/documents/${slug}`,
   PRAVLENIE: "/pravlenie",

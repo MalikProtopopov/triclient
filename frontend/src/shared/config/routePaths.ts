@@ -3,6 +3,7 @@ export const PUBLIC_PATHS = [
   "/doctors",
   "/events",
   "/articles",
+  "/faq",
   "/documents",
   "/login",
   "/register",

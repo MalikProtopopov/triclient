@@ -121,7 +121,7 @@ function ArticlesContent() {
               />
             ) : (
               <>
-                <div className="space-y-5">
+                <div className="flex flex-col gap-6">
                   {articles.map((article) => (
                     <Link key={article.id} href={ROUTES.ARTICLE(article.slug)}>
                       <article className="group flex flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-bg-secondary transition-all duration-300 hover:border-accent/40 hover:shadow-md sm:flex-row">

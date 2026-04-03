@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { label: "Врачи", href: ROUTES.DOCTORS },
   { label: "Мероприятия", href: ROUTES.EVENTS },
   { label: "Статьи", href: ROUTES.ARTICLES },
+  { label: "Вопрос-ответ", href: ROUTES.FAQ },
   { label: "Документы", href: ROUTES.DOCUMENTS },
 ];
 
