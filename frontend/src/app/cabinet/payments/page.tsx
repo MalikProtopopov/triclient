@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  Download,
   AlertTriangle,
   Clock,
   Info,
@@ -180,27 +179,6 @@ export default function PaymentsPage() {
       }
     } catch {
       toast.error("Не удалось загрузить данные");
-    }
-  };
-
-  const handleReceipt = async (paymentId: string, isRetry = false) => {
-    try {
-      const receipt = await paymentApi.getReceipt(paymentId);
-      if (receipt.receipt_url) {
-        window.open(receipt.receipt_url, "_blank");
-      } else {
-        toast.error("Не удалось получить чек");
-      }
-    } catch (err) {
-      const axiosErr = err as AxiosError;
-      if (axiosErr.response?.status === 404) {
-        toast.info("Чек формируется, попробуйте через 30 сек");
-        if (!isRetry) {
-          setTimeout(() => handleReceipt(paymentId, true), 30000);
-        }
-      } else {
-        toast.error("Не удалось получить чек");
-      }
     }
   };
 
@@ -469,9 +447,6 @@ export default function PaymentsPage() {
                   <th className="px-6 py-4 text-left text-sm font-medium text-text-secondary">
                     Статус
                   </th>
-                  <th className="px-6 py-4 text-right text-sm font-medium text-text-secondary">
-                    Действия
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -495,18 +470,12 @@ export default function PaymentsPage() {
                         statusLabel={payment.status_label}
                       />
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <PaymentRowActions
-                        payment={payment}
-                        onReceipt={handleReceipt}
-                      />
-                    </td>
                   </tr>
                 ))}
                 {payments.length === 0 && (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={4}
                       className="px-6 py-8 text-center text-sm text-text-muted"
                     >
                       Платежей пока нет
@@ -524,13 +493,7 @@ export default function PaymentsPage() {
 
 /* ── Sub-components ── */
 
-function PaymentRowActions({
-  payment,
-  onReceipt,
-}: {
-  payment: Payment;
-  onReceipt: (id: string) => void;
-}) {
+function PaymentRowActions({ payment }: { payment: Payment }) {
   const isPendingExpired =
     payment.expires_at && new Date(payment.expires_at) < new Date();
   const canPay =
@@ -539,17 +502,7 @@ function PaymentRowActions({
     !isPendingExpired;
 
   if (payment.status === "succeeded") {
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-text-secondary"
-        onClick={() => onReceipt(payment.id)}
-      >
-        <Download className="mr-1.5 h-4 w-4" />
-        Скачать чек
-      </Button>
-    );
+    return <span className="text-sm text-text-muted">—</span>;
   }
   if (canPay) {
     return (

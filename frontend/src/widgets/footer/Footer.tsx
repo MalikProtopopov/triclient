@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { Heart } from "lucide-react";
 
 import { useDocuments } from "@/entities/document";
 import { usePublicSettings } from "@/entities/settings";
@@ -148,9 +149,25 @@ export const Footer = () => {
         </div>
 
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center">
-          <p className="text-xs text-white/25">
-            &copy; {new Date().getFullYear()} {siteName}. Все права защищены.
-          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <p className="text-xs text-white/25">
+              &copy; {new Date().getFullYear()} {siteName}. Все права защищены.
+            </p>
+            <a
+              href="https://mediann.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Перейти на mediann.dev"
+              className="group inline-flex items-center gap-1.5 text-xs text-white/25 transition-colors hover:text-white/60"
+            >
+              Сделано с
+              <Heart className="h-3 w-3 fill-current text-red-400 transition-transform duration-200 group-hover:scale-125" />
+              в
+              <span className="font-medium transition-colors group-hover:text-[#edbecc]">
+                mediann.dev
+              </span>
+            </a>
+          </div>
           {footerDocuments.length > 0 && (
             <nav
               className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-white/25"

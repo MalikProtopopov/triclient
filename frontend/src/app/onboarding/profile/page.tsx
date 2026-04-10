@@ -288,7 +288,7 @@ export default function OnboardingProfilePage() {
         clinic_name: clinic || undefined,
         position: position || undefined,
         specialization: specialization || undefined,
-        academic_degree: academicDegree || undefined,
+        academic_degree: academicDegree.trim() || "Не указано",
       });
       setOptimisticStep("upload_documents");
       toast.success("Анкета сохранена");
@@ -495,7 +495,7 @@ export default function OnboardingProfilePage() {
                       onFileChange={setCertificate}
                     />
                     <FileUploadZone
-                      label="Сертификат онколога"
+                      label="Сертификат трихолога"
                       file={oncologyCertFile}
                       onFileChange={setOncologyCert}
                     />

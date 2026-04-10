@@ -111,13 +111,15 @@ export default function PravleniePage() {
                     <div className="relative">
                       <div className="relative overflow-hidden rounded-2xl">
                         {photoSrc ? (
-                          <ShimmerImage
-                            src={photoSrc}
-                            alt={fullName}
-                            width={320}
-                            height={400}
-                            className="h-[360px] w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02] lg:h-[400px]"
-                          />
+                          <div className="relative h-[360px] w-full lg:h-[400px]">
+                            <ShimmerImage
+                              src={photoSrc}
+                              alt={fullName}
+                              fill
+                              sizes="(min-width: 1024px) 320px, 100vw"
+                              className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
+                            />
+                          </div>
                         ) : (
                           <div className="flex h-[360px] w-full items-center justify-center bg-border-light/30 lg:h-[400px]">
                             <span className="font-heading text-6xl font-bold text-border-light">
@@ -161,7 +163,7 @@ export default function PravleniePage() {
                         {fullName}
                       </Link>
 
-                      {doctor.academic_degree && (
+                      {doctor.academic_degree && doctor.academic_degree !== "Не указано" && (
                         <div className="mt-3 flex flex-wrap items-center gap-3">
                           <span
                             className="inline-block rounded-full px-3 py-1 text-xs font-semibold text-[#4a4a4a]"

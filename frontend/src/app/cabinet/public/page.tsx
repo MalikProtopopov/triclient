@@ -48,6 +48,21 @@ function getDisplayData(profile: PublicProfile): {
 
   const c = draft.changes ?? {};
   const photoKey = c.photo_url ?? draft.photo_url;
+  /** После approve публичное фото уже в profile.photo_url; старый ключ в draft не значит «на модерации». */
+  if (draft.status === "approved") {
+    return {
+      bio: c.bio ?? draft.bio ?? profile.bio,
+      public_email: c.public_email ?? draft.public_email ?? profile.public_email,
+      public_phone: c.public_phone ?? draft.public_phone ?? profile.public_phone,
+      city_id: c.city_id ?? draft.city_id ?? cityId,
+      clinic_name: c.clinic_name ?? draft.clinic_name ?? profile.clinic_name,
+      specialization:
+        c.specialization ?? draft.specialization ?? profile.specialization,
+      academic_degree:
+        c.academic_degree ?? draft.academic_degree ?? profile.academic_degree,
+      photo_url: profile.photo_url,
+    };
+  }
   return {
     bio: c.bio ?? draft.bio ?? profile.bio,
     public_email: c.public_email ?? draft.public_email ?? profile.public_email,
@@ -302,16 +317,21 @@ export default function PublicProfilePage() {
           {/* Photo upload */}
           <div className="flex flex-col items-center gap-4">
             {(() => {
+              const draft = profile?.pending_draft;
               const draftPhotoKey =
-                profile?.pending_draft?.changes?.photo_url ??
-                profile?.pending_draft?.photo_url;
-              const draftPhotoUrl = resolvePendingPhotoUrl(draftPhotoKey);
+                draft?.changes?.photo_url ?? draft?.photo_url;
+              const draftPhotoUrl =
+                draft?.status === "approved"
+                  ? null
+                  : resolvePendingPhotoUrl(draftPhotoKey);
               const displayPhotoUrl =
                 draftPhotoUrl ?? profile?.photo_url ?? null;
+              const draftPhotoAwaitingReview =
+                Boolean(draftPhotoKey) && draft?.status === "pending";
               const showModerationBadge =
+                pendingPhotoFile != null ||
                 Boolean(profile?.photo_pending_moderation) ||
-                Boolean(draftPhotoKey) ||
-                pendingPhotoFile != null;
+                draftPhotoAwaitingReview;
 
               return (
                 <>
@@ -330,7 +350,7 @@ export default function PublicProfilePage() {
                     <p className="text-center text-xs text-warning">
                       {pendingPhotoFile
                         ? "Фото будет отправлено при сохранении"
-                        : draftPhotoKey
+                        : draftPhotoAwaitingReview
                           ? "Новое фото на модерации"
                           : "Фото на модерации"}
                     </p>

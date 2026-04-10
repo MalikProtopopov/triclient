@@ -180,7 +180,7 @@ export default function DoctorProfilePage() {
                 </p>
               )}
 
-              {(doctor.board_role || doctor.academic_degree) && (
+              {(doctor.board_role || (doctor.academic_degree && doctor.academic_degree !== "Не указано")) && (
                 <div className="mt-4 flex flex-wrap gap-2">
                   {doctor.board_role && (
                     <span
@@ -191,7 +191,7 @@ export default function DoctorProfilePage() {
                       {BOARD_ROLE_LABELS[doctor.board_role]}
                     </span>
                   )}
-                  {doctor.academic_degree && (
+                  {doctor.academic_degree && doctor.academic_degree !== "Не указано" && (
                     <span
                       data-badge
                       className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-bg-secondary px-4 py-2 text-sm font-medium text-text-primary"

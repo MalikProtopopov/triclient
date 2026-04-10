@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { MessageCircle, Check, Copy, ExternalLink } from "lucide-react";
+import { MessageCircle, Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
@@ -123,12 +123,13 @@ export default function CabinetTelegramPage() {
 
             {codeData ? (
               <p className="mb-4 text-sm text-text-secondary">
-                Нажмите кнопку «Открыть Telegram» — код отправится автоматически
+                Откройте бота <span className="font-medium text-text-primary">@trichologiabot</span> в Telegram и отправьте ему код
               </p>
             ) : (
               <ol className="mb-6 list-decimal space-y-2 pl-5 text-left text-sm text-text-secondary">
                 <li>Нажмите «Получить код»</li>
-                <li>Нажмите «Открыть Telegram» — код отправится автоматически</li>
+                <li>Откройте бота <span className="font-medium text-text-primary">@trichologiabot</span> в Telegram</li>
+                <li>Отправьте боту полученный код</li>
               </ol>
             )}
 
@@ -168,22 +169,26 @@ export default function CabinetTelegramPage() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
                   <Button variant="outline" onClick={handleCopy}>
                     <Copy className="mr-1.5 h-4 w-4" />
-                    Копировать
+                    Копировать код
                   </Button>
                   <a
-                    href={
-                      codeData.bot_link.includes("start=")
-                        ? codeData.bot_link
-                        : `${codeData.bot_link}${codeData.bot_link.includes("?") ? "&" : "?"}start=${codeData.auth_code}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={`tg://resolve?domain=trichologiabot&start=${codeData.auth_code}`}
                   >
                     <Button variant="outline">
-                      <ExternalLink className="mr-1.5 h-4 w-4" />
-                      Открыть Telegram
+                      <MessageCircle className="mr-1.5 h-4 w-4" />
+                      Открыть в Telegram
                     </Button>
                   </a>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText("@trichologiabot");
+                      toast.success("Имя бота скопировано");
+                    }}
+                  >
+                    <Copy className="mr-1.5 h-4 w-4" />
+                    Скопировать @trichologiabot
+                  </Button>
                 </div>
               </div>
             )}

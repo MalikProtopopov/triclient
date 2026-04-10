@@ -22,7 +22,7 @@ import { formatPassportInput, formatPassportForApi, formatPassportDisplay } from
 const DOCUMENT_TYPE_LABELS: Record<ProfileDocumentType, string> = {
   medical_diploma: "Диплом об образовании",
   retraining_cert: "Сертификат о переподготовке",
-  oncology_cert: "Сертификат онколога",
+  oncology_cert: "Сертификат трихолога",
   additional_cert: "Дополнительные сертификаты",
 };
 

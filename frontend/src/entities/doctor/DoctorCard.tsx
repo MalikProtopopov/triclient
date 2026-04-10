@@ -64,14 +64,14 @@ export const DoctorCard = ({ doctor, className, featured }: DoctorCardProps) => 
               </span>
             </div>
           )}
-          {(doctor.board_role || doctor.academic_degree) && (
+          {(doctor.board_role || (doctor.academic_degree && doctor.academic_degree !== "Не указано")) && (
             <div className="absolute left-2 top-2 flex flex-wrap gap-1">
               {doctor.board_role && (
                 <span className="rounded bg-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
                   {BOARD_ROLE_LABELS[doctor.board_role]}
                 </span>
               )}
-              {doctor.academic_degree && (
+              {doctor.academic_degree && doctor.academic_degree !== "Не указано" && (
                 <span className="rounded bg-white/90 px-1.5 py-0.5 text-[9px] font-semibold text-text-primary shadow-sm">
                   {doctor.academic_degree}
                 </span>
