@@ -20,7 +20,7 @@ const BENEFITS = [
   "Публикация в каталоге верифицированных врачей",
   "Доступ к закрытому профессиональному чату",
   "Льготные цены на конференции и семинары",
-  "Именной сертификат члена ассоциации",
+  "Именной сертификат члена организации",
 ];
 
 const STATS = [
@@ -83,7 +83,7 @@ function HomeMissionSection() {
               </p>
             </div>
             <h2 className="mt-5 max-w-[14ch] font-heading text-[1.65rem] font-bold leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-3xl lg:text-[2rem]">
-              Зачем нужна ассоциация
+              Зачем нужна организация
             </h2>
             <Link
               href={ROUTES.DOCUMENTS}
@@ -215,7 +215,7 @@ export default function HomeClient() {
                 <div data-hero-text className="mt-8 flex flex-wrap items-center gap-4">
                   <Link href={isOnboarded ? ROUTES.CABINET : ROUTES.REGISTER}>
                     <button className="group inline-flex items-center gap-3 rounded-full bg-accent px-8 py-3.5 text-sm font-semibold text-accent-contrast shadow-lg shadow-accent/20 transition-all duration-300 hover:shadow-xl hover:shadow-accent/30 hover:-translate-y-0.5">
-                      {isOnboarded ? "Перейти в кабинет" : "Стать членом"}
+                      {isOnboarded ? "Перейти в кабинет" : "Стать участником"}
                       <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </button>
                   </Link>

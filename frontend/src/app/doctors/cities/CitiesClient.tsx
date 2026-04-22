@@ -32,14 +32,14 @@ export default function CitiesClient() {
         <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
           <div className="mb-10">
             <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted">
-              Ассоциация трихологов
+              Организация трихологов
             </p>
             <h1 className="font-heading text-4xl font-bold text-text-primary lg:text-5xl">
               Трихологи по городам
             </h1>
             <p className="mt-3 max-w-xl text-text-secondary">
               Выберите город, чтобы увидеть список врачей-трихологов — членов
-              ассоциации
+              организации
             </p>
           </div>
 

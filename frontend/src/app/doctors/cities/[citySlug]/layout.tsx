@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   );
   if (!city) return { title: "Город не найден" };
 
-  const title = `Трихологи в ${city.name} | Ассоциация трихологов`;
-  const description = `Список врачей-трихологов в ${city.name}. Специалисты — члены Ассоциации трихологов.`;
+  const title = `Трихологи в ${city.name} | Организация трихологов`;
+  const description = `Список врачей-трихологов в ${city.name}. Специалисты — члены Организации трихологов.`;
   const canonical = `${ENV.SITE_URL}/doctors/cities/${citySlug}`;
 
   return {

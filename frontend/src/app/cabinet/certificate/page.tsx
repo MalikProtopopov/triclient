@@ -129,7 +129,7 @@ export default function CabinetCertificatePage() {
               <div className="flex flex-wrap items-center gap-2">
                 <p className="min-w-0 break-words font-medium text-text-primary">
                   {cert.certificate_type === "member"
-                    ? `Сертификат члена ассоциации${cert.year ? ` ${cert.year}` : ""}`
+                    ? `Сертификат члена организации${cert.year ? ` ${cert.year}` : ""}`
                     : "Сертификат мероприятия"}
                 </p>
                 <Badge variant={cert.is_active ? "success" : "error"}>

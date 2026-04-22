@@ -41,11 +41,11 @@ const BENEFITS = [
   "Публикация в каталоге верифицированных врачей",
   "Доступ к закрытому профессиональному чату",
   "Льготные цены на конференции и семинары",
-  "Именной сертификат члена ассоциации",
+  "Именной сертификат члена организации",
 ];
 
 const STATS = [
-  { num: "500+", label: "Членов ассоциации" },
+  { num: "500+", label: "Членов организации" },
   { num: "14", label: "Лет работы" },
   { num: "42", label: "Города России" },
   { num: "EHRS", label: "Международный партнёр" },
@@ -111,7 +111,7 @@ function MissionSection() {
             Миссия
           </span>
           <h2 className="font-heading text-4xl font-extrabold text-[#1A1D23] lg:text-5xl">
-            Зачем нужна ассоциация
+            Зачем нужна организация
           </h2>
         </div>
 
@@ -326,7 +326,7 @@ export const ClinicalAuraHome = () => {
                       className="group inline-flex items-center gap-3 rounded-full px-8 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                       style={{ background: PINK, boxShadow: `0 4px 20px rgba(232,99,139,0.3)` }}
                     >
-                      {isOnboarded ? "Перейти в кабинет" : "Стать членом"}
+                      {isOnboarded ? "Перейти в кабинет" : "Стать участником"}
                       <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </button>
                   </Link>

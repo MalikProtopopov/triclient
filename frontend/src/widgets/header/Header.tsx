@@ -120,7 +120,7 @@ export const Header = () => {
                   </Link>
                   <Link href={ROUTES.REGISTER}>
                     <Button variant="primary" size="sm">
-                      Стать членом
+                      Стать участником
                     </Button>
                   </Link>
                 </>
@@ -184,7 +184,7 @@ export const Header = () => {
                   </Button>
                 </Link>
                 <Link href={ROUTES.REGISTER}>
-                  <Button fullWidth>Стать членом</Button>
+                  <Button fullWidth>Стать участником</Button>
                 </Link>
               </>
             )}

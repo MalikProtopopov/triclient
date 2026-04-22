@@ -84,7 +84,7 @@ export default function EventsClient() {
         <div ref={headerRef} className="border-b border-border bg-bg-secondary">
           <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-16">
             <p data-hero-text className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted">
-              Ассоциация трихологов
+              Организация трихологов
             </p>
             <h1 data-hero-text className="font-heading text-4xl font-bold text-text-primary lg:text-5xl xl:text-6xl">
               Мероприятия

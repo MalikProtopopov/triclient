@@ -17,11 +17,11 @@ const BENEFITS = [
   "Публикация в каталоге верифицированных врачей",
   "Доступ к закрытому профессиональному чату",
   "Льготные цены на конференции и семинары",
-  "Именной сертификат члена ассоциации",
+  "Именной сертификат члена организации",
 ];
 
 const STATS = [
-  { num: "500+", caption: "членов ассоциации" },
+  { num: "500+", caption: "членов организации" },
   { num: "14", caption: "лет работы" },
   { num: "XXII", caption: "конференции" },
   { num: "EHRS", caption: "международный партнёр" },
@@ -127,7 +127,7 @@ export const SwissPrecisionHome = () => {
               <div className="mt-8 flex gap-3">
                 <Link href={isOnboarded ? ROUTES.CABINET : ROUTES.REGISTER}>
                   <button className="inline-flex items-center gap-2 rounded-[6px] bg-[#D4637A] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#c0566c]">
-                    {isOnboarded ? "Личный кабинет" : "Стать членом"}
+                    {isOnboarded ? "Личный кабинет" : "Стать участником"}
                     <ArrowRight className="h-4 w-4" strokeWidth={1.25} />
                   </button>
                 </Link>
@@ -169,7 +169,7 @@ export const SwissPrecisionHome = () => {
             Миссия
           </p>
           <h2 className="font-heading text-3xl font-bold tracking-[-0.02em] text-[#2C3340] lg:text-4xl">
-            Зачем нужна ассоциация
+            Зачем нужна организация
           </h2>
 
           <div className="mt-12 grid gap-6 lg:grid-cols-3">
@@ -228,7 +228,7 @@ export const SwissPrecisionHome = () => {
 
             <div className="flex items-center justify-center rounded-lg border border-[#DCDFE4] bg-white p-10">
               <div className="w-full space-y-6">
-                {([["Членов ассоциации","500+"],["Городов присутствия","42"],["Международный партнёр","EHRS"],["Ежегодный взнос","от 3 000 ₽"]] as const).map(([label, value]) => (
+                {([["Членов организации","500+"],["Городов присутствия","42"],["Международный партнёр","EHRS"],["Ежегодный взнос","от 3 000 ₽"]] as const).map(([label, value]) => (
                   <div key={label} className="flex items-baseline justify-between border-b border-[#DCDFE4] pb-3 last:border-0">
                     <span className="text-sm text-[#4A5568]">{label}</span>
                     <span className="text-lg font-bold text-[#2C3340]" style={mono}>{value}</span>

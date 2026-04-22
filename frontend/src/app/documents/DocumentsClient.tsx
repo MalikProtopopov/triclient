@@ -48,7 +48,7 @@ export default function DocumentsClient() {
               data-hero-text
               className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted"
             >
-              Ассоциация трихологов
+              Организация трихологов
             </p>
             <h1
               data-hero-text

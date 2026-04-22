@@ -32,7 +32,7 @@ const BENEFITS = [
   "Публикация в каталоге верифицированных врачей",
   "Доступ к закрытому профессиональному чату",
   "Льготные цены на конференции и семинары",
-  "Именной сертификат члена ассоциации",
+  "Именной сертификат члена организации",
 ];
 
 const STATS = [
@@ -157,7 +157,7 @@ export const EditorialLuxeHome = () => {
                 className="group mt-10 inline-flex items-center gap-3 rounded-[8px] px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:shadow-xl"
                 style={{ background: ROSE }}
               >
-                {isOnboarded ? "Перейти в кабинет" : "Стать членом ассоциации"}
+                {isOnboarded ? "Перейти в кабинет" : "Стать участником организации"}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
             </Link>
@@ -200,7 +200,7 @@ export const EditorialLuxeHome = () => {
                 Миссия
               </p>
               <h2 className="font-heading text-4xl leading-tight text-[#1A1520] lg:text-5xl">
-                Зачем нужна ассоциация
+                Зачем нужна организация
               </h2>
             </motion.div>
 
@@ -214,7 +214,7 @@ export const EditorialLuxeHome = () => {
                 {
                   num: "II",
                   title: "Профессиональное сообщество",
-                  desc: "Закрытый Telegram-канал, обмен клиническими случаями и поддержка коллег. Ассоциация — это живое сообщество, а не формальная структура.",
+                  desc: "Закрытый Telegram-канал, обмен клиническими случаями и поддержка коллег. Организация — это живое сообщество, а не формальная структура.",
                 },
                 {
                   num: "III",

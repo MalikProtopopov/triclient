@@ -109,7 +109,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 const FALLBACK_SITE_NAME = "Профессиональное общество Трихологов";
 const FALLBACK_DESCRIPTION =
-  "Профессиональная ассоциация врачей-трихологов России. Каталог специалистов, мероприятия, сертификация.";
+  "Профессиональная организация врачей-трихологов России. Каталог специалистов, мероприятия, сертификация.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await fetchPublicSettingsServer();

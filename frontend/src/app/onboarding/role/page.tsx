@@ -86,7 +86,7 @@ export default function OnboardingRolePage() {
             </h1>
             <p className="mb-8 text-text-secondary">
               Ваши данные сохранены. Теперь вы можете узнавать о новостях и мероприятиях
-              ассоциации.
+              организации.
             </p>
             <Link href={ROUTES.EVENTS}>
               <Button fullWidth size="lg">
@@ -116,7 +116,7 @@ export default function OnboardingRolePage() {
             </div>
             <h2 className="mb-2 text-lg font-semibold text-text-primary">Я — врач</h2>
             <p className="mb-6 flex-1 text-sm text-text-secondary">
-              Вступить в ассоциацию, получить сертификат
+              Вступить в организацию, получить сертификат
             </p>
             <Button onClick={handleDoctorSelect} fullWidth disabled={isSubmitting}>
               Выбрать

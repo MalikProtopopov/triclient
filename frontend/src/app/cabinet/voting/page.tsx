@@ -61,7 +61,7 @@ export default function CabinetVotingPage() {
         }
         if (status === 403) {
           toast.error(
-            "Только активные члены ассоциации могут голосовать. Проверьте статус подписки.",
+            "Только активные члены организации могут голосовать. Проверьте статус подписки.",
           );
           setShowForbiddenBanner(true);
           return;
@@ -124,7 +124,7 @@ export default function CabinetVotingPage() {
             <AlertCircle className="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-500" />
             <div>
               <p className="text-sm text-amber-800 dark:text-amber-200">
-                Только активные члены ассоциации с действующей подпиской могут
+                Только активные члены организации с действующей подпиской могут
                 участвовать в голосовании.
               </p>
               <Link

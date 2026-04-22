@@ -67,7 +67,7 @@ function ArticlesContent() {
               data-hero-text
               className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted"
             >
-              Ассоциация трихологов
+              Организация трихологов
             </p>
             <h1
               data-hero-text
@@ -76,7 +76,7 @@ function ArticlesContent() {
               Статьи и новости
             </h1>
             <p data-hero-text className="mt-4 max-w-xl text-text-secondary">
-              Материалы ассоциации: исследования, новости профессии и практические материалы
+              Материалы организации: исследования, новости профессии и практические материалы
             </p>
           </div>
         </div>

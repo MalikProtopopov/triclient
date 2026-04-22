@@ -13,7 +13,7 @@ import { useGSAP } from "@/shared/lib/useGSAP";
 import gsap from "gsap";
 
 const BOARD_ROLE_LABELS: Record<string, string> = {
-  president: "Президент ассоциации",
+  president: "Президент организации",
   pravlenie: "Член правления",
 };
 
@@ -49,7 +49,7 @@ export default function PravleniePage() {
               data-hero-text
               className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-text-muted"
             >
-              Ассоциация трихологов
+              Организация трихологов
             </p>
             <h1
               data-hero-text
