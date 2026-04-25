@@ -361,9 +361,9 @@ export default function HomeClient() {
                 </div>
                 <div className="relative max-w-[18rem] text-center sm:max-w-none">
                   <div className="font-heading text-[2rem] font-bold leading-[1.15] tracking-[-0.02em] text-text-primary sm:text-4xl lg:text-[2.75rem]">
-                    Вступайте
+                    Вступайте в
                     <br />
-                    в сообщество
+                    профессиональное общество
                     <br />
                     <span className="text-accent">трихологов</span>
                   </div>
