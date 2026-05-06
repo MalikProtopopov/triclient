@@ -4,8 +4,7 @@ import React, { useState, useEffect } from "react";
 import { flushSync } from "react-dom";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import { ShimmerImage } from "@/shared/ui";
+import { ShimmerImage, CoverBanner } from "@/shared/ui";
 import { MapPin, Play, Check, Loader2, ImageIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -581,25 +580,18 @@ export default function EventDetailPage() {
           ← Все мероприятия
         </Link>
 
-        {event.cover_image_url ? (
-          <div className="relative mb-8 aspect-video w-full max-h-80 overflow-hidden rounded-xl bg-metal-light">
-            <ShimmerImage
-              src={event.cover_image_url!}
-              alt={event.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 896px) 100vw, 896px"
-            />
-          </div>
-        ) : (
-          <div className="mb-8 h-64 w-full max-h-80 overflow-hidden rounded-xl bg-metal-light" />
-        )}
+        <CoverBanner
+          src={event.cover_image_url}
+          alt={event.title}
+          className="mb-8"
+        />
 
         <h1 className="mb-2 font-heading text-3xl font-semibold text-text-primary">
           {event.title}
         </h1>
         <p className="mb-2 text-text-secondary">
-          {formatDateTime(event.event_date)} — {formatDateTime(event.event_end_date)}
+          {formatDateTime(event.event_date)}
+          {event.event_end_date && ` — ${formatDateTime(event.event_end_date)}`}
         </p>
         <div className="mb-8 flex items-center gap-2 text-text-secondary">
           <MapPin className="h-4 w-4 shrink-0" />

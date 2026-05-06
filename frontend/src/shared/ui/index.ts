@@ -10,5 +10,6 @@ export { PaymentStatusBadge, ModerationStatusBadge } from "./StatusBadge";
 export { EmptyState } from "./EmptyState";
 export { PageLoader } from "./PageLoader";
 export { ShimmerImage } from "./ShimmerImage";
+export { CoverBanner } from "./CoverBanner";
 export { ContentBlockRenderer } from "./ContentBlockRenderer";
 export { DocumentContentBlockRenderer } from "./DocumentContentBlockRenderer";

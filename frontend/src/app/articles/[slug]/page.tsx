@@ -2,8 +2,7 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
-import { ShimmerImage } from "@/shared/ui";
+import { CoverBanner } from "@/shared/ui";
 
 import { useArticle } from "@/entities/article";
 import { Header } from "@/widgets/header";
@@ -60,20 +59,12 @@ export default function ArticleDetailPage() {
           ← Все статьи
         </Link>
 
-        {article.cover_image_url ? (
-          <div className="relative mb-6 h-64 w-full overflow-hidden rounded-xl bg-metal-light">
-            <ShimmerImage
-              src={article.cover_image_url}
-              alt={article.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 896px) 100vw, 896px"
-              priority
-            />
-          </div>
-        ) : (
-          <div className="mb-6 h-64 w-full overflow-hidden rounded-xl bg-metal-light" />
-        )}
+        <CoverBanner
+          src={article.cover_image_url}
+          alt={article.title}
+          className="mb-6"
+          priority
+        />
 
         <div className="mb-3 flex items-center gap-3">
           <p className="text-sm text-text-muted">

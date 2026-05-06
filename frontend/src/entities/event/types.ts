@@ -10,7 +10,7 @@ export interface EventResponseSchema {
   title: string;
   description: string;
   event_date: string;
-  event_end_date: string;
+  event_end_date: string | null;
   location: string;
   cover_image_url: string | null;
   status?: "upcoming" | "ongoing" | "finished" | "cancelled";
