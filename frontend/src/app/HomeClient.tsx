@@ -24,9 +24,9 @@ const BENEFITS = [
 ];
 
 const STATS = [
-  { num: "500+", label: "членов" },
+  { num: "300+", label: "врачей" },
   { num: "14", label: "лет работы" },
-  { num: "XXII", label: "конференции" },
+  { num: "XXIII", label: "конференции" },
   { num: "EHRS", label: "международный партнёр" },
 ];
 
