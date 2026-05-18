@@ -2,21 +2,31 @@
 
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { MessageCircle, Check, Copy } from "lucide-react";
+import { MessageCircle, Check, Copy, Users } from "lucide-react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
+import { useAuth } from "@/providers/AuthProvider";
 import {
   useTelegramBinding,
   useGenerateCode,
   telegramKeys,
 } from "@/entities/telegram";
+import { useSubscriptionStatus } from "@/entities/subscription";
 import { Card, Button, PageLoader } from "@/shared/ui";
+
+const COMMUNITY_CHAT_URL = "https://t.me/+FX-RdlpkAOVmMTRi";
 
 export default function CabinetTelegramPage() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const isDoctor = user?.role === "doctor";
   const { data: binding, isLoading } = useTelegramBinding();
+  const { data: subscription } = useSubscriptionStatus({ enabled: isDoctor });
   const generateCodeMutation = useGenerateCode();
+
+  const hasActiveSubscription =
+    isDoctor && subscription?.current_subscription?.status === "active";
   const [codeData, setCodeData] = useState<{
     auth_code: string;
     bot_link: string;
@@ -75,6 +85,31 @@ export default function CabinetTelegramPage() {
 
   if (isLoading) return <PageLoader />;
 
+  const communityChatCard = hasActiveSubscription ? (
+    <Card className="max-w-lg">
+      <div className="flex flex-col items-center gap-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10">
+          <Users className="h-8 w-8 text-accent" />
+        </div>
+        <div>
+          <h2 className="mb-2 text-lg font-semibold text-text-primary">
+            Присоединиться в телеграм чат сообщества
+          </h2>
+          <p className="mb-4 text-text-secondary">
+            Закрытый чат для врачей с активной подпиской — общение, обмен опытом
+            и анонсы.
+          </p>
+          <a href={COMMUNITY_CHAT_URL} target="_blank" rel="noopener noreferrer">
+            <Button>
+              <MessageCircle className="mr-1.5 h-4 w-4" />
+              Открыть чат
+            </Button>
+          </a>
+        </div>
+      </div>
+    </Card>
+  ) : null;
+
   if (binding?.is_linked) {
     return (
       <div className="space-y-6">
@@ -101,6 +136,7 @@ export default function CabinetTelegramPage() {
             </div>
           </div>
         </Card>
+        {communityChatCard}
       </div>
     );
   }
@@ -195,6 +231,7 @@ export default function CabinetTelegramPage() {
           </div>
         </div>
       </Card>
+      {communityChatCard}
     </div>
   );
 }
