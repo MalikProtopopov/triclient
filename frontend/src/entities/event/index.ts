@@ -4,6 +4,7 @@ export {
   useEvent,
   useEventRegisterMutation,
   useConfirmGuestMutation,
+  useEventGalleries,
   eventKeys,
 } from "./model/useEvent";
 export type {
@@ -12,6 +13,9 @@ export type {
   EventFilters,
   EventTariff,
   EventGallery,
+  EventGalleryPhoto,
+  EventGalleryWithPhotos,
+  EventGalleriesResponse,
   EventRecording,
   EventRegistrationRequest,
   EventRegistrationResponse,

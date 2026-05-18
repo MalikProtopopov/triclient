@@ -8,6 +8,7 @@ import type {
   EventRegistrationRequest,
   EventRegistrationResponse,
   ConfirmGuestRegistrationRequest,
+  EventGalleriesResponse,
 } from "../types";
 
 export const eventApi = {
@@ -22,4 +23,7 @@ export const eventApi = {
 
   confirmGuest: (eventId: string, data: ConfirmGuestRegistrationRequest): Promise<EventRegistrationResponse> =>
     apiClient.post(API_ENDPOINTS.EVENTS.CONFIRM_GUEST(eventId), data),
+
+  getGalleries: (eventId: string): Promise<EventGalleriesResponse> =>
+    apiClient.get(API_ENDPOINTS.EVENTS.GALLERIES(eventId)),
 };

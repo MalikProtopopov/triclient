@@ -13,3 +13,4 @@ export { ShimmerImage } from "./ShimmerImage";
 export { CoverBanner } from "./CoverBanner";
 export { ContentBlockRenderer } from "./ContentBlockRenderer";
 export { DocumentContentBlockRenderer } from "./DocumentContentBlockRenderer";
+export { GalleryLightbox } from "./GalleryLightbox";

@@ -11,6 +11,7 @@ export const eventKeys = {
   all: ["events"] as const,
   list: (filters?: EventFilters) => [...eventKeys.all, "list", filters] as const,
   detail: (slug: string) => [...eventKeys.all, "detail", slug] as const,
+  galleries: (eventId: string) => [...eventKeys.all, "galleries", eventId] as const,
 };
 
 export const useEvents = (filters?: EventFilters) => {
@@ -45,5 +46,14 @@ export const useConfirmGuestMutation = (eventId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: eventKeys.all });
     },
+  });
+};
+
+export const useEventGalleries = (eventId: string, enabled: boolean) => {
+  return useQuery({
+    queryKey: eventKeys.galleries(eventId),
+    queryFn: () => eventApi.getGalleries(eventId),
+    enabled: enabled && !!eventId,
+    staleTime: 5 * 60 * 1000,
   });
 };

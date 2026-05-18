@@ -50,6 +50,24 @@ export interface EventGallery {
   preview_photos?: EventGalleryPreviewPhoto[];
 }
 
+export interface EventGalleryPhoto {
+  id: string;
+  file_url: string;
+  thumbnail_url: string | null;
+  caption: string | null;
+}
+
+export interface EventGalleryWithPhotos {
+  id: string;
+  title: string;
+  access_level: "public" | "members_only";
+  photos: EventGalleryPhoto[];
+}
+
+export interface EventGalleriesResponse {
+  data: EventGalleryWithPhotos[];
+}
+
 export interface EventRecording {
   id: string;
   title: string;

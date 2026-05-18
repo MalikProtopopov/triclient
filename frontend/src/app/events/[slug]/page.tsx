@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { flushSync } from "react-dom";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ShimmerImage, CoverBanner } from "@/shared/ui";
+import { ShimmerImage, CoverBanner, GalleryLightbox } from "@/shared/ui";
 import { MapPin, Play, Check, Loader2, ImageIcon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -13,9 +13,14 @@ import {
   useEvent,
   useEventRegisterMutation,
   useConfirmGuestMutation,
+  useEventGalleries,
   eventKeys,
 } from "@/entities/event";
-import type { EventTariff, EventRegistrationResponse } from "@/entities/event";
+import type {
+  EventTariff,
+  EventRegistrationResponse,
+  EventGallery,
+} from "@/entities/event";
 import { Header } from "@/widgets/header";
 import { Footer } from "@/widgets/footer";
 import { Card, Button, Badge, Modal, Input, DocumentContentBlockRenderer } from "@/shared/ui";
@@ -407,6 +412,130 @@ function GuestModal({
   );
 }
 
+function GallerySection({
+  eventId,
+  galleries,
+}: {
+  eventId: string;
+  galleries: EventGallery[];
+}) {
+  const [openGalleryId, setOpenGalleryId] = useState<string | null>(null);
+  const [startIndex, setStartIndex] = useState(0);
+  const { data: full, isFetching } = useEventGalleries(eventId, openGalleryId !== null);
+
+  const openGallery = galleries.find((g) => g.id === openGalleryId) ?? null;
+  const fullGallery = full?.data?.find((g) => g.id === openGalleryId);
+  const photos = fullGallery?.photos ?? [];
+
+  const handleOpen = (galleryId: string, index: number) => {
+    setOpenGalleryId(galleryId);
+    setStartIndex(index);
+  };
+
+  return (
+    <section className="mb-10">
+      <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
+        Фотогалерея
+      </h2>
+      <div className="space-y-6">
+        {galleries.map((gallery) => {
+          const previews = (gallery.preview_photos ?? []).filter(
+            (p) => p.thumbnail_url,
+          );
+          const hasPreviews = previews.length > 0;
+          return (
+            <div
+              key={gallery.id}
+              className="overflow-hidden rounded-2xl border border-border bg-bg-secondary"
+            >
+              {hasPreviews ? (
+                <div className="grid grid-cols-2 gap-0.5 sm:grid-cols-4">
+                  {previews.slice(0, 4).map((photo, i) => {
+                    const isLast = i === 3;
+                    const overlayCount = gallery.photos_count - 4;
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleOpen(gallery.id, i)}
+                        aria-label={`Открыть галерею «${gallery.title}»`}
+                        className="group relative aspect-square overflow-hidden bg-border-light"
+                      >
+                        <ShimmerImage
+                          src={photo.thumbnail_url!}
+                          alt={`${gallery.title} — фото ${i + 1}`}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 640px) 50vw, 25vw"
+                        />
+                        {isLast && overlayCount > 0 && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/55 transition-colors group-hover:bg-black/65">
+                            <span className="text-lg font-semibold text-white">
+                              +{overlayCount}
+                            </span>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleOpen(gallery.id, 0)}
+                  className="flex w-full items-center justify-center gap-2 py-10 text-text-muted transition-colors hover:bg-bg"
+                >
+                  <ImageIcon className="h-8 w-8" />
+                  <span className="text-sm">{gallery.photos_count} фото</span>
+                </button>
+              )}
+              <div className="flex items-center justify-between gap-3 px-5 py-3">
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-text-primary">
+                    {gallery.title}
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    {gallery.photos_count} фото
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Badge
+                    variant={
+                      gallery.access_level === "members_only" ? "accent" : "default"
+                    }
+                  >
+                    {gallery.access_level === "members_only"
+                      ? "Только для членов"
+                      : "Публичная"}
+                  </Badge>
+                  {hasPreviews && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleOpen(gallery.id, 0)}
+                    >
+                      Все фото
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <GalleryLightbox
+        isOpen={openGalleryId !== null}
+        photos={photos}
+        startIndex={startIndex}
+        onClose={() => setOpenGalleryId(null)}
+        title={openGallery?.title}
+        isLoading={isFetching}
+      />
+    </section>
+  );
+}
+
 export default function EventDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
@@ -636,72 +765,7 @@ export default function EventDetailPage() {
         {!isUpcoming && (
           <>
             {event.galleries.length > 0 && (
-              <section className="mb-10">
-                <h2 className="mb-4 font-heading text-xl font-semibold text-text-primary">
-                  Фотогалерея
-                </h2>
-                <div className="space-y-6">
-                  {event.galleries.map((gallery) => {
-                    const previews = (gallery.preview_photos ?? []).filter(
-                      (p) => p.thumbnail_url,
-                    );
-                    return (
-                      <div
-                        key={gallery.id}
-                        className="overflow-hidden rounded-2xl border border-border bg-bg-secondary"
-                      >
-                        {previews.length > 0 ? (
-                          <div className="grid grid-cols-2 gap-0.5 sm:grid-cols-4">
-                            {previews.slice(0, 4).map((photo, i) => (
-                              <div
-                                key={i}
-                                className="relative aspect-square bg-border-light"
-                              >
-                                <ShimmerImage
-                                  src={photo.thumbnail_url!}
-                                  alt={`${gallery.title} — фото ${i + 1}`}
-                                  fill
-                                  className="object-cover"
-                                  sizes="(max-width: 640px) 50vw, 25vw"
-                                />
-                                {i === 3 && gallery.photos_count > 4 && (
-                                  <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                                    <span className="text-lg font-semibold text-white">
-                                      +{gallery.photos_count - 4}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center gap-2 py-10 text-text-muted">
-                            <ImageIcon className="h-8 w-8" />
-                            <span className="text-sm">
-                              {gallery.photos_count} фото
-                            </span>
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between px-5 py-3">
-                          <div className="min-w-0">
-                            <p className="truncate font-medium text-text-primary">
-                              {gallery.title}
-                            </p>
-                            <p className="text-xs text-text-muted">
-                              {gallery.photos_count} фото
-                            </p>
-                          </div>
-                          <Badge
-                            variant={gallery.access_level === "members_only" ? "accent" : "default"}
-                          >
-                            {gallery.access_level === "members_only" ? "Только для членов" : "Публичная"}
-                          </Badge>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
+              <GallerySection eventId={event.id} galleries={event.galleries} />
             )}
 
             {event.recordings.length > 0 && (

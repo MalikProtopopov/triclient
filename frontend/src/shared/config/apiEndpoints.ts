@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
     BY_SLUG: (slug: string) => `/api/v1/events/${slug}`,
     REGISTER: (id: string) => `/api/v1/events/${id}/register`,
     CONFIRM_GUEST: (id: string) => `/api/v1/events/${id}/confirm-guest-registration`,
+    GALLERIES: (id: string) => `/api/v1/events/${id}/galleries`,
   },
   ARTICLES: {
     LIST: "/api/v1/articles",
