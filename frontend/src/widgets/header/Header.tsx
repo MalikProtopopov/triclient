@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
+import { useFaqList } from "@/entities/faq";
 import { usePublicSettings } from "@/entities/settings";
 import { useAuth } from "@/providers/AuthProvider";
 import { cn, trimStringOrNull } from "@/shared/lib";
@@ -28,6 +29,9 @@ export const Header = () => {
   const { isAuthenticated, isLoading, logout } = useAuth();
   const { data: settings } = usePublicSettings();
   const telegramLink = trimStringOrNull(settings?.telegram_bot_link);
+  const { data: faqData } = useFaqList({ answered_only: true, limit: 1 });
+  const hideFaq = faqData?.total === 0;
+  const navItems = hideFaq ? NAV_ITEMS.filter((item) => item.href !== ROUTES.FAQ) : NAV_ITEMS;
   useEffect(() => {
     const handleScroll = (): void => {
       setIsScrolled(window.scrollY > 0);
@@ -71,7 +75,7 @@ export const Header = () => {
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -141,7 +145,7 @@ export const Header = () => {
       {isMobileOpen && (
         <div className="border-t border-border bg-bg-secondary px-4 py-4 lg:hidden">
           <nav className="flex flex-col gap-1">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
