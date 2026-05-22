@@ -11,7 +11,6 @@ export const PUBLIC_PATHS = [
   "/reset-password",
   "/confirm-email",
   "/auth/verify-email",
-  "/themes",
   "/pravlenie",
   "/payment/success",
   "/payment/fail",

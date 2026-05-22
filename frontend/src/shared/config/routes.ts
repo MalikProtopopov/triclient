@@ -12,8 +12,6 @@ export const ROUTES = {
   DOCUMENTS: "/documents",
   DOCUMENT: (slug: string) => `/documents/${slug}`,
   PRAVLENIE: "/pravlenie",
-  THEMES: "/themes",
-  UI_KIT: "/ui-kit",
 
   LOGIN: "/login",
   REGISTER: "/register",
