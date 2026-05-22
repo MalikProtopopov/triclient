@@ -1,9 +1,12 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
-import { Download, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, ExternalLink, Maximize2 } from "lucide-react";
 
+import { cn } from "@/shared/lib";
 import type { ContentBlockPublicNested } from "@/shared/types";
+import { GalleryLightbox, type LightboxPhoto } from "./GalleryLightbox";
 
 function useDeviceType(): "desktop" | "mobile" {
   if (typeof window === "undefined") return "desktop";
@@ -146,24 +149,133 @@ function parseGalleryImages(block: ContentBlockPublicNested): { url: string; alt
   return out;
 }
 
+const SWIPE_THRESHOLD = 50;
+
+function GallerySlider({ items }: { items: { url: string; alt: string }[] }) {
+  const [index, setIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const total = items.length;
+
+  const goPrev = useCallback(() => {
+    setIndex((i) => (i - 1 + total) % total);
+  }, [total]);
+  const goNext = useCallback(() => {
+    setIndex((i) => (i + 1) % total);
+  }, [total]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0]?.clientX ?? null;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const start = touchStartX.current;
+    touchStartX.current = null;
+    if (start == null || total <= 1) return;
+    const end = e.changedTouches[0]?.clientX ?? start;
+    const dx = end - start;
+    if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+    if (dx > 0) goPrev();
+    else goNext();
+  };
+
+  const lightboxPhotos: LightboxPhoto[] = items.map((item, i) => ({
+    id: `${item.url}-${i}`,
+    file_url: item.url,
+    caption: item.alt.trim() || null,
+  }));
+
+  const current = items[index];
+  const currentAlt = current.alt.trim() || `Фото ${index + 1}`;
+
+  return (
+    <figure>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setLightboxOpen(true)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          aria-label="Открыть фото в полном размере"
+          className="group relative flex h-[60vw] max-h-[640px] min-h-[260px] w-full items-center justify-center overflow-hidden rounded-xl bg-bg-secondary"
+        >
+          <Image
+            key={current.url}
+            src={current.url}
+            alt={currentAlt}
+            fill
+            className="object-contain"
+            sizes="(max-width: 768px) 100vw, 800px"
+            priority={index === 0}
+          />
+          <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/55 p-2 text-white opacity-0 transition-opacity group-hover:opacity-100">
+            <Maximize2 className="h-4 w-4" />
+          </span>
+        </button>
+
+        {total > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={goPrev}
+              aria-label="Предыдущее фото"
+              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-bg/90 p-2 text-text-primary shadow-md ring-1 ring-border transition-colors hover:bg-bg sm:left-3"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={goNext}
+              aria-label="Следующее фото"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-bg/90 p-2 text-text-primary shadow-md ring-1 ring-border transition-colors hover:bg-bg sm:right-3"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </>
+        )}
+      </div>
+
+      {total > 1 && (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-xs text-text-muted">
+            {index + 1} / {total}
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {items.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={`Перейти к фото ${i + 1}`}
+                className={cn(
+                  "h-1.5 w-6 rounded-full transition-colors",
+                  i === index ? "bg-accent" : "bg-border hover:bg-border/70",
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {currentAlt && currentAlt !== `Фото ${index + 1}` && (
+        <figcaption className="mt-2 text-center text-xs text-text-muted">
+          {currentAlt}
+        </figcaption>
+      )}
+
+      <GalleryLightbox
+        isOpen={lightboxOpen}
+        photos={lightboxPhotos}
+        startIndex={index}
+        onClose={() => setLightboxOpen(false)}
+      />
+    </figure>
+  );
+}
+
 function GalleryBlock({ block }: { block: ContentBlockPublicNested }) {
   const items = parseGalleryImages(block);
   if (items.length > 0) {
-    return (
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {items.map((item, i) => (
-          <div key={`${item.url}-${i}`} className="relative aspect-square overflow-hidden rounded-lg">
-            <Image
-              src={item.url}
-              alt={item.alt.trim() || `Фото ${i + 1}`}
-              fill
-              className="object-cover"
-              sizes="(max-width: 640px) 50vw, 33vw"
-            />
-          </div>
-        ))}
-      </div>
-    );
+    return <GallerySlider items={items} />;
   }
 
   const mediaUrl = block.media_url;
@@ -172,13 +284,13 @@ function GalleryBlock({ block }: { block: ContentBlockPublicNested }) {
   if (!src) return null;
   return (
     <figure>
-      <div className="relative aspect-video overflow-hidden rounded-xl">
+      <div className="relative aspect-video overflow-hidden rounded-xl bg-bg-secondary">
         <Image
           src={src}
           alt={block.title ?? ""}
           fill
-          className="object-cover"
-          sizes="(max-width: 640px) 100vw, 50vw"
+          className="object-contain"
+          sizes="(max-width: 768px) 100vw, 800px"
         />
       </div>
       {block.title && (
